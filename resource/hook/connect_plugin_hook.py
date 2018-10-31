@@ -18,7 +18,8 @@ logger = logging.getLogger('ftrack_perforce_location.connect_plugin_hook')
 
 
 def modify_application_launch(event):
-    '''Modify the application environment to include  our location plugin.'''
+    '''Modify the application environment to include our location plugin.'''
+
     if 'options' not in event['data']:
         event['data']['options'] = {'env': {}}
 
@@ -51,6 +52,7 @@ def register(api_object, **kw):
 
     logger.info('Connect plugin discovered.')
 
+    # TODO: replace with storage scenario registration.
     from ftrack_perforce_location import perforce_location_plugin
     perforce_location_plugin.register(api_object)
 
@@ -65,4 +67,3 @@ def register(api_object, **kw):
         'topic=ftrack.action.launch',
         modify_application_launch
     )
-

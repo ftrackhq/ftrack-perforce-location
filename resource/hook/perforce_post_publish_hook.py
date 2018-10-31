@@ -26,8 +26,8 @@ excluded_location_ids = [
 ]
 
 
-def my_callback(session, event):
-    '''Event callback printing all new or updated entities.'''
+def post_publish_callback(session, event):
+    '''Event callback to publish the result file in perforce depot.'''
 
     location_id = event['data'].get('location_id')
     if not location_id or location_id in excluded_location_ids:
@@ -56,9 +56,8 @@ def register(api_object, **kw):
         # Exit to avoid registering this plugin again.
         return
 
-
     event_handler = functools.partial(
-        my_callback, api_object
+        post_publish_callback, api_object
     )
 
     api_object.event_hub.subscribe(

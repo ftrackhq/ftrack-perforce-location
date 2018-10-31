@@ -14,6 +14,10 @@ seq_match = re.compile('(%+\d+d)|(#+)|(%d)')
 
 
 def seq_to_glob(filepath):
+    '''
+    Search for file sequence signatures in **filepath**
+    and replace it with wildcard *.
+    '''
     found = seq_match.search(filepath)
     if found:
         match = found.group()
@@ -23,27 +27,40 @@ def seq_to_glob(filepath):
 
 
 class PerforceFileHandler(object):
+    '''Handle perforce files.'''
 
     @property
     def root(self):
+        '''Return the workspace root.'''
         return self._change_handler._connection_handler._workspace_root
 
     @property
     def change(self):
+        '''Return perforce change handler instance.'''
         return self._change_handler
 
     @property
     def connection(self):
+        '''Return server connection.'''
         return self._change_handler.connection
 
-    def ensure_folder(self, folder):
+    def _ensure_folder(self, folder):
+        '''Create **folder** if does not exists.'''
         if not os.path.exists(folder):
             try:
                 os.makedirs(folder)
             except IOError as error:
                 raise PerforceFileHandlerException(error)
 
-    def __init__(self, perforce_change_handler, root=None):
+    def __init__(self, perforce_change_handler):
+        '''
+        Initialise perforce file handler.
+
+        ** perforce_change_handler ** should be an instance
+        of PerforceChangeHandler.
+
+        '''
+
         if not perforce_change_handler.connection.connected():
             raise Exception('Not Connected')
 
@@ -52,17 +69,10 @@ class PerforceFileHandler(object):
         self.logger = logging.getLogger(
             __name__ + '.' + self.__class__.__name__
         )
-        self.ensure_folder(self.root)
-
-    def list(self):
-        files_data = self.connection.run_files(
-            '//{}/...'.format(
-                self.connection.client
-            )
-        )
-        return [data.get('depotFile') for data in files_data]
+        self._ensure_folder(self.root)
 
     def file_to_depot(self, filepath):
+        '''Publish **filepath** to server.'''
         self.logger.debug('moving file {} to depot'.format(filepath))
         if not filepath.startswith(self._root):
             raise IOError('File is not in {}'.format(self._root))

@@ -3,20 +3,20 @@
 
 
 class PerforceHandlerException(Exception):
-    pass
+    '''Base perforce exception.'''
 
 
 class PerforceConnectionHandlerException(PerforceHandlerException):
-    pass
+    '''Perforce connection exception.'''
 
 
 class PerforceFileHandlerException(PerforceHandlerException):
-    pass
+    '''Perforce file exception.'''
 
 
 class PerforceChangeHanderException(PerforceHandlerException):
-    pass
+    '''Perforce change exception.'''
 
 
 class PerforceSettingsHandlerException(PerforceHandlerException):
-    pass
+    '''Perforce settings exception.'''

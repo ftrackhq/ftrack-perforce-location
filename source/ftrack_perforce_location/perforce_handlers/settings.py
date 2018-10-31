@@ -10,7 +10,7 @@ from ftrack_perforce_location.perforce_handlers.errors import PerforceSettingsHa
 
 
 class PerforceSettingsHandler(object):
-
+    '''Handles perforce connection settings.'''
     def __init__(self):
         super(PerforceSettingsHandler, self).__init__()
         self.logger = logging.getLogger(
@@ -18,7 +18,9 @@ class PerforceSettingsHandler(object):
         )
 
     @property
-    def templated_default(self):
+    def _templated_default(self):
+        '''Return a default, empty config to be setup.'''
+
         return dict(
             server=None,
             port = None,
@@ -28,7 +30,9 @@ class PerforceSettingsHandler(object):
             workspace_root= None
         )
 
-    def get_config_path(self):
+    def _get_config_path(self):
+        '''Return the current perforce config file path.'''
+
         config_file_path = os.path.join(
             appdirs.user_data_dir(
                 'ftrack-connect', 'ftrack'
@@ -39,7 +43,9 @@ class PerforceSettingsHandler(object):
         return config_file_path
 
     def write(self, config):
-        config_file = self.get_config_path()
+        '''Write **config** data to file.'''
+
+        config_file = self._get_config_path()
         # Create folder if it does not exist.
         folder = os.path.dirname(config_file)
         if not os.path.isdir(folder):
@@ -49,12 +55,14 @@ class PerforceSettingsHandler(object):
             json.dump(config, file)
 
     def read(self):
-        config_file = self.get_config_path()
+        '''Read config data to file.'''
+
+        config_file = self._get_config_path()
         config = None
 
         if not os.path.exists(config_file):
             self.logger.debug('Creating default config settings')
-            self.write(self.templated_default)
+            self.write(self._templated_default)
 
         if os.path.isfile(config_file):
             self.logger.info(u'Reading config from {0}'.format(config_file))
@@ -73,7 +81,7 @@ class PerforceSettingsHandler(object):
         if not all(config.values()):
             raise PerforceSettingsHandlerException(
                 'Please configure : {}'.format(
-                    self.get_config_path()
+                    self._get_config_path()
             ))
 
         return config

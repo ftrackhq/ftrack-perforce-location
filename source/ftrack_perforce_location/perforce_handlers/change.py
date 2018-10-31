@@ -10,6 +10,7 @@ from ftrack_perforce_location.perforce_handlers.file import seq_to_glob
 
 
 class PerforceChangeHandler(object):
+    '''Handles commit changes.'''
 
     def __init__(self, connection_handler):
         self._connection_handler = connection_handler
@@ -20,9 +21,11 @@ class PerforceChangeHandler(object):
 
     @property
     def connection(self):
+        '''Return current connection to the server.'''
         return self._connection_handler.connection
 
     def create(self, description):
+        '''Create a new change with the given **description**.'''
         change = None
         try:
             change_spec = self.connection.fetch_change()
@@ -45,6 +48,8 @@ class PerforceChangeHandler(object):
         return change
 
     def add(self, change, filepath):
+        '''Add **filepath** to *change*.'''
+
         self.logger.debug(
             'adding file {0} to change: {1}'.format(filepath, change)
         )
@@ -55,6 +60,8 @@ class PerforceChangeHandler(object):
             raise PerforceChangeHanderException(error)
 
     def submit(self, filepath, description):
+        '''Submit **filepath** with **description** to server.'''
+
         filepath = seq_to_glob(filepath)
         change = self.create(description)
         self.logger.debug(
