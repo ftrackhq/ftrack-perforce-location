@@ -74,13 +74,3 @@ class PerforceChangeHandler(object):
             self.connection.run_submit(change_specs)
         except P4Exception as error:
             raise PerforceChangeHanderException(error)
-
-        # if is a depot file.... sync it
-        if filepath.startswith('//depot'):
-            self.logger.info(
-                '{} is depot path, sync with version to fs'.format(filepath)
-            )
-            try:
-                self.run_sync(filepath)
-            except P4Exception as error:
-                raise PerforceChangeHanderException(error)
