@@ -32,7 +32,7 @@ WORKSPACE_PATH = '/home/lorenzo.angeli/devel/perforce/test_repo/'
 
 
 def configure_location(session, event):
-    '''Listen.'''
+    '''Configure perforce location.'''
 
     location = session.ensure('Location', {'name': LOCATION_NAME})
 

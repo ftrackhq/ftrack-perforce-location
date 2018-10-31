@@ -22,8 +22,14 @@ class PerforceStructure(ftrack_api.structure.standard.StandardStructure):
         self._perforce_file_handler = perforce_file_handler
 
     def _get_parts(self, entity):
-        '''Return resource identifier parts from *entity*.'''
-        # NOTE: Modified to remove version folder.
+        '''
+        Return resource identifier parts from *entity*.
+
+        .. note::
+
+                Modified to remove version folder as we do not need to handle it.
+
+        '''
 
         self.logger.debug('Get parts from entity : {}'.format(entity))
 
