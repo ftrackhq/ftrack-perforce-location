@@ -23,12 +23,8 @@ logger = logging.getLogger(
 # Name of the location plugin.
 LOCATION_NAME = 'perforce_local_workspace'
 
-
 perforce_settings = PerforceSettingsHandler()
-# This could be later extracted from env or config, here for
 perforce_settings_data = perforce_settings.read()
-
-WORKSPACE_PATH = '/home/lorenzo.angeli/devel/perforce/test_repo/'
 
 
 def configure_location(session, event):
