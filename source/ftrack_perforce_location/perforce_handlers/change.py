@@ -1,5 +1,10 @@
+# :coding: utf-8
+# :copyright: Copyright (c) 2018 ftrack
+
 import logging
+
 from P4 import P4Exception
+
 from ftrack_perforce_location.perforce_handlers.errors import PerforceChangeHanderException
 from ftrack_perforce_location.perforce_handlers.file import seq_to_glob
 

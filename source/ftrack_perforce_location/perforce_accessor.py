@@ -1,7 +1,10 @@
-import os
+# :coding: utf-8
+# :copyright: Copyright (c) 2018 ftrack
+
 import logging
+
 import ftrack_api.accessor.disk
-from ftrack_api.exception import AccessorFilesystemPathError
+
 from ftrack_perforce_location.perforce_handlers.file import seq_to_glob
 
 

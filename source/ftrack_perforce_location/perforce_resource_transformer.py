@@ -1,7 +1,12 @@
+# :coding: utf-8
+# :copyright: Copyright (c) 2018 ftrack
+
 import os
 import logging
-from P4 import P4Exception
+
 import ftrack_api.resource_identifier_transformer.base
+
+from P4 import P4Exception
 
 from ftrack_perforce_location.perforce_handlers.file import seq_to_glob
 

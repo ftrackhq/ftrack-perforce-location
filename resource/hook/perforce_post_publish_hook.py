@@ -1,3 +1,6 @@
+# :coding: utf-8
+# :copyright: Copyright (c) 2018 ftrack
+
 import ftrack_api
 from ftrack_api.symbol import (
     ORIGIN_LOCATION_ID,

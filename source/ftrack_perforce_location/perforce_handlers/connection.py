@@ -1,7 +1,11 @@
-import os
+# :coding: utf-8
+# :copyright: Copyright (c) 2018 ftrack
+
 import socket
 import logging
-from P4 import P4, P4Exception, Map
+
+from P4 import P4, P4Exception
+
 from ftrack_perforce_location.perforce_handlers.errors import PerforceConnectionHandlerException
 
 

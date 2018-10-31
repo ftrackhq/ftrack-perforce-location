@@ -1,11 +1,17 @@
+# :coding: utf-8
+# :copyright: Copyright (c) 2018 ftrack
+
 import os
 import re
 import logging
+
 from P4 import P4Exception
+
 from ftrack_perforce_location.perforce_handlers.errors import PerforceFileHandlerException
 
 
 seq_match = re.compile('(%+\d+d)|(#+)|(%d)')
+
 
 def seq_to_glob(filepath):
     found = seq_match.search(filepath)
