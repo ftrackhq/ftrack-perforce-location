@@ -74,8 +74,8 @@ class PerforceFileHandler(object):
     def file_to_depot(self, filepath):
         '''Publish **filepath** to server.'''
         self.logger.debug('moving file {} to depot'.format(filepath))
-        if not filepath.startswith(self._root):
-            raise IOError('File is not in {}'.format(self._root))
+        if not filepath.startswith(self.root):
+            raise IOError('File is not in {}'.format(self.root))
         stats = []
 
         try:
@@ -86,7 +86,7 @@ class PerforceFileHandler(object):
         # no stats file has to be added to the depot
         if not stats:
             client = self.connection.fetch_client('-t', self.connection.client)
-            client._root = self._root
+            client._root = self.root
             self.connection.save_client(client)
             self.connection.run_add(filepath)
         else:
