@@ -1,25 +1,32 @@
-ftrack-perforce-location
-========================
+#######################
+ftrack perforce location
+#######################
 
-In this repo is hosted the code for allowing ftrack to seamlessly publish in perforce.
+ftrack-perforce-location allows ftrack to publish to and import from a Perforce
+depot through a user's local workspace.
+
+It demonstrates using an accessor, location, resrouce transformer and structure
+to ingest, track versions of files and assets. For more information how ftrack
+manages files, see:
+https://help.ftrack.com/developing-with-ftrack/key-concepts/locations
+https://help.ftrack.com/administering-ftrack/general/configuring-file-storage
 
 
-pre flight check
+Prerequisites
 ================
-
-perforce
+Perforce
 --------
-
-* ensure perforce server is available and recheable.
-* ensure a user is registered to the perforce server.
+* Ensure that a Perforce server is available and reachable.
+* Ensure that a user is registered to the Perforce server.
+* Ensure that the user has created a workspace on their machine.
 
 
 ftrack
 ------
-* disable storage scenario
+* Revert to the default centralized storage scenario.
 
 
-building the plugin
+Building the plugin
 ===================
 
 .. code::
@@ -29,30 +36,31 @@ building the plugin
 TODO
 ====
 
-* import file published
-* configure perforce user ui
+* Import file published
+* Configure Perforce user ui
 
-known issues
+Known issues
 ============
 
-* login to perforce currently required from command line: 
+* User must login to Perforce themselves, either on command line as below, or
+with another client.
 
 .. code::
-    
+
     $ p4 login
 
-configuration
+Configuration
 =============
 
-Perforce configuration is locally stored next to ftrack-connect settings.
-The fist time this plugin will run the settings file will be created and an error raised
-if the config is empty.
+Perforce configuration is locally stored in perforce_config.json, inside the
+ftrack-connect settings directory. The fist time this plugin is run, the
+settings file will be created and an error raised if the config is empty.
 
-please manually edit the file to include:
+Please manually edit the file to include:
 
-* **server** , the perforce server name.
-* **port** , the perforce server port (usually ssl:1666).
-* **user** , your perforce user.
-* **password** , your perforce password.
-* **using_workspace** , the perforce workspace to be used.
+* **server** , the Perforce server name.
+* **port** , the Perforce server port (usually ssl:1666).
+* **user** , your Perforce user.
+* **password** , your Perforce password.
+* **using_workspace** , the Perforce workspace to be used.
 * **workspace_root** , the root of the workspace.
