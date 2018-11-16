@@ -22,12 +22,12 @@ class PerforceSettingsHandler(object):
         '''Return a default, empty config to be setup.'''
 
         return dict(
-            server=None,
-            port = None,
-            user = None,
-            password = None,
-            using_workspace = None,
-            workspace_root= None
+            host=None,
+            port=None,
+            user=None,
+            password=None,
+            using_workspace=None,
+            workspace_root=None
         )
 
     def _get_config_path(self):
@@ -41,6 +41,24 @@ class PerforceSettingsHandler(object):
         )
 
         return config_file_path
+
+    def _update_config_from_perforce(self, config):
+        config = dict(config)
+        from P4 import P4, P4Exception
+        p4 = P4()
+        config['host'] = p4.host
+        config['user'] = p4.user
+        config['port'] = p4.port
+        config['using_workspace'] = p4.client
+        try:
+            p4.connect()
+            config['workspace_root'] = p4.run_info()[0]['clientRoot']
+        except P4Exception as error:
+            self.logger.debug('Error while querying client root: {0}'.format(
+                error.message))
+        if config.get('password') is None:
+            config['password'] = os.environ.get('P4PASSWD')
+        return config
 
     def write(self, config):
         '''Write **config** data to file.'''
@@ -62,7 +80,9 @@ class PerforceSettingsHandler(object):
 
         if not os.path.exists(config_file):
             self.logger.debug('Creating default config settings')
-            self.write(self._templated_default)
+            updated_default_config = self._update_config_from_perforce(
+                self._templated_default)
+            self.write(updated_default_config)
 
         if os.path.isfile(config_file):
             self.logger.info(u'Reading config from {0}'.format(config_file))
@@ -82,7 +102,7 @@ class PerforceSettingsHandler(object):
             raise PerforceSettingsHandlerException(
                 'Please configure : {}'.format(
                     self._get_config_path()
-            ))
+                )
+            )
 
         return config
-

@@ -36,7 +36,7 @@ class PerforceResourceIdentifierTransformer(base_transformer.ResourceIdentifierT
 
         '''
 
-        root =  self._perforce_file_handler.root
+        root = self._perforce_file_handler.root
         fullpath = os.path.join(root, resource_identifier)
         fullpath = seq_to_glob(fullpath)
         stats = self.connection.run_fstat(fullpath)

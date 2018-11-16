@@ -1,6 +1,6 @@
-#######################
+########################
 ftrack perforce location
-#######################
+########################
 
 ftrack-perforce-location allows ftrack to publish to and import from a Perforce
 depot through a user's local workspace.
@@ -11,7 +11,6 @@ manages files, see:
 https://help.ftrack.com/developing-with-ftrack/key-concepts/locations
 https://help.ftrack.com/administering-ftrack/general/configuring-file-storage
 
-
 Prerequisites
 ================
 Perforce
@@ -20,32 +19,26 @@ Perforce
 * Ensure that a user is registered to the Perforce server.
 * Ensure that the user has created a workspace on their machine.
 
-
 ftrack
 ------
 * Revert to the default centralized storage scenario.
 
-
 Building the plugin
 ===================
 
-.. code::
+.. code:: bash
 
     $ python setup.py build_plugin
 
 TODO
 ====
-
 * Import file published
 * Configure Perforce user ui
 
 Known issues
 ============
-
 * User must login to Perforce themselves, either on command line as below, or
-with another client.
-
-.. code::
+  with another client.::
 
     $ p4 login
 
@@ -58,8 +51,8 @@ settings file will be created and an error raised if the config is empty.
 
 Please manually edit the file to include:
 
-* **server** , the Perforce server name.
-* **port** , the Perforce server port (usually ssl:1666).
+* **host** , the hostname to identify as.
+* **port** , server address (e.g. ssl:1666). Format: [protocol:][address:]port
 * **user** , your Perforce user.
 * **password** , your Perforce password.
 * **using_workspace** , the Perforce workspace to be used.

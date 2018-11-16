@@ -18,11 +18,6 @@ class PerforceConnectionHandler(object):
         return self.connection.run('info')[0]
 
     @property
-    def server(self):
-        '''Return the current server name.'''
-        return self._server
-
-    @property
     def port(self):
         '''Return the current server port.'''
         return self._port
@@ -37,12 +32,8 @@ class PerforceConnectionHandler(object):
         '''Return the current workspace.'''
         return self._workspace
 
-    def __init__(self,
-        server=None, port=None,
-        user=None, password=None,
-        using_workspace=None,
-        workspace_root=None
-    ):
+    def __init__(self, host=None, port=None, user=None, password=None,
+                 using_workspace=None, workspace_root=None):
         '''Initialise perforce connection handler
         **server** and **port** should point to a live perforce server
         address to connect to.
@@ -60,12 +51,11 @@ class PerforceConnectionHandler(object):
             __name__ + '.' + self.__class__.__name__
         )
 
-        self._server = server
         self._port = port
         self._connection = None
         self._user = user
         self._password = password
-        self._hostname = socket.gethostname()
+        self._hostname = host if host is not None else socket.gethostname()
         self._workspace = None
         self._workspace_root = workspace_root
         self._using_workspace = using_workspace
@@ -84,13 +74,13 @@ class PerforceConnectionHandler(object):
         '''Handles connection to the server.'''
 
         p4 = P4()
-        p4.host = str(self.server)
+        p4.host = str(self._hostname)
         p4.port = str(self.port)
         p4.user = str(self._user)
         p4.password = str(self._password)
 
         self.logger.debug(
-            'Connecting to : {0}:{1}'.format(self.server, self.port)
+            'Connecting to : {0}'.format(self.port)
         )
 
         try:
@@ -105,10 +95,17 @@ class PerforceConnectionHandler(object):
     def _get_workspace(self):
         '''Lookup and return for the workspace to be used.'''
         workspaces = self.connection.run_clients("-u", self._user)
-        filtered_workspaces = [ws for ws in workspaces if (ws.get("Host") or self._hostname) == self._hostname]
-        filtered_workspaces = [ws for ws in filtered_workspaces if ws.get('client') == self._using_workspace]
+        filtered_workspaces = [
+            ws for
+            ws in workspaces
+            if (ws.get("Host") or self._hostname) == self._hostname]
+        filtered_workspaces = [
+            ws for
+            ws in filtered_workspaces
+            if ws.get('client') == self._using_workspace]
         if not filtered_workspaces:
-            raise PerforceConnectionHandlerException('No worspace found named : {}'.format(self._using_workspace))
+            raise PerforceConnectionHandlerException(
+                'No worspace found named : {}'.format(self._using_workspace))
 
         workspace = filtered_workspaces[0].get('client')
         self.logger.debug('getting workspace :{}'.format(workspace))

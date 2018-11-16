@@ -22,6 +22,9 @@ logger = logging.getLogger(
 
 # Name of the location plugin.
 LOCATION_NAME = 'perforce_local_workspace'
+LOCATION_LABEL = 'Perforce'
+LOCATION_DESCRIPTION = ('Perforce allows ftrack to publish to and import from '
+                        'a Perforce depot through a user\'s local workspace.')
 
 perforce_settings = PerforceSettingsHandler()
 perforce_settings_data = perforce_settings.read()
@@ -30,7 +33,10 @@ perforce_settings_data = perforce_settings.read()
 def configure_location(session, event):
     '''Configure perforce location.'''
 
-    location = session.ensure('Location', {'name': LOCATION_NAME})
+    location = session.ensure('Location',
+                              {'name': LOCATION_NAME, 'label': LOCATION_LABEL,
+                               'description': LOCATION_DESCRIPTION},
+                              identifying_keys=['name'])
 
     perforce_connection_handler = PerforceConnectionHandler(
         **perforce_settings_data

@@ -91,4 +91,10 @@ class PerforceFileHandler(object):
             self.connection.save_client(client)
             self.connection.run_add(filepath)
         else:
+            # 'p4 edit' requires that the file exists in the client
+            if not os.path.exists(filepath):
+                basedir = os.path.dirname(filepath)
+                if not os.path.exists(basedir):
+                    os.makedirs(basedir)
+                open(filepath, 'a').close()
             self.connection.run_edit(filepath)

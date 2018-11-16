@@ -32,7 +32,8 @@ class PerforceAccessor(ftrack_api.accessor.disk.DiskAccessor):
         filesystem_path = self.get_filesystem_path(resource_identifier)
         filesystem_path = seq_to_glob(filesystem_path)
         self.perforce_file_handler.file_to_depot(filesystem_path)
-        return super(PerforceAccessor, self).open(resource_identifier, mode=mode)
+        return super(PerforceAccessor, self).open(
+            resource_identifier, mode=mode)
 
     def exists(self, resource_identifier):
         '''
