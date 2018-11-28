@@ -42,6 +42,21 @@ Known issues
 
     $ p4 login
 
+* In case of :: [Warning]: '<FILEPATH> - file(s) not in client view.'#
+
+.. code::bash
+
+    $p4 client <yourclient>
+
+and ensure :
+
+.. code::config
+
+    View:
+    //depot/... //<yourclient>/...
+
+
+
 Configuration
 =============
 
@@ -57,3 +72,5 @@ Please manually edit the file to include:
 * **password** , your Perforce password.
 * **using_workspace** , the Perforce workspace to be used.
 * **workspace_root** , the root of the workspace.
+
+
