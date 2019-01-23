@@ -16,6 +16,7 @@ README_PATH = os.path.join(ROOT_PATH, 'README.rst')
 RESOURCE_PATH = os.path.join(ROOT_PATH, 'resource')
 BUILD_PATH = os.path.join(ROOT_PATH, 'build')
 HOOK_PATH = os.path.join(RESOURCE_PATH, 'hook')
+APPLICATION_HOOK_PATH = os.path.join(RESOURCE_PATH, 'application_hook')
 
 
 # Read version from source.
@@ -56,13 +57,18 @@ class BuildPlugin(Command):
             os.path.join(STAGING_PATH, 'hook')
         )
 
+        # Copy application hook files
+        shutil.copytree(
+            APPLICATION_HOOK_PATH,
+            os.path.join(STAGING_PATH, 'application_hook')
+        )
+
         pip_main(
             [
                 'install',
                 '.',
                 '--target',
-                os.path.join(STAGING_PATH, 'dependencies'),
-                '--process-dependency-links'
+                os.path.join(STAGING_PATH, 'dependencies')
             ]
         )
 

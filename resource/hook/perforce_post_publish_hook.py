@@ -1,6 +1,9 @@
 # :coding: utf-8
 # :copyright: Copyright (c) 2018 ftrack
 
+import functools
+import logging
+
 import ftrack_api
 from ftrack_api.symbol import (
     ORIGIN_LOCATION_ID,
@@ -10,8 +13,7 @@ from ftrack_api.symbol import (
     SERVER_LOCATION_ID,
     COMPONENT_ADDED_TO_LOCATION_TOPIC
 )
-import functools
-import logging
+from ftrack_perforce_location.perforce_location_plugin import LOCATION_NAME
 
 logger = logging.getLogger(
     'ftrack_perforce_location.perforce_post_publish_hook'
@@ -33,8 +35,12 @@ def post_publish_callback(session, event):
     if not location_id or location_id in excluded_location_ids:
         return
 
-    component_id = event['data'].get('component_id')
+    # TODO(spetterborg) Instead, subscribe to publishes only for this location.
     perforce_location = session.get('Location', location_id)
+    if perforce_location['name'] != LOCATION_NAME:
+        return
+
+    component_id = event['data'].get('component_id')
     perforce_component = session.get('Component', component_id)
 
     perforce_path = perforce_location.get_filesystem_path(perforce_component)

@@ -8,6 +8,9 @@ import logging
 import ftrack_api
 import ftrack_connect.application
 
+APPLICATION_HOOK_DIRECTORY = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), '..', 'application_hook')
+)
 LOCATION_DIRECTORY = os.path.abspath(
     os.path.join(os.path.dirname(__file__), '..', 'dependencies')
 )
@@ -26,10 +29,11 @@ def modify_application_launch(event):
     environment = event['data']['options']['env']
 
     ftrack_connect.application.appendPath(
-        LOCATION_DIRECTORY,
+        APPLICATION_HOOK_DIRECTORY,
         'FTRACK_EVENT_PLUGIN_PATH',
         environment
     )
+
     ftrack_connect.application.appendPath(
         LOCATION_DIRECTORY,
         'PYTHONPATH',
@@ -55,6 +59,10 @@ def register(api_object, **kw):
     # TODO: replace with storage scenario registration.
     from ftrack_perforce_location import perforce_location_plugin
     perforce_location_plugin.register(api_object)
+
+    from ftrack_perforce_location import perforce_scenario
+    perforce_scenario.register(api_object)
+    perforce_scenario.register_configuration(api_object)
 
     # Location will be available from within the dcc applications.
     api_object.event_hub.subscribe(
