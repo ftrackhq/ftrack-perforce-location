@@ -11,19 +11,30 @@ from ftrack_perforce_location.perforce_handlers.errors import PerforceSettingsHa
 
 class PerforceSettingsHandler(object):
     '''Handles perforce connection settings.'''
-    def __init__(self):
+    def __init__(self, session):
         super(PerforceSettingsHandler, self).__init__()
         self.logger = logging.getLogger(
             __name__ + '.' + self.__class__.__name__
         )
+        self.session = session
+
+    @property
+    def server_settings(self):
+
+        storage_query = self.session.query(
+            'select value from Setting '
+            'where name is "storage_scenario" and group is "STORAGE"'
+        ).one()
+
+        storage_data = json.loads(storage_query['value'])['data']
+        self.logger.info(storage_data)
+        return storage_data
 
     @property
     def _templated_default(self):
         '''Return a default, empty config to be setup.'''
 
         return dict(
-            host=None,
-            port=None,
             user=None,
             password=None,
             using_workspace=None,
@@ -46,9 +57,7 @@ class PerforceSettingsHandler(object):
         config = dict(config)
         from P4 import P4, P4Exception
         p4 = P4()
-        config['host'] = p4.host
         config['user'] = p4.user
-        config['port'] = p4.port
         config['using_workspace'] = p4.client
         try:
             p4.connect()
@@ -104,5 +113,17 @@ class PerforceSettingsHandler(object):
                     self._get_config_path()
                 )
             )
+
+        server_settings ={
+            'host': self.server_settings['host'],
+            'port': self.server_settings['port']
+        }
+
+        if self.server_settings['use_ssl']:
+            server_settings['port'] = 'ssl:{}'.format(self.server_settings['port'])
+
+        config.update(server_settings)
+
+        self.logger.info(config)
 
         return config

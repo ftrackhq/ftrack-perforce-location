@@ -27,9 +27,6 @@ LOCATION_LABEL = 'Perforce'
 LOCATION_DESCRIPTION = ('Perforce allows ftrack to publish to and import from '
                         'a Perforce depot through a user\'s local workspace.')
 
-perforce_settings = PerforceSettingsHandler()
-perforce_settings_data = perforce_settings.read()
-
 
 def configure_location(session, event):
     '''Configure perforce location.'''
@@ -43,6 +40,9 @@ def configure_location(session, event):
         },
         identifying_keys=['name']
     )
+
+    perforce_settings = PerforceSettingsHandler(session)
+    perforce_settings_data = perforce_settings.read()
 
     perforce_connection_handler = PerforceConnectionHandler(
         **perforce_settings_data

@@ -64,7 +64,7 @@ class ConfigurePerforceStorageScenario(object):
 
         values = event['data'].get('values', {})
 
-        # We have to have gotten here from somewhere.
+        # Get last step from the event or assume we have just started.
         previous_step = values.get('step', 'select_scenario')
         next_step = steps[steps.index(previous_step) + 1]
         state = 'configuring'
@@ -87,7 +87,7 @@ class ConfigurePerforceStorageScenario(object):
         if next_step == 'select_options':
 
             perforce_server = self.existing_perforce_storage_configuration.get(
-                'server', None)
+                'host', None)
 
             perforce_port = self.existing_perforce_storage_configuration.get(
                 'port', '1666')
@@ -99,13 +99,12 @@ class ConfigurePerforceStorageScenario(object):
             {
                 'type': 'label',
                 'value': (
-                    'Please provide here settings for accessing the peforce'
-                    ' server.'
+                    'Please provide settings for accessing the peforce server.'
                 )
             }, {
                 'type': 'text',
                 'label': 'Perforce server name or address (P4HOST).',
-                'name': 'server',
+                'name': 'host',
                 'value': perforce_server
             }, {
                 'type': 'number',
@@ -125,7 +124,7 @@ class ConfigurePerforceStorageScenario(object):
                 'value': (
                     'Here you go, hope you chose wisely.'
                     ' Your server is: {0} and port {1}').format(
-                        configuration['select_options']['server'],
+                        configuration['select_options']['host'],
                         configuration['select_options']['port']
                     )
             }]
@@ -135,7 +134,7 @@ class ConfigurePerforceStorageScenario(object):
             setting_value = json.dumps({
                 'scenario': scenario_name,
                 'data': {
-                    'server': configuration['select_options']['server'],
+                    'host': configuration['select_options']['host'],
                     'port': configuration['select_options']['port'],
                     'use_ssl': configuration['select_options']['use_ssl']
                 }
