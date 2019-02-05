@@ -8,7 +8,7 @@ import ftrack_api
 from ftrack_api.logging import LazyLogMessage as L
 
 
-SCENARIO_ID = 'ftrack.perforce-storage'
+SCENARIO_ID = '356c1d9f4ea84de9bb0aaec3e38ed085'
 SCENARIO_NAME = 'Perforce storage scenario'
 SCENARIO_DESCRIPTION = (
     'Storage scenario where files are stored and versioned by '
