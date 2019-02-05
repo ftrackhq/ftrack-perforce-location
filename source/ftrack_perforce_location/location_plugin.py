@@ -42,7 +42,7 @@ def configure_location(session, event):
         perforce_settings_data = perforce_settings.read()
 
     except PerforceSettingsHandlerException as error:
-        logger.debug(error)
+        logger.warning(error)
         return
 
     perforce_connection_handler = PerforceConnectionHandler(
