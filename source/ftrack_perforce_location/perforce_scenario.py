@@ -104,7 +104,7 @@ class ConfigurePerforceStorageScenario(object):
                 )
             }, {
                 'type': 'text',
-                'label': 'Perforce server name or address.',
+                'label': 'Perforce server name or address (P4HOST).',
                 'name': 'server',
                 'value': perforce_server
             }, {
@@ -114,7 +114,7 @@ class ConfigurePerforceStorageScenario(object):
                 'value': perforce_port
             }, {
                 'type': 'boolean',
-                'label': 'Connection uses SSL.',
+                'label': 'Perforce connection uses SSL.',
                 'name': 'use_ssl',
                 'value': perforce_ssl
             }]
