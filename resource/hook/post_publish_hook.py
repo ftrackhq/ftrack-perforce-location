@@ -13,7 +13,7 @@ from ftrack_api.symbol import (
     SERVER_LOCATION_ID,
     COMPONENT_ADDED_TO_LOCATION_TOPIC
 )
-from ftrack_perforce_location.location_plugin import LOCATION_NAME
+from ftrack_perforce_location.location_plugin import SCENARIO_NAME
 
 logger = logging.getLogger(
     'ftrack_perforce_location.perforce_post_publish_hook'
@@ -37,7 +37,7 @@ def post_publish_callback(session, event):
 
     # TODO(spetterborg) Instead, subscribe to publishes only for this location.
     perforce_location = session.get('Location', location_id)
-    if perforce_location['name'] != LOCATION_NAME:
+    if perforce_location['name'] != SCENARIO_NAME:
         return
 
     component_id = event['data'].get('component_id')

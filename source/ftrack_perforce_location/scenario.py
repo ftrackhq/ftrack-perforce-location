@@ -8,7 +8,12 @@ import ftrack_api
 from ftrack_api.logging import LazyLogMessage as L
 
 
-scenario_name = 'ftrack.perforce-storage'
+SCENARIO_ID = 'ftrack.perforce-storage'
+SCENARIO_NAME = 'Perforce storage scenario'
+SCENARIO_DESCRIPTION = (
+    'Storage scenario where files are stored and versioned by '
+    'Perforce, with flexible mapping between projects and depots.'
+)
 
 logger = logging.getLogger(
     __name__
@@ -47,7 +52,7 @@ class ConfigurePerforceStorageScenario(object):
         if not isinstance(configuration, dict):
             return {}
 
-        if configuration.get('scenario') != scenario_name:
+        if configuration.get('scenario') != SCENARIO_ID:
             return {}
 
         return configuration.get('data', {})
@@ -122,17 +127,18 @@ class ConfigurePerforceStorageScenario(object):
             items = [{
                 'type': 'label',
                 'value': (
-                    'Here you go, hope you chose wisely.'
-                    ' Your server is: {0} and port {1}').format(
+                    '# Perforce storage is now configured with the following settings:\n\n'
+                    '* **Host**: {0} \n* **Port**: {1} \n* Use **SSL** : {2}').format(
                         configuration['select_options']['host'],
-                        configuration['select_options']['port']
-                    )
+                        configuration['select_options']['port'],
+                        configuration['select_options']['use_ssl']
+                )
             }]
             state = 'confirm'
 
         elif next_step == 'save_configuration':
             setting_value = json.dumps({
-                'scenario': scenario_name,
+                'scenario': SCENARIO_ID,
                 'data': {
                     'host': configuration['select_options']['host'],
                     'port': configuration['select_options']['port'],
@@ -153,8 +159,8 @@ class ConfigurePerforceStorageScenario(object):
                 'type': 'label',
                 'value': (
                     '#Done!#\n'
-                    'Your storage scenario is now configured and ready '
-                    'to use. **Note that you may have to restart Connect and '
+                    'Your Perforce storage scenario is now configured and ready '
+                    'to use.\n **Note that you may have to restart Connect and '
                     'other applications to start using it.**'
                 )
             }]
@@ -178,12 +184,9 @@ class ConfigurePerforceStorageScenario(object):
     def discover(self, event):
         '''Return action discover dictionary for *event*.'''
         return {
-            'id': scenario_name,
-            'name': 'Perforce storage scenario',
-            'description': (
-                'Storage scenario where files are stored and versioned by '
-                'Perforce, with flexible mapping between projects and depots.'
-            )
+            'id': SCENARIO_ID,
+            'name': SCENARIO_NAME,
+            'description': SCENARIO_DESCRIPTION
         }
 
     def register(self, session):
@@ -206,7 +209,7 @@ class ConfigurePerforceStorageScenario(object):
                 'and data.scenario_id="{0}" '
                 'and source.user.username="{1}"'
             ).format(
-                scenario_name,
+                SCENARIO_ID,
                 session.api_user
             ),
             self.configure_scenario
@@ -248,7 +251,7 @@ class ActivatePerforceStorageScenario(object):
             (
                 'topic=ftrack.storage-scenario.activate '
                 'and data.storage_scenario.scenario="{0}"'.format(
-                    scenario_name
+                    SCENARIO_ID
                 )
             ),
             self.activate
@@ -261,7 +264,7 @@ class ActivatePerforceStorageScenario(object):
             (
                 'topic=ftrack.connect.verify-startup '
                 'and data.storage_scenario.scenario="{0}"'.format(
-                    scenario_name
+                    SCENARIO_ID
                 )
             ),
             self._verify_startup

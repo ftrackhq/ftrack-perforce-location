@@ -16,16 +16,13 @@ from ftrack_perforce_location.perforce_handlers.connection import PerforceConnec
 from ftrack_perforce_location.perforce_handlers.file import PerforceFileHandler
 from ftrack_perforce_location.perforce_handlers.change import PerforceChangeHandler
 from ftrack_perforce_location.perforce_handlers.settings import PerforceSettingsHandler
+from ftrack_perforce_location.scenario import SCENARIO_ID, SCENARIO_DESCRIPTION, SCENARIO_NAME
+from ftrack_perforce_location.perforce_handlers.errors import PerforceSettingsHandlerException
+
 
 logger = logging.getLogger(
     __name__
 )
-
-# Name of the location plugin.
-LOCATION_NAME = 'perforce_local_workspace'
-LOCATION_LABEL = 'Perforce'
-LOCATION_DESCRIPTION = ('Perforce allows ftrack to publish to and import from '
-                        'a Perforce depot through a user\'s local workspace.')
 
 
 def configure_location(session, event):
@@ -34,15 +31,19 @@ def configure_location(session, event):
     location = session.ensure(
         'Location',
         {
-            'name': LOCATION_NAME,
-            'label': LOCATION_LABEL,
-            'description': LOCATION_DESCRIPTION
+            'name': SCENARIO_ID,
+            'label': SCENARIO_NAME,
+            'description': SCENARIO_DESCRIPTION
         },
         identifying_keys=['name']
     )
+    try:
+        perforce_settings = PerforceSettingsHandler(session, SCENARIO_ID)
+        perforce_settings_data = perforce_settings.read()
 
-    perforce_settings = PerforceSettingsHandler(session)
-    perforce_settings_data = perforce_settings.read()
+    except PerforceSettingsHandlerException as error:
+        logger.debug(error)
+        return
 
     perforce_connection_handler = PerforceConnectionHandler(
         **perforce_settings_data
