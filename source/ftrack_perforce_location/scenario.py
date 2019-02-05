@@ -89,6 +89,10 @@ class ConfigurePerforceStorageScenario(object):
             # Update configuration with values from the previous step.
             configuration[previous_step] = values
 
+        if next_step == 'review_configuration' and not values['host']:
+            # validate host is set
+            next_step = 'select_options'
+
         if next_step == 'select_options':
 
             perforce_server = self.existing_perforce_storage_configuration.get(
