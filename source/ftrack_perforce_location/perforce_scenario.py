@@ -85,39 +85,49 @@ class ConfigurePerforceStorageScenario(object):
             configuration[previous_step] = values
 
         if next_step == 'select_options':
-            perforce_server = self.existing_perforce_storage_configuration.get(
-                'server', 'perforce:1666')
-            one_project_per_depot = self.existing_perforce_storage_configuration.get(
-                'one_project_per_depot', False)
-            create_workspace_mappings = self.existing_perforce_storage_configuration.get(
-                'create_workspace_mappings', True)
 
-            items = [{
+            perforce_server = self.existing_perforce_storage_configuration.get(
+                'server', None)
+
+            perforce_port = self.existing_perforce_storage_configuration.get(
+                'port', '1666')
+
+            perforce_ssl = self.existing_perforce_storage_configuration.get(
+                'use_ssl', True)
+
+            items = [
+            {
                 'type': 'label',
-                'value': 'Hey, guy, here are some settings:'
+                'value': (
+                    'Please provide here settings for accessing the peforce'
+                    ' server.'
+                )
             }, {
                 'type': 'text',
-                'label': 'Perforce server (value of P4PORT)',
+                'label': 'Perforce server name or address.',
                 'name': 'server',
                 'value': perforce_server
             }, {
-                'type': 'boolean',
-                'label': 'Enforce one project depot',
-                'name': 'one_project_per_depot',
-                'value': one_project_per_depot
+                'type': 'number',
+                'label': 'Perforce server port number.',
+                'name': 'port',
+                'value': perforce_port
             }, {
                 'type': 'boolean',
-                'label': 'Create workspace mappings',
-                'name': 'create_workspace_mappings',
-                'value': create_workspace_mappings
+                'label': 'Connection uses SSL.',
+                'name': 'use_ssl',
+                'value': perforce_ssl
             }]
 
         elif next_step == 'review_configuration':
             items = [{
                 'type': 'label',
-                'value': ('Here you go, hope you chose wisely.'
-                          ' Your server is: {0}').format(
-                        configuration['select_options']['server'])
+                'value': (
+                    'Here you go, hope you chose wisely.'
+                    ' Your server is: {0} and port {1}').format(
+                        configuration['select_options']['server'],
+                        configuration['select_options']['port']
+                    )
             }]
             state = 'confirm'
 
@@ -126,8 +136,8 @@ class ConfigurePerforceStorageScenario(object):
                 'scenario': scenario_name,
                 'data': {
                     'server': configuration['select_options']['server'],
-                    'one_project_per_depot': configuration['select_options']['one_project_per_depot'],
-                    'create_workspace_mappings': configuration['select_options']['create_workspace_mappings']
+                    'port': configuration['select_options']['port'],
+                    'use_ssl': configuration['select_options']['use_ssl']
                 }
             })
 

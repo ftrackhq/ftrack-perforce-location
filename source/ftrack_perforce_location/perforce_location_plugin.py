@@ -34,10 +34,15 @@ perforce_settings_data = perforce_settings.read()
 def configure_location(session, event):
     '''Configure perforce location.'''
 
-    location = session.ensure('Location',
-                              {'name': LOCATION_NAME, 'label': LOCATION_LABEL,
-                               'description': LOCATION_DESCRIPTION},
-                              identifying_keys=['name'])
+    location = session.ensure(
+        'Location',
+        {
+            'name': LOCATION_NAME,
+            'label': LOCATION_LABEL,
+            'description': LOCATION_DESCRIPTION
+        },
+        identifying_keys=['name']
+    )
 
     perforce_connection_handler = PerforceConnectionHandler(
         **perforce_settings_data
