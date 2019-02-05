@@ -7,10 +7,10 @@ import logging
 import ftrack_api
 import ftrack_api.accessor.disk
 
-from ftrack_perforce_location import perforce_accessor
-from ftrack_perforce_location import perforce_resource_transformer
-from ftrack_perforce_location import perforce_scenario
-from ftrack_perforce_location import perforce_structure
+from ftrack_perforce_location import accessor
+from ftrack_perforce_location import resource_transformer
+from ftrack_perforce_location import scenario
+from ftrack_perforce_location import structure
 
 from ftrack_perforce_location.perforce_handlers.connection import PerforceConnectionHandler
 from ftrack_perforce_location.perforce_handlers.file import PerforceFileHandler
@@ -56,14 +56,14 @@ def configure_location(session, event):
         perforce_change_handler=perforce_change_handler
     )
 
-    location.accessor = perforce_accessor.PerforceAccessor(
+    location.accessor = accessor.PerforceAccessor(
         perforce_file_handler=perforce_file_handler
     )
-    location.structure = perforce_structure.PerforceStructure(
+    location.structure = structure.PerforceStructure(
         perforce_file_handler=perforce_file_handler,
     )
 
-    location.resource_identifier_transformer = perforce_resource_transformer.PerforceResourceIdentifierTransformer(
+    location.resource_identifier_transformer = resource_transformer.PerforceResourceIdentifierTransformer(
         session, perforce_file_handler=perforce_file_handler
     )
 

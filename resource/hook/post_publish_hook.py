@@ -13,7 +13,7 @@ from ftrack_api.symbol import (
     SERVER_LOCATION_ID,
     COMPONENT_ADDED_TO_LOCATION_TOPIC
 )
-from ftrack_perforce_location.perforce_location_plugin import LOCATION_NAME
+from ftrack_perforce_location.location_plugin import LOCATION_NAME
 
 logger = logging.getLogger(
     'ftrack_perforce_location.perforce_post_publish_hook'

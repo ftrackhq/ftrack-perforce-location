@@ -57,12 +57,12 @@ def register(api_object, **kw):
     logger.info('Connect plugin discovered.')
 
     # TODO: replace with storage scenario registration.
-    from ftrack_perforce_location import perforce_location_plugin
-    perforce_location_plugin.register(api_object)
+    from ftrack_perforce_location import location_plugin
+    location_plugin.register(api_object)
 
-    from ftrack_perforce_location import perforce_scenario
-    perforce_scenario.register(api_object)
-    perforce_scenario.register_configuration(api_object)
+    from ftrack_perforce_location import scenario
+    scenario.register(api_object)
+    scenario.register_configuration(api_object)
 
     # Location will be available from within the dcc applications.
     api_object.event_hub.subscribe(

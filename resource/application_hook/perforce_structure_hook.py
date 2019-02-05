@@ -11,5 +11,5 @@ def register(api_object, **kw):
         return
 
     # TODO(spetterborg) Use structure instead
-    from ftrack_perforce_location import perforce_location_plugin
-    perforce_location_plugin.register(api_object)
+    from ftrack_perforce_location import location_plugin
+    location_plugin.register(api_object)
