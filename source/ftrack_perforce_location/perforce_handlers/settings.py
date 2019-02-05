@@ -27,7 +27,6 @@ class PerforceSettingsHandler(object):
         ).one()
 
         storage_data = json.loads(storage_query['value'])['data']
-        self.logger.info(storage_data)
         return storage_data
 
     @property
@@ -123,7 +122,4 @@ class PerforceSettingsHandler(object):
             server_settings['port'] = 'ssl:{}'.format(self.server_settings['port'])
 
         config.update(server_settings)
-
-        self.logger.info(config)
-
         return config

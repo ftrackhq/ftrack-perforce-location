@@ -18,7 +18,7 @@ from ftrack_perforce_location.perforce_handlers.change import PerforceChangeHand
 from ftrack_perforce_location.perforce_handlers.settings import PerforceSettingsHandler
 
 logger = logging.getLogger(
-    'ftrack_perforce_location.perforce_location_plugin'
+    __name__
 )
 
 # Name of the location plugin.

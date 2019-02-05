@@ -11,7 +11,7 @@ from ftrack_api.logging import LazyLogMessage as L
 scenario_name = 'ftrack.perforce-storage'
 
 logger = logging.getLogger(
-    'ftrack_perforce_location.perforce_scenario'
+    __name__
 )
 
 
