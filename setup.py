@@ -14,7 +14,6 @@ BUILD_PATH = os.path.join(ROOT_PATH, 'build')
 SOURCE_PATH = os.path.join(ROOT_PATH, 'source')
 README_PATH = os.path.join(ROOT_PATH, 'README.rst')
 RESOURCE_PATH = os.path.join(ROOT_PATH, 'resource')
-BUILD_PATH = os.path.join(ROOT_PATH, 'build')
 HOOK_PATH = os.path.join(RESOURCE_PATH, 'hook')
 APPLICATION_HOOK_PATH = os.path.join(RESOURCE_PATH, 'application_hook')
 
@@ -68,7 +67,8 @@ class BuildPlugin(Command):
                 'install',
                 '.',
                 '--target',
-                os.path.join(STAGING_PATH, 'dependencies')
+                os.path.join(STAGING_PATH, 'dependencies'),
+                '--process-dependency-links'
             ]
         )
 

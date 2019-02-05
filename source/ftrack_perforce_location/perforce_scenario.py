@@ -14,6 +14,7 @@ logger = logging.getLogger(
     'ftrack_perforce_location.perforce_scenario'
 )
 
+
 class ConfigurePerforceStorageScenario(object):
     '''Configure a storage scenario using Perforce.'''
 
