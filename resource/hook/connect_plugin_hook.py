@@ -8,10 +8,6 @@ import functools
 
 import ftrack_api
 import ftrack_connect.application
-from ftrack_perforce_location.scenario import (
-    register as register_perforce,
-    register_configuration as register_perforce_configuration
-)
 
 dependencies_directory = os.path.abspath(
     os.path.join(os.path.dirname(__file__), '..', 'dependencies')
@@ -24,7 +20,9 @@ logger = logging.getLogger('ftrack_perforce_location.connect_plugin_hook')
 def modify_application_launch(event, session=None):
     '''Modify the application environment to include our location plugin.'''
 
-    register_perforce_configuration(session)
+    scenario_hook_path = os.path.abspath(
+        os.path.dirname(__file__)
+    )
 
     if 'options' not in event['data']:
         event['data']['options'] = {'env': {}}
@@ -32,13 +30,15 @@ def modify_application_launch(event, session=None):
     environment = event['data']['options']['env']
 
     ftrack_connect.application.appendPath(
-        dependencies_directory,
-        'PYTHONPATH',
+        scenario_hook_path,
+        'FTRACK_EVENT_PLUGIN_PATH',
         environment
     )
 
-    logger.info(
-        'Connect plugin modified launch hook to register location plugin.'
+    ftrack_connect.application.appendPath(
+        dependencies_directory,
+        'PYTHONPATH',
+        environment
     )
 
 
@@ -65,6 +65,5 @@ def register(api_object, **kw):
         'topic=ftrack.action.launch',
         functools.partial(modify_application_launch, session=api_object)
     )
-    register_perforce(api_object)
 
 

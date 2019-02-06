@@ -9,6 +9,10 @@ import logging
 import ftrack_api
 from ftrack_api.logging import LazyLogMessage as L
 
+dependencies_directory = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), '..', 'dependencies')
+)
+sys.path.append(dependencies_directory)
 
 from ftrack_perforce_location.perforce_handlers.connection import PerforceConnectionHandler
 from ftrack_perforce_location.perforce_handlers.file import PerforceFileHandler
@@ -252,7 +256,6 @@ class ActivatePerforceStorageScenario(object):
     def activate(self, event):
         # Called by ftrack_api, but no response needed.
         storage_scenario = event['data']['storage_scenario']
-        self.logger.info('Activated : {}'.format(storage_scenario))
 
         try:
             location_data = storage_scenario['data']
@@ -313,12 +316,12 @@ class ActivatePerforceStorageScenario(object):
                self.session, perforce_file_handler=perforce_file_handler
             )
 
-            location.priority = 1
+            location.priority = 0
 
             self.logger.info(L(
                 u'Storage scenario activated. Configured {0!r} from '
                 u'{1!r}',
-                location, storage_scenario
+                location, perforce_settings_data
             ))
 
     def register(self, session):
@@ -351,14 +354,22 @@ class ActivatePerforceStorageScenario(object):
 
 def register(session):
     '''Register storage scenario.'''
+    if not isinstance(session, ftrack_api.Session):
+        # Exit to avoid registering this plugin again.
+        return
 
     # TODO(spetterborg) Probably remove logging in release version
     logger.info('Registering activate listener')
     scenario = ActivatePerforceStorageScenario()
     scenario.register(session)
 
+    register_configuration(session)
+
 
 def register_configuration(session):
+    if not isinstance(session, ftrack_api.Session):
+        # Exit to avoid registering this plugin again.
+        return
 
     '''Register storage scenario.'''
     logger.info('Registering config listener')

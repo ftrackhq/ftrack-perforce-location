@@ -13,6 +13,14 @@ class PerforceConnectionHandler(object):
     '''Handles credentials and login to perforce server.'''
 
     @property
+    def user(self):
+        return self._user
+
+    @property
+    def host(self):
+        return self._hostname
+
+    @property
     def info(self):
         '''Return informations about the current connection.'''
         return self.connection.run('info')[0]
@@ -74,13 +82,15 @@ class PerforceConnectionHandler(object):
         '''Handles connection to the server.'''
 
         p4 = P4()
-        p4.host = str(self._hostname)
+        p4.host = str(self.host)
         p4.port = str(self.port)
-        p4.user = str(self._user)
+        p4.user = str(self.user)
         p4.password = str(self._password)
 
         self.logger.debug(
-            'Connecting to : {0}'.format(self.port)
+            'Connecting to server {0} on port {1} as user {2}'.format(
+                self.host, self.port, self.user
+            )
         )
 
         try:
