@@ -113,7 +113,7 @@ class ActivatePerforceStorageScenario(object):
             self.logger.info(L(
                 u'Storage scenario activated. Configured {0!r} from '
                 u'{1!r}',
-                location, perforce_settings_data
+                location['name'], perforce_settings_data
             ))
 
     def register(self, session):
