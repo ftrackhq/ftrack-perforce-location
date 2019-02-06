@@ -4,24 +4,27 @@
 import os
 import sys
 import logging
+import functools
 
 import ftrack_api
 import ftrack_connect.application
-
-APPLICATION_HOOK_DIRECTORY = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), '..', 'application_hook')
+from ftrack_perforce_location.scenario import (
+    register as register_perforce,
+    register_configuration as register_perforce_configuration
 )
-LOCATION_DIRECTORY = os.path.abspath(
+
+dependencies_directory = os.path.abspath(
     os.path.join(os.path.dirname(__file__), '..', 'dependencies')
 )
 
-sys.path.append(LOCATION_DIRECTORY)
 
 logger = logging.getLogger('ftrack_perforce_location.connect_plugin_hook')
 
 
-def modify_application_launch(event):
+def modify_application_launch(event, session=None):
     '''Modify the application environment to include our location plugin.'''
+
+    register_perforce_configuration(session)
 
     if 'options' not in event['data']:
         event['data']['options'] = {'env': {}}
@@ -29,16 +32,11 @@ def modify_application_launch(event):
     environment = event['data']['options']['env']
 
     ftrack_connect.application.appendPath(
-        APPLICATION_HOOK_DIRECTORY,
-        'FTRACK_EVENT_PLUGIN_PATH',
-        environment
-    )
-
-    ftrack_connect.application.appendPath(
-        LOCATION_DIRECTORY,
+        dependencies_directory,
         'PYTHONPATH',
         environment
     )
+
     logger.info(
         'Connect plugin modified launch hook to register location plugin.'
     )
@@ -56,22 +54,17 @@ def register(api_object, **kw):
 
     logger.info('Connect plugin discovered.')
 
-    # TODO: replace with storage scenario registration.
-    from ftrack_perforce_location import location_plugin
-    location_plugin.register(api_object)
-
-    from ftrack_perforce_location import scenario
-    scenario.register(api_object)
-    scenario.register_configuration(api_object)
-
     # Location will be available from within the dcc applications.
     api_object.event_hub.subscribe(
         'topic=ftrack.connect.application.launch',
-        modify_application_launch
+        functools.partial(modify_application_launch, session=api_object)
     )
 
     # Location will be available from actions
     api_object.event_hub.subscribe(
         'topic=ftrack.action.launch',
-        modify_application_launch
+        functools.partial(modify_application_launch, session=api_object)
     )
+    register_perforce(api_object)
+
+

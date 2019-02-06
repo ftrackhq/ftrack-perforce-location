@@ -11,32 +11,11 @@ from ftrack_perforce_location.perforce_handlers.errors import PerforceSettingsHa
 
 class PerforceSettingsHandler(object):
     '''Handles perforce connection settings.'''
-    def __init__(self, session, scenario_id):
+    def __init__(self):
         super(PerforceSettingsHandler, self).__init__()
         self.logger = logging.getLogger(
             __name__ + '.' + self.__class__.__name__
         )
-        self.session = session
-        self._scenario_id = scenario_id
-
-    @property
-    def server_settings(self):
-
-        storage_query = self.session.query(
-            'select value from Setting '
-            'where name is "storage_scenario" and group is "STORAGE"'
-        ).one()
-
-        raw_storage_data = json.loads(storage_query['value'])
-        if raw_storage_data.get('scenario') != self._scenario_id:
-            raise PerforceSettingsHandlerException(
-                '{} cannot be used to configure perforce'.format(
-                    raw_storage_data.get('scenario', 'Not Storage Defined.')
-                )
-            )
-
-        storage_data = raw_storage_data['data']
-        return storage_data
 
     @property
     def _templated_default(self):
@@ -122,13 +101,4 @@ class PerforceSettingsHandler(object):
                 )
             )
 
-        server_settings ={
-            'host': self.server_settings['host'],
-            'port': self.server_settings['port']
-        }
-
-        if self.server_settings['use_ssl']:
-            server_settings['port'] = 'ssl:{}'.format(self.server_settings['port'])
-
-        config.update(server_settings)
         return config

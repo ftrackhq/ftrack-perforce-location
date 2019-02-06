@@ -1,6 +1,8 @@
 # :coding: utf-8
 # :copyright: Copyright (c) 2018 ftrack
 
+import os
+import sys
 import functools
 import logging
 
@@ -13,7 +15,13 @@ from ftrack_api.symbol import (
     SERVER_LOCATION_ID,
     COMPONENT_ADDED_TO_LOCATION_TOPIC
 )
-from ftrack_perforce_location.location_plugin import SCENARIO_NAME
+
+dependencies_directory = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), '..', 'dependencies')
+)
+sys.path.append(dependencies_directory)
+
+from ftrack_perforce_location.constants import SCENARIO_NAME
 
 logger = logging.getLogger(
     'ftrack_perforce_location.post_publish_hook'
