@@ -16,7 +16,7 @@ from ftrack_api.symbol import (
 from ftrack_perforce_location.location_plugin import SCENARIO_NAME
 
 logger = logging.getLogger(
-    'ftrack_perforce_location.perforce_post_publish_hook'
+    'ftrack_perforce_location.post_publish_hook'
 )
 
 excluded_location_ids = [
