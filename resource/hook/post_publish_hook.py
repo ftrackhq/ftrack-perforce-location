@@ -21,7 +21,7 @@ dependencies_directory = os.path.abspath(
 )
 sys.path.append(dependencies_directory)
 
-from ftrack_perforce_location.constants import SCENARIO_NAME
+from ftrack_perforce_location.constants import SCENARIO_ID
 
 logger = logging.getLogger(
     'ftrack_perforce_location.post_publish_hook'
@@ -45,7 +45,7 @@ def post_publish_callback(session, event):
 
     # TODO(spetterborg) Instead, subscribe to publishes only for this location.
     perforce_location = session.get('Location', location_id)
-    if perforce_location['name'] != SCENARIO_NAME:
+    if perforce_location['name'] != SCENARIO_ID:
         return
 
     component_id = event['data'].get('component_id')

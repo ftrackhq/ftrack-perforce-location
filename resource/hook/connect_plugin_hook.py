@@ -4,7 +4,6 @@
 import os
 import sys
 import logging
-import functools
 
 import ftrack_api
 import ftrack_connect.application
@@ -17,12 +16,14 @@ dependencies_directory = os.path.abspath(
 logger = logging.getLogger('ftrack_perforce_location.connect_plugin_hook')
 
 
-def modify_application_launch(event, session=None):
+def modify_application_launch(event):
     '''Modify the application environment to include our location plugin.'''
 
     scenario_hook_path = os.path.abspath(
         os.path.dirname(__file__)
     )
+
+    logger.info('hook path: {}'.format(scenario_hook_path))
 
     if 'options' not in event['data']:
         event['data']['options'] = {'env': {}}
@@ -32,6 +33,12 @@ def modify_application_launch(event, session=None):
     ftrack_connect.application.appendPath(
         scenario_hook_path,
         'FTRACK_EVENT_PLUGIN_PATH',
+        environment
+    )
+
+    ftrack_connect.application.appendPath(
+        scenario_hook_path,
+        'PYTHONPATH',
         environment
     )
 
@@ -52,18 +59,16 @@ def register(api_object, **kw):
         # Exit to avoid registering this plugin again.
         return
 
-    logger.info('Connect plugin discovered.')
-
     # Location will be available from within the dcc applications.
     api_object.event_hub.subscribe(
         'topic=ftrack.connect.application.launch',
-        functools.partial(modify_application_launch, session=api_object)
+        modify_application_launch
     )
 
     # Location will be available from actions
     api_object.event_hub.subscribe(
         'topic=ftrack.action.launch',
-        functools.partial(modify_application_launch, session=api_object)
+        modify_application_launch
     )
 
 
