@@ -18,11 +18,6 @@ logger = logging.getLogger('ftrack_perforce_location.connect_plugin_hook')
 
 def modify_application_launch(event):
     '''Modify the application environment to include our location plugin.'''
-
-    scenario_hook_path = os.path.abspath(
-        os.path.dirname(__file__)
-    )
-
     logger.info('hook path: {}'.format(scenario_hook_path))
 
     if 'options' not in event['data']:
@@ -30,17 +25,6 @@ def modify_application_launch(event):
 
     environment = event['data']['options']['env']
 
-    ftrack_connect.application.appendPath(
-        scenario_hook_path,
-        'FTRACK_EVENT_PLUGIN_PATH',
-        environment
-    )
-
-    ftrack_connect.application.appendPath(
-        scenario_hook_path,
-        'PYTHONPATH',
-        environment
-    )
 
     ftrack_connect.application.appendPath(
         dependencies_directory,
