@@ -18,7 +18,7 @@ from ftrack_perforce_location.perforce_handlers.connection import PerforceConnec
 from ftrack_perforce_location.perforce_handlers.file import PerforceFileHandler
 from ftrack_perforce_location.perforce_handlers.change import PerforceChangeHandler
 from ftrack_perforce_location.perforce_handlers.settings import PerforceSettingsHandler
-from ftrack_perforce_location.constants import SCENARIO_ID, SCENARIO_DESCRIPTION
+from ftrack_perforce_location.constants import SCENARIO_ID, SCENARIO_DESCRIPTION, SCENARIO_LABEL
 
 from ftrack_perforce_location import accessor
 from ftrack_perforce_location import resource_transformer
@@ -200,7 +200,7 @@ class ConfigurePerforceStorageScenario(object):
         '''Return action discover dictionary for *event*.'''
         return {
             'id': SCENARIO_ID,
-            'name': 'Perforce storage scenario',
+            'name': SCENARIO_LABEL,
             'description': SCENARIO_DESCRIPTION
         }
 

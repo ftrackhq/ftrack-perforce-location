@@ -18,7 +18,7 @@ from ftrack_perforce_location.perforce_handlers.connection import PerforceConnec
 from ftrack_perforce_location.perforce_handlers.file import PerforceFileHandler
 from ftrack_perforce_location.perforce_handlers.change import PerforceChangeHandler
 from ftrack_perforce_location.perforce_handlers.settings import PerforceSettingsHandler
-from ftrack_perforce_location.constants import SCENARIO_ID, SCENARIO_DESCRIPTION
+from ftrack_perforce_location.constants import SCENARIO_ID, SCENARIO_DESCRIPTION, SCENARIO_LABEL
 
 from ftrack_perforce_location import accessor
 from ftrack_perforce_location import resource_transformer
@@ -63,14 +63,16 @@ class ActivatePerforceStorageScenario(object):
 
         else:
 
-            location = self.session.create(
+            location = self.session.ensure(
                 'Location',
-                data=dict(
-                    name=SCENARIO_ID,
-                    id=SCENARIO_ID
-                ),
-                reconstructing=True
+                {
+                    'name': SCENARIO_ID,
+                    'label': SCENARIO_LABEL,
+                    'description': SCENARIO_DESCRIPTION
+                },
+                identifying_keys=['name']
             )
+
             perforce_settings = PerforceSettingsHandler()
             perforce_settings_data = perforce_settings.read()
 
