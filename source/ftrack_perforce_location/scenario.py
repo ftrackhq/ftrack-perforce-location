@@ -231,6 +231,7 @@ class ActivatePerforceStorageScenario(object):
         )
 
     def _connect_to_perforce(self, event):
+        '''Create a new perforce connection and raise any issue.'''
         storage_scenario = event['data']['storage_scenario']
 
         try:
