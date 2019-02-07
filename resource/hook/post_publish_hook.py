@@ -51,9 +51,14 @@ def register(api_object, **kw):
         post_publish_callback, api_object
     )
 
+    session = ftrack_api.Session()
+    location_id = session.query(
+        'Location where name is "{}"'.format(SCENARIO_ID)
+    ).one()['id']
+
     api_object.event_hub.subscribe(
         'topic={0} and data.location_id="{1}"'.format(
-            COMPONENT_ADDED_TO_LOCATION_TOPIC, SCENARIO_ID
+            COMPONENT_ADDED_TO_LOCATION_TOPIC, location_id
         ),
         event_handler
     )
