@@ -14,6 +14,7 @@ from ftrack_perforce_location.perforce_handlers.file import PerforceFileHandler
 from ftrack_perforce_location.perforce_handlers.change import PerforceChangeHandler
 from ftrack_perforce_location.perforce_handlers.settings import PerforceSettingsHandler
 from ftrack_perforce_location.constants import SCENARIO_ID, SCENARIO_DESCRIPTION, SCENARIO_LABEL
+from ftrack_perforce_location.perforce_handlers import errors
 
 from ftrack_perforce_location import accessor
 from ftrack_perforce_location import resource_transformer
@@ -229,14 +230,7 @@ class ActivatePerforceStorageScenario(object):
             __name__ + '.' + self.__class__.__name__
         )
 
-    def _verify_startup(self, event):
-        '''Verify the storage scenario configuration.'''
-        # TODO(spetterborg) One place to check the workspace mappings.
-        # Called by Connect
-        pass
-
-    def activate(self, event):
-        # Called by ftrack_api, but no response needed.
+    def _connect_to_perforce(self, event):
         storage_scenario = event['data']['storage_scenario']
 
         try:
@@ -247,22 +241,11 @@ class ActivatePerforceStorageScenario(object):
                 'Unable to read storage scenario data.'
             )
             self.logger.error(L(error_message))
-            raise ftrack_api.exception.LocationError(
+            raise errors.PerforceConnectionHandlerException(
                 'Unable to configure location based on scenario.'
             )
 
         else:
-
-            location = self.session.ensure(
-                'Location',
-                {
-                    'name': SCENARIO_ID,
-                    'label': SCENARIO_LABEL,
-                    'description': SCENARIO_DESCRIPTION
-                },
-                identifying_keys=['name']
-            )
-
             perforce_settings = PerforceSettingsHandler()
             perforce_settings_data = perforce_settings.read()
 
@@ -276,10 +259,40 @@ class ActivatePerforceStorageScenario(object):
                     location_data['port'])
 
             perforce_settings_data.update(server_settings)
+            try:
+                perforce_connection_handler = PerforceConnectionHandler(
+                    **perforce_settings_data
+                )
+            except Exception as error:
+                self.logger.error(L(str(error)))
+                error = str(error).split('[Error]:')[-1]
+                error = 'Perforce Error: {}'.format(error)
+                raise errors.PerforceConnectionHandlerException(error)
 
-            perforce_connection_handler = PerforceConnectionHandler(
-                **perforce_settings_data
+            return perforce_connection_handler
+
+    def _verify_startup(self, event):
+        '''Verify the storage scenario configuration.'''
+        # TODO(spetterborg) One place to check the workspace mappings.
+        # Called by Connect
+        try:
+            self._connect_to_perforce(event)
+        except errors.PerforceConnectionHandlerException as error:
+            return unicode(error)
+
+    def activate(self, event):
+
+            location = self.session.ensure(
+                'Location',
+                {
+                    'name': SCENARIO_ID,
+                    'label': SCENARIO_LABEL,
+                    'description': SCENARIO_DESCRIPTION
+                },
+                identifying_keys=['name']
             )
+
+            perforce_connection_handler = self._connect_to_perforce(event)
 
             perforce_change_handler = PerforceChangeHandler(
                 perforce_connection_handler
@@ -303,9 +316,8 @@ class ActivatePerforceStorageScenario(object):
             location.priority = 0
 
             self.logger.info(L(
-                u'Storage scenario activated. Configured {0!r} from '
-                u'{1!r}',
-                location['name'], perforce_settings_data
+                u'Storage scenario activated. Configured {0!r}',
+                location['name']
             ))
 
     def register(self, session):
