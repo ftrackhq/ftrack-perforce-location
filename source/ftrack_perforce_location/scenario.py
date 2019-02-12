@@ -113,7 +113,7 @@ class ConfigurePerforceStorageScenario(object):
                 )
             }, {
                 'type': 'text',
-                'label': 'Perforce server name or address (P4HOST).',
+                'label': 'Perforce server name or address.',
                 'name': 'host',
                 'value': perforce_server
             }, {
@@ -252,12 +252,15 @@ class ActivatePerforceStorageScenario(object):
 
             server_settings = {
                 'host': location_data['host'],
-                'port': location_data['port']
             }
 
             if location_data['use_ssl']:
                 server_settings['port'] = 'ssl:{}'.format(
                     location_data['port'])
+            else:
+                server_settings['port'] = 'tcp:{}'.format(
+                    location_data['port'])
+
 
             perforce_settings_data.update(server_settings)
             try:
