@@ -55,9 +55,15 @@ def register(api_object, **kw):
     )
 
     session = ftrack_api.Session()
-    location_id = session.query(
+    location = session.query(
         'Location where name is "{}"'.format(SCENARIO_ID)
-    ).one()['id']
+    ).first()
+
+    if not location:
+        logger.debug('Location {} not found'.format(SCENARIO_ID))
+        return
+
+    location_id = location['id']
 
     api_object.event_hub.subscribe(
         'topic={0} and data.location_id="{1}"'.format(
