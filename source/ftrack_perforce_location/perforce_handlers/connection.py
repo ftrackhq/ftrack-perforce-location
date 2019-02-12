@@ -88,8 +88,8 @@ class PerforceConnectionHandler(object):
         p4.password = str(self._password)
 
         self.logger.debug(
-            'Connecting to server {0} on port {1} as user {2}'.format(
-                self.host, self.port, self.user
+            'Connecting to {}'.format(
+                p4.__repr__()
             )
         )
 
