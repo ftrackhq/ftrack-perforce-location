@@ -54,7 +54,10 @@ def register(api_object, **kw):
         post_publish_callback, api_object
     )
 
-    session = ftrack_api.Session()
+    session = ftrack_api.Session(
+        auto_connect_event_hub=False,
+        plugin_paths=[]
+    )
     location = session.query(
         'Location where name is "{}"'.format(SCENARIO_ID)
     ).first()
