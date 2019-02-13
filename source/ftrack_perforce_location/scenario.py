@@ -75,12 +75,6 @@ class ConfigurePerforceStorageScenario(object):
         next_step = steps[steps.index(previous_step) + 1]
         state = 'configuring'
 
-        self.logger.info(L(
-            u'Configuring scenario, previous step: {0}, next step: {1}. '
-            u'Values {2!r}.',
-            previous_step, next_step, values
-        ))
-
         if 'configuration' in values:
             configuration = values.pop('configuration')
         else:
@@ -90,17 +84,17 @@ class ConfigurePerforceStorageScenario(object):
             # Update configuration with values from the previous step.
             configuration[previous_step] = values
 
-        if next_step == 'review_configuration' and not values['host']:
-            # validate host is set
+        if next_step == 'review_configuration' and not values['server']:
+            # validate server is set
             next_step = 'select_options'
 
         if next_step == 'select_options':
 
             perforce_server = self.existing_perforce_storage_configuration.get(
-                'host', None)
+                'server', '127.0.0.1')
 
             perforce_port = self.existing_perforce_storage_configuration.get(
-                'port', '1666')
+                'port_number', '1666')
 
             perforce_ssl = self.existing_perforce_storage_configuration.get(
                 'use_ssl', True)
@@ -114,12 +108,12 @@ class ConfigurePerforceStorageScenario(object):
             }, {
                 'type': 'text',
                 'label': 'Perforce server name or address.',
-                'name': 'host',
+                'name': 'server',
                 'value': perforce_server
             }, {
                 'type': 'number',
                 'label': 'Perforce server port number.',
-                'name': 'port',
+                'name': 'port_number',
                 'value': perforce_port
             }, {
                 'type': 'boolean',
@@ -133,9 +127,9 @@ class ConfigurePerforceStorageScenario(object):
                 'type': 'label',
                 'value': (
                     '# Perforce storage is now configured with the following settings:\n\n'
-                    '* **Host**: {0} \n* **Port**: {1} \n* Use **SSL** : {2}').format(
-                        configuration['select_options']['host'],
-                        configuration['select_options']['port'],
+                    '* **Server**: {0} \n* **Port**: {1} \n* Use **SSL** : {2}').format(
+                        configuration['select_options']['server'],
+                        configuration['select_options']['port_number'],
                         configuration['select_options']['use_ssl']
                 )
             }]
@@ -145,8 +139,8 @@ class ConfigurePerforceStorageScenario(object):
             setting_value = json.dumps({
                 'scenario': SCENARIO_ID,
                 'data': {
-                    'host': configuration['select_options']['host'],
-                    'port': configuration['select_options']['port'],
+                    'server': configuration['select_options']['server'],
+                    'port_number': configuration['select_options']['port_number'],
                     'use_ssl': configuration['select_options']['use_ssl']
                 }
             })
@@ -250,19 +244,17 @@ class ActivatePerforceStorageScenario(object):
             perforce_settings = PerforceSettingsHandler()
             perforce_settings_data = perforce_settings.read()
 
-            server_settings = {
-                'host': location_data['host'],
-            }
-
             if location_data['use_ssl']:
-                server_settings['port'] = 'ssl:{}'.format(
-                    location_data['port'])
+                perforce_settings_data['port'] = 'ssl:{}:{}'.format(
+                    location_data['server'],
+                    location_data['port_number']
+                )
             else:
-                server_settings['port'] = 'tcp:{}'.format(
-                    location_data['port'])
+                perforce_settings_data['port'] = 'tcp:{}:{}'.format(
+                    location_data['server'],
+                    location_data['port_number']
+                )
 
-
-            perforce_settings_data.update(server_settings)
             try:
                 perforce_connection_handler = PerforceConnectionHandler(
                     **perforce_settings_data

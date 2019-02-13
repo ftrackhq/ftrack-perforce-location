@@ -44,6 +44,7 @@ class PerforceSettingsHandler(object):
         config = dict(config)
         from P4 import P4, P4Exception
         p4 = P4()
+        config['host'] = p4.host
         config['user'] = p4.user
         config['using_workspace'] = p4.client
         try:
