@@ -40,24 +40,13 @@ def post_publish_callback(session, event):
     )
 
 
-def register(api_object, **kw):
+def _register(event, session=None):
     '''Register plugin to api_object.'''
 
-    # Validate that api_object is an instance of ftrack_api.Session. If not,
-    # assume that register is being called from an incompatible API
-    # and return without doing anything.
-    if not isinstance(api_object, ftrack_api.Session):
-        # Exit to avoid registering this plugin again.
-        return
-
     event_handler = functools.partial(
-        post_publish_callback, api_object
+        post_publish_callback, session
     )
 
-    session = ftrack_api.Session(
-        auto_connect_event_hub=False,
-        plugin_paths=[]
-    )
     location = session.query(
         'Location where name is "{}"'.format(SCENARIO_ID)
     ).first()
@@ -68,9 +57,25 @@ def register(api_object, **kw):
 
     location_id = location['id']
 
-    api_object.event_hub.subscribe(
+    session.event_hub.subscribe(
         'topic={0} and data.location_id="{1}"'.format(
             COMPONENT_ADDED_TO_LOCATION_TOPIC, location_id
         ),
         event_handler
+    )
+
+
+def register(api_object, **kw):
+    # Validate that api_object is an instance of ftrack_api.Session. If not,
+    # assume that register is being called from an incompatible API
+    # and return without doing anything.
+
+    if not isinstance(api_object, ftrack_api.Session):
+        # Exit to avoid registering this plugin again.
+        return
+
+
+    api_object.event_hub.subscribe(
+        'topic=ftrack.api.session.ready',
+        functools.partial(_register, session=api_object)
     )
