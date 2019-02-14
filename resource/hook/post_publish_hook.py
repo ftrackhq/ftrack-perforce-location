@@ -56,6 +56,7 @@ def _register(event, session=None):
         return
 
     location_id = location['id']
+    logger.denug('registering post publish hook for location {}'.format(SCENARIO_ID))
 
     session.event_hub.subscribe(
         'topic={0} and data.location_id="{1}"'.format(
@@ -73,7 +74,6 @@ def register(api_object, **kw):
     if not isinstance(api_object, ftrack_api.Session):
         # Exit to avoid registering this plugin again.
         return
-
 
     api_object.event_hub.subscribe(
         'topic=ftrack.api.session.ready',

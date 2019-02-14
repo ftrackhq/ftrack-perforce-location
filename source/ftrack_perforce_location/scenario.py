@@ -61,6 +61,8 @@ class ConfigurePerforceStorageScenario(object):
     def configure_scenario(self, event):
         '''Configure scenario based on *event* and return form items.'''
 
+        self.logger.debug('configuring scenario')
+
         steps = (
             'select_scenario',
             'select_options',
@@ -271,14 +273,16 @@ class ActivatePerforceStorageScenario(object):
         '''Verify the storage scenario configuration.'''
         # TODO(spetterborg) One place to check the workspace mappings.
         # Called by Connect
+        self.logger.debug('Verifying storage startup.')
         try:
             self._connect_to_perforce(event)
         except errors.PerforceConnectionHandlerException as error:
             return unicode(error)
 
     def activate(self, event):
+        self.logger.debug('Activating storage scenario {}.'.format(SCENARIO_ID))
 
-            location = self.session.ensure(
+        location = self.session.ensure(
                 'Location',
                 {
                     'name': SCENARIO_ID,
@@ -288,33 +292,35 @@ class ActivatePerforceStorageScenario(object):
                 identifying_keys=['name']
             )
 
-            perforce_connection_handler = self._connect_to_perforce(event)
+        self.logger.debug('Creating Location {}.'.format(location))
 
-            perforce_change_handler = PerforceChangeHandler(
-                perforce_connection_handler
-            )
+        perforce_connection_handler = self._connect_to_perforce(event)
 
-            perforce_file_handler = PerforceFileHandler(
-                perforce_change_handler=perforce_change_handler
-            )
+        perforce_change_handler = PerforceChangeHandler(
+            perforce_connection_handler
+        )
 
-            location.accessor = accessor.PerforceAccessor(
-                perforce_file_handler=perforce_file_handler
-            )
-            location.structure = structure.PerforceStructure(
-                perforce_file_handler=perforce_file_handler,
-            )
+        perforce_file_handler = PerforceFileHandler(
+            perforce_change_handler=perforce_change_handler
+        )
 
-            location.resource_identifier_transformer = resource_transformer.PerforceResourceIdentifierTransformer(
-               self.session, perforce_file_handler=perforce_file_handler
-            )
+        location.accessor = accessor.PerforceAccessor(
+            perforce_file_handler=perforce_file_handler
+        )
+        location.structure = structure.PerforceStructure(
+            perforce_file_handler=perforce_file_handler,
+        )
 
-            location.priority = 0
+        location.resource_identifier_transformer = resource_transformer.PerforceResourceIdentifierTransformer(
+           self.session, perforce_file_handler=perforce_file_handler
+        )
 
-            self.logger.info(L(
-                u'Storage scenario activated. Configured {0!r}',
-                location['name']
-            ))
+        location.priority = 0
+
+        self.logger.info(L(
+            u'Storage scenario activated. Configured {0!r}',
+            location['name']
+        ))
 
     def register(self, session):
         '''Subscribe to events on *session*.'''
