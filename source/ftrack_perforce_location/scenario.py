@@ -283,14 +283,14 @@ class ActivatePerforceStorageScenario(object):
         self.logger.debug('Activating storage scenario {}.'.format(SCENARIO_ID))
 
         location = self.session.ensure(
-                'Location',
-                {
-                    'name': SCENARIO_ID,
-                    'label': SCENARIO_LABEL,
-                    'description': SCENARIO_DESCRIPTION
-                },
-                identifying_keys=['name']
-            )
+            'Location',
+            {
+                'name': SCENARIO_ID,
+                'label': SCENARIO_LABEL,
+                'description': SCENARIO_DESCRIPTION
+            },
+            identifying_keys=['name']
+        )
 
         self.logger.debug('Creating Location {}.'.format(location))
 
