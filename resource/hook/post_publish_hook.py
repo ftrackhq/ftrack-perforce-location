@@ -56,7 +56,7 @@ def _register(event, session=None):
         return
 
     location_id = location['id']
-    logger.denug('registering post publish hook for location {}'.format(SCENARIO_ID))
+    logger.debug('registering post publish hook for location {}'.format(SCENARIO_ID))
 
     session.event_hub.subscribe(
         'topic={0} and data.location_id="{1}"'.format(
