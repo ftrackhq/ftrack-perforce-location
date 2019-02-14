@@ -81,12 +81,14 @@ def configure_logging(logger_name, level=None, format=None, extra_modules=None):
                 'level': 'DEBUG',
                 'formatter': 'file',
                 'filename': logfile,
+                'filters': ['perforce_location_only'],
                 'mode': 'a',
                 'maxBytes': 10485760,
                 'backupCount': 5,
             },
 
         },
+        'filters': {'perforce_location_only': {'name': logger_name}},
         'formatters': {
             'file': {
                 'format': format

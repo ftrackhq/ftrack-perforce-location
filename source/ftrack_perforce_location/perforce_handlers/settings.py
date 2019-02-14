@@ -22,8 +22,6 @@ class PerforceSettingsHandler(object):
         '''Return a default, empty config to be setup.'''
 
         return dict(
-            host=None,
-            port=None,
             user=None,
             password=None,
             using_workspace=None,
@@ -48,7 +46,6 @@ class PerforceSettingsHandler(object):
         p4 = P4()
         config['host'] = p4.host
         config['user'] = p4.user
-        config['port'] = p4.port
         config['using_workspace'] = p4.client
         try:
             p4.connect()

@@ -13,6 +13,14 @@ class PerforceConnectionHandler(object):
     '''Handles credentials and login to perforce server.'''
 
     @property
+    def user(self):
+        return self._user
+
+    @property
+    def host(self):
+        return self._hostname
+
+    @property
     def info(self):
         '''Return informations about the current connection.'''
         return self.connection.run('info')[0]
@@ -55,6 +63,7 @@ class PerforceConnectionHandler(object):
         self._connection = None
         self._user = user
         self._password = password
+
         self._hostname = host if host is not None else socket.gethostname()
         self._workspace = None
         self._workspace_root = workspace_root
@@ -74,20 +83,21 @@ class PerforceConnectionHandler(object):
         '''Handles connection to the server.'''
 
         p4 = P4()
-        p4.host = str(self._hostname)
+        p4.host = str(self.host)
         p4.port = str(self.port)
-        p4.user = str(self._user)
+        p4.user = str(self.user)
         p4.password = str(self._password)
 
         self.logger.debug(
-            'Connecting to : {0}'.format(self.port)
+            'Connecting to {}'.format(
+                p4.__repr__()
+            )
         )
 
         try:
             p4.connect()
         except P4Exception as error:
-            print error
-            return False
+            raise PerforceConnectionHandlerException(error)
 
         self._connection = p4
         return True
@@ -98,14 +108,14 @@ class PerforceConnectionHandler(object):
         filtered_workspaces = [
             ws for
             ws in workspaces
-            if (ws.get("Host") or self._hostname) == self._hostname]
+            if (ws.get("Host") or self.host) == self.host]
         filtered_workspaces = [
             ws for
             ws in filtered_workspaces
             if ws.get('client') == self._using_workspace]
         if not filtered_workspaces:
             raise PerforceConnectionHandlerException(
-                'No worspace found named : {}'.format(self._using_workspace))
+                'No workspace found named : {}'.format(self._using_workspace))
 
         workspace = filtered_workspaces[0].get('client')
         self.logger.debug('getting workspace :{}'.format(workspace))
@@ -117,7 +127,10 @@ class PerforceConnectionHandler(object):
         self.logger.debug(
             'Logging in as: {0}'.format(self._user)
         )
-        self._connection.run_login(self._user)
+        try:
+            self._connection.run_login(self._user)
+        except P4Exception as error:
+            raise PerforceConnectionHandlerException(error)
 
     def disconnect(self):
         '''Handles server disconnection.'''

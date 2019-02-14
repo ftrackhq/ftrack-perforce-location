@@ -2,6 +2,10 @@
 # :copyright: Copyright (c) 2018 ftrack
 
 
+class PerforceLocationError(Exception):
+    '''Base Location exception.'''
+
+
 class PerforceHandlerException(Exception):
     '''Base perforce exception.'''
 
