@@ -29,9 +29,12 @@ class PerforceAccessor(ftrack_api.accessor.disk.DiskAccessor):
         '''
 
         self.logger.debug('opening : {}'.format(resource_identifier))
+        # Assume the structure's path separator is '/'
+        project_name = resource_identifier.split('/')[0]
         filesystem_path = self.get_filesystem_path(resource_identifier)
         filesystem_path = seq_to_glob(filesystem_path)
-        self.perforce_file_handler.file_to_depot(filesystem_path)
+        self.perforce_file_handler.file_to_depot(filesystem_path,
+                                                 project_name=project_name)
         return super(PerforceAccessor, self).open(
             resource_identifier, mode=mode)
 

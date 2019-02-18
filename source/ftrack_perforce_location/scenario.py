@@ -1,24 +1,27 @@
 # :coding: utf-8
 # :copyright: Copyright (c) 2019 ftrack
 
-import os
-import sys
 import json
 import logging
 
 import ftrack_api
 from ftrack_api.logging import LazyLogMessage as L
 
-from ftrack_perforce_location.perforce_handlers.connection import PerforceConnectionHandler
-from ftrack_perforce_location.perforce_handlers.file import PerforceFileHandler
-from ftrack_perforce_location.perforce_handlers.change import PerforceChangeHandler
-from ftrack_perforce_location.perforce_handlers.settings import PerforceSettingsHandler
-from ftrack_perforce_location.constants import SCENARIO_ID, SCENARIO_DESCRIPTION, SCENARIO_LABEL
-from ftrack_perforce_location.perforce_handlers import errors
-
 from ftrack_perforce_location import accessor
 from ftrack_perforce_location import resource_transformer
 from ftrack_perforce_location import structure
+from ftrack_perforce_location.constants import (
+    SCENARIO_ID, SCENARIO_DESCRIPTION, SCENARIO_LABEL)
+from ftrack_perforce_location.perforce_handlers import errors
+from ftrack_perforce_location.perforce_handlers.change import (
+    PerforceChangeHandler)
+from ftrack_perforce_location.perforce_handlers.connection import (
+    PerforceConnectionHandler)
+from ftrack_perforce_location.perforce_handlers.file import (
+    PerforceFileHandler)
+from ftrack_perforce_location.perforce_handlers.settings import (
+    PerforceSettingsHandler)
+from ftrack_perforce_location.validate_workspace import WorkspaceValidator
 
 
 class ConfigurePerforceStorageScenario(object):
@@ -101,49 +104,75 @@ class ConfigurePerforceStorageScenario(object):
             perforce_ssl = self.existing_perforce_storage_configuration.get(
                 'use_ssl', True)
 
-            items = [
-            {
-                'type': 'label',
-                'value': (
-                    'Please provide settings for accessing the peforce server.'
+            one_depot_per_project = self.existing_perforce_storage_configuration.get(
+                'one_depot_per_project', True)
+
+            project_list = ', '.join(
+                self.existing_perforce_storage_configuration.get(
+                    'individual_depot_projects', []
                 )
-            }, {
-                'type': 'text',
-                'label': 'Perforce server name or address.',
-                'name': 'server',
-                'value': perforce_server
-            }, {
-                'type': 'number',
-                'label': 'Perforce server port number.',
-                'name': 'port_number',
-                'value': perforce_port
-            }, {
-                'type': 'boolean',
-                'label': 'Perforce connection uses SSL.',
-                'name': 'use_ssl',
-                'value': perforce_ssl
-            }]
+            )
+
+            items = [
+                {
+                    'type': 'label',
+                    'value': (
+                        'Please provide settings for accessing the peforce server.'
+                    )
+                }, {
+                    'type': 'text',
+                    'label': 'Perforce server name or address.',
+                    'name': 'server',
+                    'value': perforce_server
+                }, {
+                    'type': 'number',
+                    'label': 'Perforce server port number.',
+                    'name': 'port_number',
+                    'value': perforce_port
+                }, {
+                    'type': 'boolean',
+                    'label': 'Perforce connection uses SSL.',
+                    'name': 'use_ssl',
+                    'value': perforce_ssl
+                }, {
+                    'type': 'boolean',
+                    'label': 'Enforce each project having own depot.',
+                    'name': 'one_depot_per_project',
+                    'value': one_depot_per_project
+                }, {
+                    'type': 'textarea',
+                    'label': 'List of projects which need their own depot.',
+                    'name': 'individual_depot_projects',
+                    'value': project_list
+                }]
 
         elif next_step == 'review_configuration':
             items = [{
                 'type': 'label',
                 'value': (
                     '# Perforce storage is now configured with the following settings:\n\n'
-                    '* **Server**: {0} \n* **Port**: {1} \n* Use **SSL** : {2}').format(
+                    '* **Server**: {0} \n* **Port**: {1} \n* Use **SSL**: {2} \n'
+                    '* **One depot per project**: {3} \n* **Projects**: {4}').format(
                         configuration['select_options']['server'],
                         configuration['select_options']['port_number'],
-                        configuration['select_options']['use_ssl']
+                        configuration['select_options']['use_ssl'],
+                        configuration['select_options']['one_depot_per_project'],
+                        configuration['select_options']['individual_depot_projects']
                 )
             }]
             state = 'confirm'
 
         elif next_step == 'save_configuration':
+            projects = configuration['select_options'][
+                'individual_depot_projects'].replace(',', '').split()
             setting_value = json.dumps({
                 'scenario': SCENARIO_ID,
                 'data': {
                     'server': configuration['select_options']['server'],
                     'port_number': configuration['select_options']['port_number'],
-                    'use_ssl': configuration['select_options']['use_ssl']
+                    'use_ssl': configuration['select_options']['use_ssl'],
+                    'one_depot_per_project': configuration['select_options']['one_depot_per_project'],
+                    'individual_depot_projects': projects
                 }
             })
 
@@ -275,12 +304,36 @@ class ActivatePerforceStorageScenario(object):
         # Called by Connect
         self.logger.debug('Verifying storage startup.')
         try:
-            self._connect_to_perforce(event)
+            connection = self._connect_to_perforce(event)
         except errors.PerforceConnectionHandlerException as error:
             return unicode(error)
 
+        storage_scenario = event['data']['storage_scenario']
+        try:
+            location_data = storage_scenario['data']
+        except KeyError:
+            error_message = (
+                'Unable to read storage scenario data.'
+            )
+            return error_message
+
+        projects = location_data.get('individual_depot_projects', [])
+        if len(projects) == 0:
+            projects = self.session.query('Project').all()
+        else:
+            projects = [
+                self.session.query('Project where name is "{0}"'.format(
+                    project)).one()
+                for project in projects
+            ]
+        validator = WorkspaceValidator(connection.connection, projects)
+        if not validator.validate_one_depot_per_project():
+            return ('Perforce location error: \n'
+                    'Not all specified projects have own depot.')
+
     def activate(self, event):
-        self.logger.debug('Activating storage scenario {}.'.format(SCENARIO_ID))
+        self.logger.debug(
+            'Activating storage scenario {}.'.format(SCENARIO_ID))
 
         location = self.session.ensure(
             'Location',
@@ -300,8 +353,17 @@ class ActivatePerforceStorageScenario(object):
             perforce_connection_handler
         )
 
+        one_depot_per_project = False
+        try:
+            storage_scenario = event['data']['storage_scenario']
+            location_data = storage_scenario['data']
+            one_depot_per_project = location_data['one_depot_per_project']
+        except KeyError:
+            pass
+
         perforce_file_handler = PerforceFileHandler(
-            perforce_change_handler=perforce_change_handler
+            perforce_change_handler=perforce_change_handler,
+            one_depot_per_project=one_depot_per_project
         )
 
         location.accessor = accessor.PerforceAccessor(
@@ -312,7 +374,7 @@ class ActivatePerforceStorageScenario(object):
         )
 
         location.resource_identifier_transformer = resource_transformer.PerforceResourceIdentifierTransformer(
-           self.session, perforce_file_handler=perforce_file_handler
+            self.session, perforce_file_handler=perforce_file_handler
         )
 
         location.priority = 0
