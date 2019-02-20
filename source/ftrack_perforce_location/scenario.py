@@ -17,6 +17,8 @@ from ftrack_perforce_location.perforce_handlers.change import (
     PerforceChangeHandler)
 from ftrack_perforce_location.perforce_handlers.connection import (
     PerforceConnectionHandler)
+from ftrack_perforce_location.perforce_handlers.errors import (
+    PerforceValidationError)
 from ftrack_perforce_location.perforce_handlers.file import (
     PerforceFileHandler)
 from ftrack_perforce_location.perforce_handlers.settings import (
@@ -317,19 +319,24 @@ class ActivatePerforceStorageScenario(object):
             )
             return error_message
 
-        projects = location_data.get('individual_depot_projects', [])
-        if len(projects) == 0:
-            projects = self.session.query('Project').all()
-        else:
-            projects = [
-                self.session.query('Project where name is "{0}"'.format(
-                    project)).one()
-                for project in projects
-            ]
-        validator = WorkspaceValidator(connection.connection, projects)
-        if not validator.validate_one_depot_per_project():
-            return ('Perforce location error: \n'
-                    'Not all specified projects have own depot.')
+        if location_data.get('one_depot_per_project', False):
+            projects = location_data.get('individual_depot_projects', [])
+            if len(projects) == 0:
+                projects = self.session.query('Project').all()
+            else:
+                projects = [
+                    self.session.query('Project where name is "{0}"'.format(
+                        project)).one()
+                    for project in projects
+                ]
+            validator = WorkspaceValidator(connection.connection, projects)
+            try:
+                validator.validate_one_depot_per_project()
+            except PerforceValidationError as error:
+                return (
+                    'Caught error while validating one depot per project: \n'
+                    '{}'.format(error)
+                )
 
     def activate(self, event):
         self.logger.debug(

@@ -4,15 +4,15 @@ import re
 
 import P4
 
+from perforce_handlers.errors import PerforceValidationError
+
 
 class WorkspaceValidator(object):
-    def __init__(self, p4=None, projects=None, settings=None):
+    def __init__(self, p4, projects=None, settings=None):
         self.logger = logging.getLogger(
             __name__ + '.' + self.__class__.__name__
         )
 
-        if p4 is None:
-            p4 = self.setup_perforce()
         self._p4 = p4
         if projects is None:
             projects = []
@@ -23,15 +23,6 @@ class WorkspaceValidator(object):
         self._case_insensitive = (
             self._p4.run_info()[0]['clientCase'] == 'insensitive'
         )
-
-    def setup_perforce(self):
-        '''Returns a connected, logged in, P4 instance.'''
-        p4 = P4.P4()
-
-        p4.connect()
-        p4.run_login()
-
-        return p4
 
     def _get_ws_mapping(self):
         client_map = P4.Map(self._client_info['View'])
@@ -62,10 +53,9 @@ class WorkspaceValidator(object):
         if mapping is None:
             mapping = self._ws_map
         if not self._proj_in_mapping(project['name'], mapping):
-            self.logger.warning('Project directory {0} not in mapping.'.format(
-                self._prefix)
+            raise PerforceValidationError(
+                'Project directory {0} not in mapping.'.format(self._prefix)
             )
-            return False
         potential_depots = []
         for lhs, rhs in zip(mapping.lhs(), mapping.rhs()):
             if lhs.startswith('-'):
@@ -92,27 +82,28 @@ class WorkspaceValidator(object):
             projects = self._projects
 
         if not os.path.exists(self._prefix):
-            self.logger.warning('Workspace root {0}, does not exist'.format(
-                self._prefix))
-            return False
+            raise PerforceValidationError(
+                'Workspace root {0}, does not exist'.format(self._prefix)
+            )
 
         workspace_mappings = self._client_info.get('View')
         if not workspace_mappings:
-            self.logger.warning(
+            raise PerforceValidationError(
                 'Workspace {0} has no views configured.'.format(
-                    self._client_info['Client']))
-            return False
+                    self._client_info['Client'])
+            )
 
         if len(list(self._positive_mappings())) == 1:
             self.logger.warning(
                 'Workspace only configured for a single depot.')
             if len(projects) > 1:
-                return False
+                raise PerforceValidationError(
+                    'Multiple projects specified, but workspace mapping'
+                    ' contains only one depot.')
 
         for project in projects:
             if not self._proj_has_own_depot(project):
-                self.logger.warning('Project {0} shares a depot.'.format(
-                    project['name']))
-                return False
+                raise PerforceValidationError(
+                    'Project {0} shares a depot.'.format(project['name']))
 
         return True

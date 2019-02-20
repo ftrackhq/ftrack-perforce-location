@@ -24,3 +24,7 @@ class PerforceChangeHanderException(PerforceHandlerException):
 
 class PerforceSettingsHandlerException(PerforceHandlerException):
     '''Perforce settings exception.'''
+
+
+class PerforceValidationError(Exception):
+    '''Perforce configuration validation exception.'''
