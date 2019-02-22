@@ -109,12 +109,6 @@ class ConfigurePerforceStorageScenario(object):
             one_depot_per_project = self.existing_perforce_storage_configuration.get(
                 'one_depot_per_project', True)
 
-            project_list = ', '.join(
-                self.existing_perforce_storage_configuration.get(
-                    'individual_depot_projects', []
-                )
-            )
-
             items = [
                 {
                     'type': 'label',
@@ -141,11 +135,6 @@ class ConfigurePerforceStorageScenario(object):
                     'label': 'Enforce each project having own depot.',
                     'name': 'one_depot_per_project',
                     'value': one_depot_per_project
-                }, {
-                    'type': 'textarea',
-                    'label': 'List of projects which need their own depot.',
-                    'name': 'individual_depot_projects',
-                    'value': project_list
                 }]
 
         elif next_step == 'review_configuration':
@@ -154,27 +143,23 @@ class ConfigurePerforceStorageScenario(object):
                 'value': (
                     '# Perforce storage is now configured with the following settings:\n\n'
                     '* **Server**: {0} \n* **Port**: {1} \n* Use **SSL**: {2} \n'
-                    '* **One depot per project**: {3} \n* **Projects**: {4}').format(
+                    '* **One depot per project**: {3}').format(
                         configuration['select_options']['server'],
                         configuration['select_options']['port_number'],
                         configuration['select_options']['use_ssl'],
-                        configuration['select_options']['one_depot_per_project'],
-                        configuration['select_options']['individual_depot_projects']
+                        configuration['select_options']['one_depot_per_project']
                 )
             }]
             state = 'confirm'
 
         elif next_step == 'save_configuration':
-            projects = configuration['select_options'][
-                'individual_depot_projects'].replace(',', '').split()
             setting_value = json.dumps({
                 'scenario': SCENARIO_ID,
                 'data': {
                     'server': configuration['select_options']['server'],
                     'port_number': configuration['select_options']['port_number'],
                     'use_ssl': configuration['select_options']['use_ssl'],
-                    'one_depot_per_project': configuration['select_options']['one_depot_per_project'],
-                    'individual_depot_projects': projects
+                    'one_depot_per_project': configuration['select_options']['one_depot_per_project']
                 }
             })
 
@@ -320,15 +305,12 @@ class ActivatePerforceStorageScenario(object):
             return error_message
 
         if location_data.get('one_depot_per_project', False):
-            projects = location_data.get('individual_depot_projects', [])
+            projects = self.session.query(
+                'Project where custom_attributes any'
+                ' (key is own_perforce_depot and value is 1)').all()
             if len(projects) == 0:
-                projects = self.session.query('Project').all()
-            else:
-                projects = [
-                    self.session.query('Project where name is "{0}"'.format(
-                        project)).one()
-                    for project in projects
-                ]
+                return
+
             validator = WorkspaceValidator(connection.connection, projects)
             try:
                 validator.validate_one_depot_per_project()

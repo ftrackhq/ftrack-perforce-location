@@ -1,6 +1,7 @@
 # :coding: utf-8
 # :copyright: Copyright (c) 2018 ftrack
 
+import json
 import os
 import sys
 import functools
@@ -37,27 +38,32 @@ def post_publish_callback(session, event):
     perforce_path = perforce_location.get_filesystem_path(perforce_component)
     logger.info('Publishing {} to perforce'.format(perforce_path))
 
-    project_name = [link for link
-                    in perforce_component['version']['link']
-                    if link['type'] == 'Project'][0]['name']
+    project_id = [link for link
+                  in perforce_component['version']['link']
+                  if link['type'] == 'Project'][0]['id']
+    project = session.query(
+        'select id, name from Project where id is "{0}"'.format(project_id)
+    ).one()
 
     storage_scenario = session.query(
         'select value from Setting '
         'where name is "storage_scenario" and group is "STORAGE"'
     ).one()
-    require_one_depot_per_project = storage_scenario.get(
+    configuration = json.loads(storage_scenario['value'])
+    location_data = configuration.get('data', {})
+    require_one_depot_per_project = location_data.get(
         'one_depot_per_project', False
     )
-    if require_one_depot_per_project:
-        project_list = storage_scenario.get('one_depot_per_project', [])
-        if ((len(project_list) == 0 or project_name in project_list) and
-                not project_has_own_depot(connection, project_name)):
-            error_message = (
-                'Cannot checkin {}. Project {} requires its own depot.'.format(
-                    perforce_path, project_name
-                )
+
+    if (require_one_depot_per_project and
+        project['custom_attributes'].get('own_perforce_depot', False) and
+            not project_has_own_depot(connection, project['name'])):
+        error_message = (
+            'Cannot checkin {}. Project {} requires its own depot.'.format(
+                perforce_path, project['name']
             )
-            raise PerforceValidationError(error_message)
+        )
+        raise PerforceValidationError(error_message)
 
     # PUBLISH RESULT FILE IN PERFORCE
     perforce_location.accessor.perforce_file_handler.change.submit(
