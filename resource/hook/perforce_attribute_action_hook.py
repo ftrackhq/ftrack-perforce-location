@@ -23,11 +23,14 @@ class PerforceAttributeAction(BaseAction):
             return False
 
         entity_type, entity_id = entities[0]
+        if not self._user_is_admin(
+            username=event['source']['user']['username'],
+                project_id=entity_id):
+            return False
 
         return entity_type == 'Project'
 
     def interface(self, session, entities, event):
-        # Add attribute if needed, set attribute
         values = event['data'].get('values', {})
         if values:
             return
@@ -51,8 +54,13 @@ class PerforceAttributeAction(BaseAction):
         return widgets
 
     def launch(self, session, entities, event):
-        # Take the values, do some stuff
+        # It is possible but unlikely that someone has launched the event
+        # directly. Let's make sure the source a valid user.
+        if not self.discover(session, entities, event):
+            return False
+
         entity_type, entity_id = entities[0]
+
         values = event['data'].get('values', {})
 
         project = self.session.get(entity_type, entity_id)
@@ -92,6 +100,18 @@ class PerforceAttributeAction(BaseAction):
             identifying_keys=['entity_type', 'key', 'project_id', 'type_id'])
 
         return perforce_attribute
+
+    def _user_is_admin(self, username, project_id):
+        appropriate_admin_role = self.session.query(
+            'UserSecurityRole where user.username is "{0}"'
+            ' and security_role.name is "Administrator"'
+            ' and (is_all_projects is True'
+            ' or projects any (id is "{1}"))'.format(
+                username, project_id)).first()
+        if appropriate_admin_role is None:
+            return False
+        else:
+            return True
 
 
 def register(session):
