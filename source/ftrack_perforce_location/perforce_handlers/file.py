@@ -7,9 +7,7 @@ import logging
 
 from P4 import P4Exception
 
-from ftrack_perforce_location.perforce_handlers.errors import (
-    PerforceFileHandlerException, PerforceValidationError)
-from ftrack_perforce_location.validate_workspace import WorkspaceValidator
+from ftrack_perforce_location.perforce_handlers.errors import PerforceFileHandlerException
 
 
 seq_match = re.compile('(%+\d+d)|(#+)|(%d)')
@@ -54,7 +52,7 @@ class PerforceFileHandler(object):
             except IOError as error:
                 raise PerforceFileHandlerException(error)
 
-    def __init__(self, perforce_change_handler, one_depot_per_project=False):
+    def __init__(self, perforce_change_handler):
         '''
         Initialise perforce file handler.
 
@@ -72,20 +70,9 @@ class PerforceFileHandler(object):
             __name__ + '.' + self.__class__.__name__
         )
         self._ensure_folder(self.root)
-        self._one_depot_per_project = one_depot_per_project
 
-    def file_to_depot(self, filepath, project_name=None):
+    def file_to_depot(self, filepath):
         '''Publish **filepath** to server.'''
-        # TODO Also filter by projects listed in scenario
-        if (project_name is not None and
-                self._one_depot_per_project and
-                not self.project_has_own_depot(project_name)):
-            error_message = (
-                'Cannot checkin {}. Project {} requires its own depot.'.format(
-                    filepath, project_name
-                )
-            )
-            raise PerforceFileHandlerException(error_message)
         self.logger.debug('moving file {} to depot'.format(filepath))
         if not filepath.startswith(self.root):
             raise IOError('File is not in {}'.format(self.root))
@@ -111,17 +98,3 @@ class PerforceFileHandler(object):
                     os.makedirs(basedir)
                 open(filepath, 'a').close()
             self.connection.run_edit(filepath)
-
-    def project_has_own_depot(self, project_name):
-        # TODO Sanitise project_name for filesystem.
-        project_list = [{'name': project_name}]
-        validator = WorkspaceValidator(self.connection, project_list)
-        try:
-            validator.validate_one_depot_per_project()
-        except PerforceValidationError as error:
-            self.logger.warning('Workspace validation failed for project {}:\n'
-                                '{}'.format(project_name, error)
-                                )
-            return False
-
-        return True

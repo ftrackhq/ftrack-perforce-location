@@ -360,17 +360,8 @@ class ActivatePerforceStorageScenario(object):
             perforce_connection_handler
         )
 
-        one_depot_per_project = False
-        try:
-            storage_scenario = event['data']['storage_scenario']
-            location_data = storage_scenario['data']
-            one_depot_per_project = location_data['one_depot_per_project']
-        except KeyError:
-            pass
-
         perforce_file_handler = PerforceFileHandler(
-            perforce_change_handler=perforce_change_handler,
-            one_depot_per_project=one_depot_per_project
+            perforce_change_handler=perforce_change_handler
         )
 
         location.accessor = accessor.PerforceAccessor(
