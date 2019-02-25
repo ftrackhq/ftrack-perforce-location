@@ -11,11 +11,12 @@ from ftrack_perforce_location.perforce_handlers.errors import PerforceSettingsHa
 
 class PerforceSettingsHandler(object):
     '''Handles perforce connection settings.'''
-    def __init__(self):
+    def __init__(self, session):
         super(PerforceSettingsHandler, self).__init__()
         self.logger = logging.getLogger(
             __name__ + '.' + self.__class__.__name__
         )
+        self.session = session
 
     @property
     def _templated_default(self):
@@ -44,7 +45,6 @@ class PerforceSettingsHandler(object):
         config = dict(config)
         from P4 import P4, P4Exception
         p4 = P4()
-        config['host'] = p4.host
         config['user'] = p4.user
         config['using_workspace'] = p4.client
         try:
@@ -96,6 +96,7 @@ class PerforceSettingsHandler(object):
 
         # if settings exists but is not filled up...
         if not all(config.values()):
+            # TODO: EMIT EVENT TO RAISE QT WIDET TO CONFIGURE USER SETTING
             raise PerforceSettingsHandlerException(
                 'Please configure : {}'.format(
                     self._get_config_path()
