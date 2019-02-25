@@ -4,24 +4,31 @@
 import sys
 from ftrack_action_handler.action import BaseAction
 from QtExt import QtCore, QtGui, QtWidgets
+import ftrack_connect
 
 
-class ConfigureUserSettingsWidget(QtWidgets.QtWidget):
+class ConfigureUserSettingsWidget(ftrack_connect.ui.application.ApplicationPlugin):
 
-    def __init__(self, parent=None):
-        super(ConfigureUserSettingsWidget, self).__init__(parent=parent)
-
+    def __init__(self,  *args, **kwargs):
+        super(ConfigureUserSettingsWidget, self).__init__( *args, **kwargs)
         main_layout = QtWidgets.QVBoxLayout()
         self.setLayout(main_layout)
 
+    def getName(self):
+        '''Return name of widget.'''
+        return 'Perforce Settings'
 
+
+def register_plugin(connect):
+        '''Register publish plugin to ftrack connect.'''
+        config = ConfigureUserSettingsWidget()
+        connect.addPlugin(config)
 
 
 class ConfigureUserSettingsAction(BaseAction):
     label = 'Configure Perforce User Settings'
     identifier = 'com.ftrack.perforce.configure_user_settings'
     description = 'Configure Perforce User Settings'
-
 
     def validate_selection(self, entities):
         '''Return True if the selection is valid.
@@ -43,7 +50,13 @@ class ConfigureUserSettingsAction(BaseAction):
         return self.validate_selection(entities)
 
     def launch(self, session, entities, event):
-        app = QtGui.QApplication(sys.argv)
-        window = ConfigureUserSettingsWidget()
-        window.show()
-        sys.exit(app.exec_())
+        application_instance = QtGui.QApplication.instance()
+        widgets = application_instance.topLevelWidgets()
+        connect = None
+        for widget in widgets:
+            if widget.objectName() == 'ftrack-connect-window':
+                connect = widget
+                break
+
+        register_plugin(connect)
+        return True

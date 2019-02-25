@@ -243,7 +243,7 @@ class ActivatePerforceStorageScenario(object):
             )
 
         else:
-            perforce_settings = PerforceSettingsHandler()
+            perforce_settings = PerforceSettingsHandler(self.session)
             perforce_settings_data = perforce_settings.read()
 
             if location_data['use_ssl']:

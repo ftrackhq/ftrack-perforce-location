@@ -26,5 +26,5 @@ def register(session):
         return
 
     logger.info('discovering configure storage scenario')
-    scenario = ConfigureUserSettingsAction()
-    scenario.register(session)
+    scenario = ConfigureUserSettingsAction(session)
+    scenario.register()

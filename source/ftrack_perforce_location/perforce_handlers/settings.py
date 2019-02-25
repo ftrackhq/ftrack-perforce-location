@@ -5,6 +5,7 @@ import os
 import json
 import appdirs
 import logging
+import ftrack_api
 
 from ftrack_perforce_location.perforce_handlers.errors import PerforceSettingsHandlerException
 
@@ -97,10 +98,16 @@ class PerforceSettingsHandler(object):
         # if settings exists but is not filled up...
         if not all(config.values()):
             # TODO: EMIT EVENT TO RAISE QT WIDET TO CONFIGURE USER SETTING
-            raise PerforceSettingsHandlerException(
-                'Please configure : {}'.format(
-                    self._get_config_path()
+            configure_event = ftrack_api.event.base.Event(
+                topic=(
+                    'ftrack.action.launch and '
+                    'data.actionIdentifier=com.ftrack.perforce.configure_user_settings',
                 )
+            )
+
+            self.session.event_hub.publish(
+                configure_event,
+                synchronous=True
             )
 
         return config
