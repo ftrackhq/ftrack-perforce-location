@@ -28,10 +28,37 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
         )
         self.layout().addWidget(self.greetings)
 
-        settings_data = self.settings.read() or self.settings._templated_default
+        settings_data = self.settings.read()
 
-        for item, value in settings_data.items():
-            print item, value
+        user = settings_data['user']
+        self.settings.p4.connect()
+        available_worskpaces = self.settings.p4.run_workspaces('-u', user)
+        clients = [w['client'] for w in available_worskpaces]
+
+        using_workspace = settings_data['using_workspace']
+        workspace_root = settings_data['workspace_root']
+
+        grid = QtWidgets.QGridLayout()
+        self.layout().addLayout(grid)
+
+        user_label = QtWidgets.QLabel('User')
+        user_value = QtWidgets.QLineEdit(user)
+
+        grid.addWidget(user_label, 0, 0)
+        grid.addWidget(user_value, 0, 1)
+
+        ws_label = QtWidgets.QLabel('Workspace')
+        ws_value = QtWidgets.QComboBox()
+        ws_value.addItems(clients)
+
+        grid.addWidget(ws_label, 1, 0)
+        grid.addWidget(ws_value, 1, 1)
+
+        root_label = QtWidgets.QLabel('Workspace Root')
+        root_value = QtWidgets.QLineEdit(workspace_root)
+
+        grid.addWidget(root_label, 2, 0)
+        grid.addWidget(root_value, 2, 1)
 
         self.button = QtWidgets.QPushButton('Save Settings')
         self.layout().addWidget(self.button)
@@ -42,8 +69,7 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
     def setTheme(self):
         '''Set *theme*.'''
         self.setWindowTitle('Perforce User Settings.')
-        self.setMinimumWidth(400)
-        self.setMinimumHeight(600)
+        self.resize(600, 200)
         ftrack_connect.ui.theme.applyFont()
         ftrack_connect.ui.theme.applyTheme(self, 'light', 'cleanlooks')
 

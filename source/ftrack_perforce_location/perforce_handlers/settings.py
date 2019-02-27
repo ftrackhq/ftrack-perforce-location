@@ -18,6 +18,7 @@ class PerforceSettingsHandler(object):
         self.logger = logging.getLogger(
             __name__ + '.' + self.__class__.__name__
         )
+        self.p4 = P4()
 
     @property
     def _templated_default(self):
@@ -25,7 +26,6 @@ class PerforceSettingsHandler(object):
 
         return dict(
             user=None,
-            password=None,
             using_workspace=None,
             workspace_root=None
         )
@@ -44,17 +44,14 @@ class PerforceSettingsHandler(object):
 
     def _update_config_from_perforce(self, config):
         config = dict(config)
-        p4 = P4()
-        config['user'] = p4.user
-        config['using_workspace'] = p4.client
+        config['user'] = self.p4.user
+        config['using_workspace'] = self.p4.client
         try:
             p4.connect()
-            config['workspace_root'] = p4.run_info()[0]['clientRoot']
+            config['workspace_root'] = self.p4.run_info()[0]['clientRoot']
         except P4Exception as error:
             self.logger.debug('Error while querying client root: {0}'.format(
                 error.message))
-        if config.get('password') is None:
-            config['password'] = os.environ.get('P4PASSWD')
         return config
 
     def write(self, config):
