@@ -23,13 +23,7 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
     def build(self):
         main_layout = QtWidgets.QVBoxLayout()
         self.setLayout(main_layout)
-        self.greetings = QtWidgets.QLabel(
-            'Hi, looks like there are some settings missing!'
-        )
-        self.layout().addWidget(self.greetings)
-
         settings_data = self.settings.read()
-
         user = settings_data['user']
         self.settings.p4.connect()
         available_worskpaces = self.settings.p4.run_workspaces('-u', user)
@@ -51,6 +45,12 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
         ws_value = QtWidgets.QComboBox()
         ws_value.addItems(clients)
 
+        if clients and using_workspace:
+            index = ws_value.findText(
+                using_workspace, QtCore.Qt.MatchFixedString
+            )
+            ws_value.setCurrentIndex(index)
+
         grid.addWidget(ws_label, 1, 0)
         grid.addWidget(ws_value, 1, 1)
 
@@ -64,7 +64,7 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
         self.layout().addWidget(self.button)
 
     def post_build(self):
-        pass
+        self.button.clicked.connect(self.on_save_settings)
 
     def setTheme(self):
         '''Set *theme*.'''
@@ -73,6 +73,8 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
         ftrack_connect.ui.theme.applyFont()
         ftrack_connect.ui.theme.applyTheme(self, 'light', 'cleanlooks')
 
+    def on_save_settings(self):
+        pass
 
 class ConfigureUserSettingsAction(BaseAction):
     label = 'Configure Perforce User Settings'
