@@ -5,10 +5,7 @@ from QtExt import QtCore, QtGui, QtWidgets
 import ftrack_connect.ui.theme
 
 from ftrack_action_handler.action import BaseAction
-
-from ftrack_perforce_location.perforce_handlers import errors
 from ftrack_perforce_location.perforce_handlers.settings import PerforceSettingsHandler
-
 
 
 class ConfigureUserSettingsWidget(QtWidgets.QDialog):
@@ -16,6 +13,8 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
     def __init__(self, settings):
         super(ConfigureUserSettingsWidget, self).__init__()
         self.settings = settings
+        self.ws_clients = []
+        self.ws_roots = []
         self.setTheme()
         self.build()
         self.post_build()
@@ -27,7 +26,8 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
         user = settings_data['user']
         self.settings.p4.connect()
         available_worskpaces = self.settings.p4.run_workspaces('-u', user)
-        clients = [w['client'] for w in available_worskpaces]
+        self.ws_clients = [w['client'] for w in available_worskpaces]
+        self.ws_roots = [w['Root'] for w in available_worskpaces]
 
         using_workspace = settings_data['using_workspace']
         workspace_root = settings_data['workspace_root']
@@ -36,35 +36,36 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
         self.layout().addLayout(grid)
 
         user_label = QtWidgets.QLabel('User')
-        user_value = QtWidgets.QLineEdit(user)
+        self.user_value = QtWidgets.QLineEdit(user)
 
         grid.addWidget(user_label, 0, 0)
-        grid.addWidget(user_value, 0, 1)
+        grid.addWidget(self.user_value, 0, 1)
 
         ws_label = QtWidgets.QLabel('Workspace')
-        ws_value = QtWidgets.QComboBox()
-        ws_value.addItems(clients)
+        self.ws_value = QtWidgets.QComboBox()
+        self.ws_value.addItems(self.ws_clients)
 
-        if clients and using_workspace:
-            index = ws_value.findText(
+        if self.ws_clients and using_workspace:
+            index = self.ws_value.findText(
                 using_workspace, QtCore.Qt.MatchFixedString
             )
-            ws_value.setCurrentIndex(index)
+            self.ws_value.setCurrentIndex(index)
 
         grid.addWidget(ws_label, 1, 0)
-        grid.addWidget(ws_value, 1, 1)
+        grid.addWidget(self.ws_value, 1, 1)
 
         root_label = QtWidgets.QLabel('Workspace Root')
-        root_value = QtWidgets.QLineEdit(workspace_root)
+        self.root_value = QtWidgets.QLineEdit(workspace_root)
 
         grid.addWidget(root_label, 2, 0)
-        grid.addWidget(root_value, 2, 1)
+        grid.addWidget(self.root_value, 2, 1)
 
         self.button = QtWidgets.QPushButton('Save Settings')
         self.layout().addWidget(self.button)
 
     def post_build(self):
         self.button.clicked.connect(self.on_save_settings)
+        self.ws_value.currentIndexChanged.connect(self.on_workspace_change)
 
     def setTheme(self):
         '''Set *theme*.'''
@@ -73,8 +74,17 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
         ftrack_connect.ui.theme.applyFont()
         ftrack_connect.ui.theme.applyTheme(self, 'light', 'cleanlooks')
 
+    def on_workspace_change(self):
+        ws_root = self.ws_roots[self.ws_value.currentIndex()]
+        self.root_value.setText(ws_root)
+
     def on_save_settings(self):
-        pass
+        config_data = {}
+        config_data['user'] = self.user_value.text()
+        config_data['using_workspace'] = self.ws_value.itemData(self.ws_value.currentIndex())
+        config_data['workspace_root'] = self.root_value.text()
+        self.settings.write(config_data)
+
 
 class ConfigureUserSettingsAction(BaseAction):
     label = 'Configure Perforce User Settings'
