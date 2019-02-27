@@ -95,7 +95,7 @@ setup(
     },
     install_requires=[
         'appdirs == 1.4.0',
-        'p4python == 2017.2.1615960'
+        'p4python >= 2018.2'
     ],
     tests_require=[
     ],

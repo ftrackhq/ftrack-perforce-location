@@ -2,10 +2,21 @@
 # :copyright: Copyright (c) 2019 ftrack
 
 import logging
-
+import os
+import sys
 
 import ftrack_api
 from ftrack_action_handler.action import BaseAction
+
+dependencies_directory = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), '..', 'dependencies')
+)
+sys.path.append(dependencies_directory)
+
+import P4
+from P4 import P4Exception
+
+from ftrack_perforce_location.constants import SCENARIO_ID
 
 logger = logging.getLogger(
     'ftrack_perforce_location.perforce_attribute_action_hook')
@@ -37,10 +48,13 @@ class PerforceAttributeAction(BaseAction):
 
         entity_type, entity_id = entities[0]
 
-        self._session = ftrack_api.Session()
         self._create_attribute(entity_id)
 
         project = self.session.get(entity_type, entity_id)
+        # Custom attributes are cached, but we want to be sure our value is
+        # up to date
+        del project['custom_attributes']
+        self.session.populate(project, 'custom_attributes')
         current_value = project['custom_attributes'].get(
             'own_perforce_depot', False)
 
@@ -60,15 +74,27 @@ class PerforceAttributeAction(BaseAction):
             return False
 
         entity_type, entity_id = entities[0]
-
         values = event['data'].get('values', {})
-
         project = self.session.get(entity_type, entity_id)
         project['custom_attributes']['own_perforce_depot'] = (
             values['own_depot'])
         self.session.commit()
 
+        if values['own_depot']:
+            depot_name = str(self._sanitise(project['name']))
+            if depot_name not in (depot['name'] for depot
+                                  in self.connection.run_depots()):
+                self._create_depot(depot_name)
+            self._update_workspace_map(depot_name)
+
         return True
+
+    @property
+    def connection(self):
+        '''Return connection to perforce server.'''
+        perforce_location = self.session.query(
+            'Location where name is "{0}"'.format(SCENARIO_ID)).one()
+        return perforce_location.resource_identifier_transformer.connection
 
     def _create_attribute(self, project_id):
         admin_role = self.session.query(
@@ -97,9 +123,34 @@ class PerforceAttributeAction(BaseAction):
                 'type_id': boolean_type['id'],
                 'write_security_roles': [admin_role],
             },
-            identifying_keys=['entity_type', 'key', 'project_id', 'type_id'])
+            identifying_keys=['entity_type', 'key', 'project_id', 'type_id']
+        )
 
         return perforce_attribute
+
+    def _create_depot(self, depot_name):
+        self.connection.save_depot({
+            'Depot': depot_name,
+            'Map': '{0}/...'.format(depot_name),
+            'Description': 'Created by ftrack.',
+            'Type': 'local'
+        })
+
+    def _sanitise(self, name):
+        perforce_location = self.session.query(
+            'Location where name is "{0}"'.format(SCENARIO_ID)).one()
+        return perforce_location.structure.sanitise_for_filesystem(name)
+
+    def _update_workspace_map(self, new_depot):
+        workspace = self.connection.fetch_client('-o')
+        map_ = P4.Map(workspace['View'])
+        map_.insert(
+            '//{0}/... //{1}/{0}/...'.format(
+                new_depot, workspace['Client']
+            )
+        )
+        workspace['View'] = map_.as_array()
+        self.connection.save_client(workspace)
 
     def _user_is_admin(self, username, project_id):
         appropriate_admin_role = self.session.query(
@@ -108,10 +159,7 @@ class PerforceAttributeAction(BaseAction):
             ' and (is_all_projects is True'
             ' or projects any (id is "{1}"))'.format(
                 username, project_id)).first()
-        if appropriate_admin_role is None:
-            return False
-        else:
-            return True
+        return appropriate_admin_role is not None
 
 
 def register(session):

@@ -30,7 +30,6 @@ def post_publish_callback(session, event):
 
     location_id = event['data'].get('location_id')
     perforce_location = session.get('Location', location_id)
-    connection = perforce_location.resource_identifier_transformer.connection
 
     component_id = event['data'].get('component_id')
     perforce_component = session.get('Component', component_id)
@@ -38,9 +37,10 @@ def post_publish_callback(session, event):
     perforce_path = perforce_location.get_filesystem_path(perforce_component)
     logger.info('Publishing {} to perforce'.format(perforce_path))
 
-    project_id = [link for link
+    project_id = (link for link
                   in perforce_component['version']['link']
-                  if link['type'] == 'Project'][0]['id']
+                  if link['type'] == 'Project'
+                  ).next()['id']
     project = session.query(
         'select id, name from Project where id is "{0}"'.format(project_id)
     ).one()
@@ -54,16 +54,29 @@ def post_publish_callback(session, event):
     require_one_depot_per_project = location_data.get(
         'one_depot_per_project', False
     )
+    # Fluentish?
+    # require_one_depot_per_project = (
+    #     json
+    #     .loads(storage_scenario['value'])
+    #     .get('data', {})
+    #     .get('one_depot_per_project', False)
+    # )
 
     if (require_one_depot_per_project and
-        project['custom_attributes'].get('own_perforce_depot', False) and
-            not project_has_own_depot(connection, project['name'])):
-        error_message = (
-            'Cannot checkin {}. Project {} requires its own depot.'.format(
-                perforce_path, project['name']
-            )
+            project['custom_attributes'].get('own_perforce_depot', False)):
+        connection = (
+            perforce_location.resource_identifier_transformer.connection
         )
-        raise PerforceValidationError(error_message)
+        project_name = perforce_location.structure.sanitise_for_filesystem(
+            project['name']
+        )
+        if not project_has_own_depot(connection, project_name):
+            error_message = (
+                'Cannot checkin {}. Project {} requires its own depot.'.format(
+                    perforce_path, project['name']
+                )
+            )
+            raise PerforceValidationError(error_message)
 
     # PUBLISH RESULT FILE IN PERFORCE
     perforce_location.accessor.perforce_file_handler.change.submit(
@@ -72,7 +85,7 @@ def post_publish_callback(session, event):
 
 
 def project_has_own_depot(connection, project_name):
-    # TODO Sanitise project_name for filesystem.
+    '''Verify the P4 *connection* maps *project_name* to its own depot.'''
     project_list = [{'name': project_name}]
     validator = WorkspaceValidator(connection, project_list)
     try:
