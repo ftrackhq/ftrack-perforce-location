@@ -5,19 +5,19 @@ import os
 import json
 import appdirs
 import logging
-import ftrack_api
+
+from P4 import P4, P4Exception
 
 from ftrack_perforce_location.perforce_handlers.errors import PerforceSettingsHandlerException
 
 
 class PerforceSettingsHandler(object):
     '''Handles perforce connection settings.'''
-    def __init__(self, session):
+    def __init__(self):
         super(PerforceSettingsHandler, self).__init__()
         self.logger = logging.getLogger(
             __name__ + '.' + self.__class__.__name__
         )
-        self.session = session
 
     @property
     def _templated_default(self):
@@ -44,7 +44,6 @@ class PerforceSettingsHandler(object):
 
     def _update_config_from_perforce(self, config):
         config = dict(config)
-        from P4 import P4, P4Exception
         p4 = P4()
         config['user'] = p4.user
         config['using_workspace'] = p4.client
@@ -86,28 +85,6 @@ class PerforceSettingsHandler(object):
             self.logger.info(u'Reading config from {0}'.format(config_file))
 
             with open(config_file, 'r') as file:
-                try:
-                    config = json.load(file)
-                except Exception:
-                    raise PerforceSettingsHandlerException(
-                        u'Exception reading json config in {0}.'.format(
-                            config_file
-                        )
-                    )
-
-        # if settings exists but is not filled up...
-        if not all(config.values()):
-            # TODO: EMIT EVENT TO RAISE QT WIDET TO CONFIGURE USER SETTING
-            configure_event = ftrack_api.event.base.Event(
-                topic=(
-                    'ftrack.action.launch and '
-                    'data.actionIdentifier=com.ftrack.perforce.configure_user_settings',
-                )
-            )
-
-            self.session.event_hub.publish(
-                configure_event,
-                synchronous=True
-            )
+                config = json.load(file)
 
         return config

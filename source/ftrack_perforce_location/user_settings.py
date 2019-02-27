@@ -1,34 +1,62 @@
 # :coding: utf-8
 # :copyright: Copyright (c) 2018 ftrack
 
-import sys
-from ftrack_action_handler.action import BaseAction
 from QtExt import QtCore, QtGui, QtWidgets
-import ftrack_connect
+import ftrack_connect.ui.theme
+
+from ftrack_action_handler.action import BaseAction
+
+from ftrack_perforce_location.perforce_handlers import errors
+from ftrack_perforce_location.perforce_handlers.settings import PerforceSettingsHandler
 
 
-class ConfigureUserSettingsWidget(ftrack_connect.ui.application.ApplicationPlugin):
 
-    def __init__(self,  *args, **kwargs):
-        super(ConfigureUserSettingsWidget, self).__init__( *args, **kwargs)
+class ConfigureUserSettingsWidget(QtWidgets.QDialog):
+
+    def __init__(self, settings):
+        super(ConfigureUserSettingsWidget, self).__init__()
+        self.settings = settings
+        self.setTheme()
+        self.build()
+        self.post_build()
+
+    def build(self):
         main_layout = QtWidgets.QVBoxLayout()
         self.setLayout(main_layout)
+        self.greetings = QtWidgets.QLabel(
+            'Hi, looks like there are some settings missing!'
+        )
+        self.layout().addWidget(self.greetings)
 
-    def getName(self):
-        '''Return name of widget.'''
-        return 'Perforce Settings'
+        settings_data = self.settings.read() or self.settings._templated_default
 
+        for item, value in settings_data.items():
+            print item, value
 
-def register_plugin(connect):
-        '''Register publish plugin to ftrack connect.'''
-        config = ConfigureUserSettingsWidget()
-        connect.addPlugin(config)
+        self.button = QtWidgets.QPushButton('Save Settings')
+        self.layout().addWidget(self.button)
+
+    def post_build(self):
+        pass
+
+    def setTheme(self):
+        '''Set *theme*.'''
+        self.setWindowTitle('Perforce User Settings.')
+        self.setMinimumWidth(400)
+        self.setMinimumHeight(600)
+        ftrack_connect.ui.theme.applyFont()
+        ftrack_connect.ui.theme.applyTheme(self, 'light', 'cleanlooks')
 
 
 class ConfigureUserSettingsAction(BaseAction):
     label = 'Configure Perforce User Settings'
     identifier = 'com.ftrack.perforce.configure_user_settings'
     description = 'Configure Perforce User Settings'
+
+    def __init__(self, *args, **kwargs):
+        super(ConfigureUserSettingsAction, self).__init__(*args, **kwargs)
+        perforce_settings = PerforceSettingsHandler()
+        self.settings = ConfigureUserSettingsWidget(perforce_settings)
 
     def validate_selection(self, entities):
         '''Return True if the selection is valid.
@@ -50,13 +78,5 @@ class ConfigureUserSettingsAction(BaseAction):
         return self.validate_selection(entities)
 
     def launch(self, session, entities, event):
-        application_instance = QtGui.QApplication.instance()
-        widgets = application_instance.topLevelWidgets()
-        connect = None
-        for widget in widgets:
-            if widget.objectName() == 'ftrack-connect-window':
-                connect = widget
-                break
-
-        register_plugin(connect)
+        self.settings.show()
         return True

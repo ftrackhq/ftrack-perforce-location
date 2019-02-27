@@ -9,6 +9,7 @@ import logging
 import ftrack_api
 from ftrack_api.logging import LazyLogMessage as L
 
+from ftrack_perforce_location.user_settings import ConfigureUserSettingsWidget
 from ftrack_perforce_location.perforce_handlers.connection import PerforceConnectionHandler
 from ftrack_perforce_location.perforce_handlers.file import PerforceFileHandler
 from ftrack_perforce_location.perforce_handlers.change import PerforceChangeHandler
@@ -243,8 +244,14 @@ class ActivatePerforceStorageScenario(object):
             )
 
         else:
-            perforce_settings = PerforceSettingsHandler(self.session)
+            perforce_settings = PerforceSettingsHandler()
+
             perforce_settings_data = perforce_settings.read()
+            if not all(perforce_settings_data.values()):
+                settings_widget = ConfigureUserSettingsWidget(perforce_settings)
+                settings_widget.exec_()
+                # Respawn until settings are right!
+                self._connect_to_perforce(event)
 
             if location_data['use_ssl']:
                 perforce_settings_data['port'] = 'ssl:{}:{}'.format(
