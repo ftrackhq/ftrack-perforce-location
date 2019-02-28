@@ -20,6 +20,7 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
         self.post_build()
 
     def build(self):
+        '''Build interface layout and widgets.'''
         main_layout = QtWidgets.QVBoxLayout()
         self.setLayout(main_layout)
         settings_data = self.settings.read()
@@ -66,21 +67,24 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
         self.layout().addWidget(self.button)
 
     def post_build(self):
+        '''Connect events.'''
         self.button.clicked.connect(self.on_save_settings)
         self.ws_value.currentIndexChanged.connect(self.on_workspace_change)
 
     def setTheme(self):
-        '''Set *theme*.'''
+        '''Set theme to match connect one.'''
         self.setWindowTitle('Perforce User Settings.')
         self.resize(600, 200)
         ftrack_connect.ui.theme.applyFont()
         ftrack_connect.ui.theme.applyTheme(self, 'light', 'cleanlooks')
 
     def on_workspace_change(self):
+        '''Qt slot for workspace combobox changes.'''
         ws_root = self.ws_roots[self.ws_value.currentIndex()]
         self.root_value.setText(ws_root)
 
     def on_save_settings(self):
+        '''Qt slot for save button.'''
         config_data = {}
         config_data['user'] = self.user_value.text()
         config_data['using_workspace'] = self.ws_clients[self.ws_value.currentIndex()]
@@ -119,5 +123,6 @@ class ConfigureUserSettingsAction(BaseAction):
         return self.validate_selection(entities)
 
     def launch(self, session, entities, event):
+        '''Launch action.'''
         self.settings.show()
         return True
