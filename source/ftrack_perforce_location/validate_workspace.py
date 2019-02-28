@@ -25,7 +25,7 @@ class WorkspaceValidator(object):
         self._sanitise = sanitise
 
         self._client_info = self._p4.run_client('-o')[0]
-        self._prefix = self._client_info['Root']
+        self._prefix = os.path.normpath(self._client_info['Root'])
         self._ws_map = self._get_ws_mapping()
         self._case_insensitive = (
             self._p4.run_info()[0]['clientCase'] == 'insensitive'
@@ -43,11 +43,13 @@ class WorkspaceValidator(object):
             self._p4.client))
         client_map = P4.Map(self._client_info['View'])
         root_map = P4.Map('//{0}/... {1}/...'.format(
-            self._client_info['Client'], self._client_info['Root']))
+            self._client_info['Client'], self._prefix))
+        result = P4.Map.join(client_map, root_map)
+
         self.logger.debug('Client map:\n{0}'.format(client_map))
         self.logger.debug('Client root map:\n{0}'.format(root_map))
-        result = P4.Map.join(client_map, root_map)
         self.logger.debug('Result:\n{0}'.format(result))
+
         return result
 
     def _positive_mappings(self, mapping=None):
