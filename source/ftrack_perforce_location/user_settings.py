@@ -37,6 +37,7 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
 
         user_label = QtWidgets.QLabel('User')
         self.user_value = QtWidgets.QLineEdit(user)
+        self.user_value.setReadOnly(True)
 
         grid.addWidget(user_label, 0, 0)
         grid.addWidget(self.user_value, 0, 1)
@@ -82,9 +83,10 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
     def on_save_settings(self):
         config_data = {}
         config_data['user'] = self.user_value.text()
-        config_data['using_workspace'] = self.ws_value.itemData(self.ws_value.currentIndex())
+        config_data['using_workspace'] = self.ws_clients[self.ws_value.currentIndex()]
         config_data['workspace_root'] = self.root_value.text()
         self.settings.write(config_data)
+        self.close()
 
 
 class ConfigureUserSettingsAction(BaseAction):

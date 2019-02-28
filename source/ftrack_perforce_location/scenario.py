@@ -245,9 +245,10 @@ class ActivatePerforceStorageScenario(object):
 
         else:
             perforce_settings = PerforceSettingsHandler()
-
             perforce_settings_data = perforce_settings.read()
-            if not all(perforce_settings_data.values()):
+            user_settings_values = perforce_settings_data.values()
+
+            if not all(user_settings_values):
                 settings_widget = ConfigureUserSettingsWidget(perforce_settings)
                 settings_widget.exec_()
                 # Respawn until settings are right!
@@ -263,7 +264,6 @@ class ActivatePerforceStorageScenario(object):
                     location_data['server'],
                     location_data['port_number']
                 )
-
             try:
                 perforce_connection_handler = PerforceConnectionHandler(
                     **perforce_settings_data
