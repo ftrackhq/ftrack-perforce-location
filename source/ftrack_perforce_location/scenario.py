@@ -23,6 +23,7 @@ from ftrack_perforce_location.perforce_handlers.file import (
     PerforceFileHandler)
 from ftrack_perforce_location.perforce_handlers.settings import (
     PerforceSettingsHandler)
+from ftrack_perforce_location.user_settings import ConfigureUserSettingsWidget
 from ftrack_perforce_location.validate_workspace import WorkspaceValidator
 
 
@@ -260,32 +261,38 @@ class ActivatePerforceStorageScenario(object):
                 'Unable to configure location based on scenario.'
             )
 
-        else:
-            perforce_settings = PerforceSettingsHandler()
+        perforce_settings = PerforceSettingsHandler()
+        perforce_settings_data = perforce_settings.read()
+        user_settings_values = perforce_settings_data.values()
+
+        if not all(user_settings_values):
+            settings_widget = ConfigureUserSettingsWidget(perforce_settings)
+            settings_widget.exec_()
+            # Respawn until settings are right!
+            self._connect_to_perforce(event)
             perforce_settings_data = perforce_settings.read()
 
-            if location_data['use_ssl']:
-                perforce_settings_data['port'] = 'ssl:{}:{}'.format(
-                    location_data['server'],
-                    location_data['port_number']
-                )
-            else:
-                perforce_settings_data['port'] = 'tcp:{}:{}'.format(
-                    location_data['server'],
-                    location_data['port_number']
-                )
+        if location_data['use_ssl']:
+            perforce_settings_data['port'] = 'ssl:{}:{}'.format(
+                location_data['server'],
+                location_data['port_number']
+            )
+        else:
+            perforce_settings_data['port'] = 'tcp:{}:{}'.format(
+                location_data['server'],
+                location_data['port_number']
+            )
+        try:
+            perforce_connection_handler = PerforceConnectionHandler(
+                **perforce_settings_data
+            )
+        except Exception as error:
+            self.logger.error(L(str(error)))
+            error = str(error).split('[Error]:')[-1]
+            error = 'Perforce Error: {}'.format(error)
+            raise errors.PerforceConnectionHandlerException(error)
 
-            try:
-                perforce_connection_handler = PerforceConnectionHandler(
-                    **perforce_settings_data
-                )
-            except Exception as error:
-                self.logger.error(L(str(error)))
-                error = str(error).split('[Error]:')[-1]
-                error = 'Perforce Error: {}'.format(error)
-                raise errors.PerforceConnectionHandlerException(error)
-
-            return perforce_connection_handler
+        return perforce_connection_handler
 
     def _verify_startup(self, event):
         '''Verify the storage scenario configuration.'''
