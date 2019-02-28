@@ -47,7 +47,7 @@ class PerforceSettingsHandler(object):
         config['user'] = self.p4.user
         config['using_workspace'] = self.p4.client
         try:
-            p4.connect()
+            self.p4.connect()
             config['workspace_root'] = self.p4.run_info()[0]['clientRoot']
         except P4Exception as error:
             self.logger.debug('Error while querying client root: {0}'.format(
