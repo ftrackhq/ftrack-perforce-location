@@ -1,6 +1,7 @@
 # :coding: utf-8
 # :copyright: Copyright (c) 2018 ftrack
 
+import json
 import os
 import sys
 import functools
@@ -9,13 +10,15 @@ import logging
 import ftrack_api
 from ftrack_api.symbol import COMPONENT_ADDED_TO_LOCATION_TOPIC
 
-
 dependencies_directory = os.path.abspath(
     os.path.join(os.path.dirname(__file__), '..', 'dependencies')
 )
 sys.path.append(dependencies_directory)
 
 from ftrack_perforce_location.constants import SCENARIO_ID
+from ftrack_perforce_location.perforce_handlers.errors import (
+    PerforceValidationError)
+from ftrack_perforce_location.validate_workspace import WorkspaceValidator
 
 logger = logging.getLogger(
     'ftrack_perforce_location.post_publish_hook'
@@ -33,6 +36,53 @@ def post_publish_callback(session, event):
 
     perforce_path = perforce_location.get_filesystem_path(perforce_component)
     logger.info('Publishing {} to perforce'.format(perforce_path))
+
+    project_id = perforce_component['version']['link'][0]['id']
+    project = session.query(
+        'select id, name from Project where id is "{0}"'.format(project_id)
+    ).one()
+
+    storage_scenario = session.query(
+        'select value from Setting '
+        'where name is "storage_scenario" and group is "STORAGE"'
+    ).one()
+    configuration = json.loads(storage_scenario['value'])
+    location_data = configuration.get('data', {})
+    require_one_depot_per_project = location_data.get(
+        'one_depot_per_project', False
+    )
+
+    if require_one_depot_per_project:
+        # Avoid stale cached values
+        del project['custom_attributes']
+        session.populate(project, 'custom_attributes')
+        if project['custom_attributes'].get('own_perforce_depot', False):
+            connection = (
+                perforce_location.resource_identifier_transformer.connection
+            )
+            try:
+                sanitise_function = (
+                    perforce_location.structure.sanitise_for_filesystem
+                )
+            except AttributeError:
+                sanitise_function = None
+            validator = WorkspaceValidator(
+                connection, [project], sanitise_function
+            )
+            try:
+                validator.validate_one_depot_per_project()
+            except PerforceValidationError as error:
+                logger.warning(
+                    'Workspace validation failed for project {}:\n{}'.format(
+                        project['name'], error)
+                )
+                error_message = (
+                    'Cannot checkin {}.\n'
+                    'Project {} requires its own depot.'.format(
+                        perforce_path, project['name']
+                    )
+                )
+                raise PerforceValidationError(error_message)
 
     # PUBLISH RESULT FILE IN PERFORCE
     perforce_location.accessor.perforce_file_handler.change.submit(
