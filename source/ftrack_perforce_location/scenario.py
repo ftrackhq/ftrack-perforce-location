@@ -106,8 +106,10 @@ class ConfigurePerforceStorageScenario(object):
             perforce_ssl = self.existing_perforce_storage_configuration.get(
                 'use_ssl', True)
 
-            one_depot_per_project = self.existing_perforce_storage_configuration.get(
-                'one_depot_per_project', True)
+            one_depot_per_project = (
+                self.existing_perforce_storage_configuration.get(
+                    'one_depot_per_project', True)
+            )
 
             items = [
                 {
@@ -287,8 +289,6 @@ class ActivatePerforceStorageScenario(object):
 
     def _verify_startup(self, event):
         '''Verify the storage scenario configuration.'''
-        # TODO(spetterborg) One place to check the workspace mappings.
-        # Called by Connect
         self.logger.debug('Verifying storage startup.')
         try:
             connection = self._connect_to_perforce(event)
@@ -310,8 +310,16 @@ class ActivatePerforceStorageScenario(object):
                 ' (key is own_perforce_depot and value is 1)').all()
             if len(projects) == 0:
                 return
-
-            validator = WorkspaceValidator(connection.connection, projects)
+            try:
+                sanitise_function = (
+                    self.query('Location where name is "{0}"'.format(
+                        SCENARIO_ID)).one().structure.sanitise_for_filesystem
+                )
+            except AttributeError:
+                sanitise_function = None
+            validator = WorkspaceValidator(
+                connection.connection, projects, sanitise_function
+            )
             try:
                 validator.validate_one_depot_per_project()
             except PerforceValidationError as error:
@@ -353,8 +361,10 @@ class ActivatePerforceStorageScenario(object):
             perforce_file_handler=perforce_file_handler,
         )
 
-        location.resource_identifier_transformer = resource_transformer.PerforceResourceIdentifierTransformer(
-            self.session, perforce_file_handler=perforce_file_handler
+        location.resource_identifier_transformer = (
+            resource_transformer.PerforceResourceIdentifierTransformer(
+                self.session, perforce_file_handler=perforce_file_handler
+            )
         )
 
         location.priority = 0
