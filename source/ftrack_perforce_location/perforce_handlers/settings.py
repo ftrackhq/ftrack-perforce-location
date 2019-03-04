@@ -1,18 +1,16 @@
 # :coding: utf-8
 # :copyright: Copyright (c) 2018 ftrack
 
-import os
-import json
 import appdirs
+import json
 import logging
+import os
 
 from P4 import P4, P4Exception
 
-from ftrack_perforce_location.perforce_handlers.errors import PerforceSettingsHandlerException
-
 
 class PerforceSettingsHandler(object):
-    '''Handles perforce connection settings.'''
+    '''Handles Perforce connection settings.'''
     def __init__(self):
         super(PerforceSettingsHandler, self).__init__()
         self.logger = logging.getLogger(
@@ -31,7 +29,7 @@ class PerforceSettingsHandler(object):
         )
 
     def _get_config_path(self):
-        '''Return the current perforce config file path.'''
+        '''Return the current Perforce config file path.'''
 
         config_file_path = os.path.join(
             appdirs.user_data_dir(

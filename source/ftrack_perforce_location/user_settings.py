@@ -1,11 +1,15 @@
 # :coding: utf-8
 # :copyright: Copyright (c) 2018 ftrack
 
+from ftrack_action_handler.action import BaseAction
 from QtExt import QtCore, QtWidgets
 import ftrack_connect.ui.theme
 
-from ftrack_action_handler.action import BaseAction
-from ftrack_perforce_location.perforce_handlers.settings import PerforceSettingsHandler
+from ftrack_perforce_location.perforce_handlers.settings import (
+    PerforceSettingsHandler)
+
+
+ICON_URL = 'https://bam.gallerycdn.vsassets.io/extensions/bam/vscode-perforce/1.1.3/1498206133077/Microsoft.VisualStudio.Services.Icons.Default'
 
 
 class ConfigureUserSettingsWidget(QtWidgets.QDialog):
@@ -87,7 +91,8 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
         '''Qt slot for save button.'''
         config_data = {}
         config_data['user'] = self.user_value.text()
-        config_data['using_workspace'] = self.ws_clients[self.ws_value.currentIndex()]
+        config_data['using_workspace'] = self.ws_clients[
+            self.ws_value.currentIndex()]
         config_data['workspace_root'] = self.root_value.text()
         self.settings.write(config_data)
         self.close()
@@ -109,10 +114,19 @@ class ConfigureUserSettingsAction(BaseAction):
         Utility method to check *entities* validity.
 
         '''
-        if not entities: # show only if nothing is selected.
+        if not entities:  # show only if nothing is selected.
             return True
 
         return False
+
+    def _discover(self, event):
+        '''Inject Perforce icon into the attribute dictionary.'''
+        my_dict = super(ConfigureUserSettingsAction, self)._discover(event)
+        if my_dict is None:
+            return my_dict
+
+        my_dict['items'][0].update({'icon': ICON_URL})
+        return my_dict
 
     def discover(self, session, entities, event):
         '''Return True if the action can be discovered.

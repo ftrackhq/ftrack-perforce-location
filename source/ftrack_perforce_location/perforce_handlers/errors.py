@@ -7,7 +7,7 @@ class PerforceLocationError(Exception):
 
 
 class PerforceHandlerException(Exception):
-    '''Base perforce exception.'''
+    '''Base Perforce exception.'''
 
 
 class PerforceConnectionHandlerException(PerforceHandlerException):

@@ -1,17 +1,16 @@
 # :coding: utf-8
 # :copyright: Copyright (c) 2018 ftrack
 
-import os
-import sys
 import logging
+import os
 
 import ftrack_api
 import ftrack_connect.application
 
+
 dependencies_directory = os.path.abspath(
     os.path.join(os.path.dirname(__file__), '..', 'dependencies')
 )
-
 
 logger = logging.getLogger('ftrack_perforce_location.connect_plugin_hook')
 
@@ -19,16 +18,15 @@ logger = logging.getLogger('ftrack_perforce_location.connect_plugin_hook')
 def modify_application_launch(event):
     '''Modify the application environment to include our location plugin.'''
 
-    if 'options' not in event['data']:
-        event['data']['options'] = {'env': {}}
-
-    environment = event['data']['options']['env']
+    try:
+        environment = event['data']['options']['env']
+    except KeyError:
+        environment = {}
 
     ftrack_connect.application.appendPath(
         os.path.dirname(__file__),
         'FTRACK_EVENT_PLUGIN_PATH',
         environment
-
     )
 
     ftrack_connect.application.appendPath(
@@ -59,5 +57,3 @@ def register(api_object, **kw):
         'topic=ftrack.action.launch',
         modify_application_launch
     )
-
-

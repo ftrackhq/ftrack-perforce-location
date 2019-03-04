@@ -1,16 +1,17 @@
 # :coding: utf-8
 # :copyright: Copyright (c) 2018 ftrack
 
-import socket
 import logging
+import socket
 
 from P4 import P4, P4Exception
 
-from ftrack_perforce_location.perforce_handlers.errors import PerforceConnectionHandlerException
+from ftrack_perforce_location.perforce_handlers.errors import (
+    PerforceConnectionHandlerException)
 
 
 class PerforceConnectionHandler(object):
-    '''Handles credentials and login to perforce server.'''
+    '''Handles credentials and login to Perforce server.'''
 
     @property
     def user(self):
@@ -42,12 +43,12 @@ class PerforceConnectionHandler(object):
 
     def __init__(self, host=None, port=None, user=None, password=None,
                  using_workspace=None, workspace_root=None):
-        '''Initialise perforce connection handler
-        **server** and **port** should point to a live perforce server
+        '''Initialise Perforce connection handler
+        **server** and **port** should point to a live Perforce server
         address to connect to.
 
         **user** and **password** should be the one registered on
-        the perforce server.
+        the Perforce server.
 
         **using_workspace** is the workspace name to be used on the server.
         **workspace_root** should point to a local folder where files

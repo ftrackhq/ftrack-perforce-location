@@ -1,9 +1,10 @@
 # :coding: utf-8
 # :copyright: Copyright (c) 2019 ftrack
 
+import logging
 import os
 import sys
-import logging
+
 import ftrack_api
 
 dependencies_directory = os.path.abspath(

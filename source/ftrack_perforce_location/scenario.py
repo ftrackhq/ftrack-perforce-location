@@ -4,8 +4,8 @@
 import json
 import logging
 
-import ftrack_api
 from ftrack_api.logging import LazyLogMessage as L
+import ftrack_api
 
 from ftrack_perforce_location import accessor
 from ftrack_perforce_location import resource_transformer
@@ -116,7 +116,8 @@ class ConfigurePerforceStorageScenario(object):
                 {
                     'type': 'label',
                     'value': (
-                        'Please provide settings for accessing the peforce server.'
+                        'Please provide settings for accessing'
+                        ' the Perforce server.'
                     )
                 }, {
                     'type': 'text',
@@ -246,7 +247,7 @@ class ActivatePerforceStorageScenario(object):
         )
 
     def _connect_to_perforce(self, event):
-        '''Create a new perforce connection and raise any issue.'''
+        '''Create a new Perforce connection and raise any issue.'''
         storage_scenario = event['data']['storage_scenario']
 
         try:

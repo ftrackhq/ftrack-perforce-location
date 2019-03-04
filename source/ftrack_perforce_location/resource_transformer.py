@@ -1,17 +1,17 @@
 # :coding: utf-8
 # :copyright: Copyright (c) 2018 ftrack
 
-import os
 import logging
-
-import ftrack_api.resource_identifier_transformer.base as base_transformer
+import os
 
 from P4 import P4Exception
+import ftrack_api.resource_identifier_transformer.base as base_transformer
 
 from ftrack_perforce_location.perforce_handlers.file import seq_to_glob
 
 
-class PerforceResourceIdentifierTransformer(base_transformer.ResourceIdentifierTransformer):
+class PerforceResourceIdentifierTransformer(
+        base_transformer.ResourceIdentifierTransformer):
     def __init__(self, session, perforce_file_handler):
         super(PerforceResourceIdentifierTransformer, self).__init__(session)
 
@@ -23,7 +23,7 @@ class PerforceResourceIdentifierTransformer(base_transformer.ResourceIdentifierT
 
     @property
     def connection(self):
-        '''Return connection to perforce server.'''
+        '''Return connection to Perforce server.'''
         return self._perforce_file_handler.connection
 
     def encode(self, resource_identifier, context=None):
