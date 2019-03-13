@@ -84,6 +84,13 @@ class PerforceSettingsHandler(object):
 
             with open(config_file, 'r') as file:
                 config = json.load(file)
+            if any((key not in config) for key in self._templated_default):
+                updated_default_config = self._update_config_from_perforce(
+                    self._templated_default
+                )
+                updated_default_config.update(config)
+                self.write(updated_default_config)
+                config = updated_default_config
 
         return config
 

@@ -70,6 +70,8 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
         root_label = QtWidgets.QLabel('Workspace Root')
         self.root_value = QtWidgets.QLineEdit(workspace_root)
         self.root_value.setReadOnly(True)
+        if not workspace_root:
+            self.on_workspace_change()
 
         grid.addWidget(root_label, 2, 0)
         grid.addWidget(self.root_value, 2, 1)
