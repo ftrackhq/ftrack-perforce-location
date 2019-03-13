@@ -50,7 +50,8 @@ class PerforceSettingsHandler(object):
             config['workspace_root'] = self.p4.run_info()[0]['clientRoot']
         except P4Exception as error:
             self.logger.debug('Error while querying client root: {0}'.format(
-                error.message))
+                error.message)
+            )
         return config
 
     def write(self, config):
@@ -74,7 +75,8 @@ class PerforceSettingsHandler(object):
         if not os.path.exists(config_file):
             self.logger.debug('Creating default config settings')
             updated_default_config = self._update_config_from_perforce(
-                self._templated_default)
+                self._templated_default
+            )
             self.write(updated_default_config)
 
         if os.path.isfile(config_file):

@@ -11,18 +11,24 @@ from ftrack_perforce_location import accessor
 from ftrack_perforce_location import resource_transformer
 from ftrack_perforce_location import structure
 from ftrack_perforce_location.constants import (
-    SCENARIO_ID, SCENARIO_DESCRIPTION, SCENARIO_LABEL)
+    SCENARIO_ID, SCENARIO_DESCRIPTION, SCENARIO_LABEL
+)
 from ftrack_perforce_location.perforce_handlers import errors
 from ftrack_perforce_location.perforce_handlers.change import (
-    PerforceChangeHandler)
+    PerforceChangeHandler
+)
 from ftrack_perforce_location.perforce_handlers.connection import (
-    PerforceConnectionHandler)
+    PerforceConnectionHandler
+)
 from ftrack_perforce_location.perforce_handlers.errors import (
-    PerforceValidationError)
+    PerforceValidationError
+)
 from ftrack_perforce_location.perforce_handlers.file import (
-    PerforceFileHandler)
+    PerforceFileHandler
+)
 from ftrack_perforce_location.perforce_handlers.settings import (
-    PerforceSettingsHandler)
+    PerforceSettingsHandler
+)
 from ftrack_perforce_location.user_settings import ConfigureUserSettingsWidget
 from ftrack_perforce_location.validate_workspace import WorkspaceValidator
 
@@ -99,17 +105,21 @@ class ConfigurePerforceStorageScenario(object):
         if next_step == 'select_options':
 
             perforce_server = self.existing_perforce_storage_configuration.get(
-                'server', '127.0.0.1')
+                'server', '127.0.0.1'
+            )
 
             perforce_port = self.existing_perforce_storage_configuration.get(
-                'port_number', '1666')
+                'port_number', '1666'
+            )
 
             perforce_ssl = self.existing_perforce_storage_configuration.get(
-                'use_ssl', True)
+                'use_ssl', True
+            )
 
             one_depot_per_project = (
                 self.existing_perforce_storage_configuration.get(
-                    'one_depot_per_project', True)
+                    'one_depot_per_project', True
+                )
             )
 
             items = [
@@ -139,7 +149,8 @@ class ConfigurePerforceStorageScenario(object):
                     'label': 'Enforce each project having own depot.',
                     'name': 'one_depot_per_project',
                     'value': one_depot_per_project
-                }]
+                }
+            ]
 
         elif next_step == 'review_configuration':
             items = [{

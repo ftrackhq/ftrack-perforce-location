@@ -7,7 +7,8 @@ import socket
 from P4 import P4, P4Exception
 
 from ftrack_perforce_location.perforce_handlers.errors import (
-    PerforceConnectionHandlerException)
+    PerforceConnectionHandlerException
+)
 
 
 class PerforceConnectionHandler(object):
@@ -116,7 +117,8 @@ class PerforceConnectionHandler(object):
             if ws.get('client') == self._using_workspace]
         if not filtered_workspaces:
             raise PerforceConnectionHandlerException(
-                'No workspace found named : {}'.format(self._using_workspace))
+                'No workspace found named : {}'.format(self._using_workspace)
+            )
 
         workspace = filtered_workspaces[0].get('client')
         self.logger.debug('getting workspace :{}'.format(workspace))

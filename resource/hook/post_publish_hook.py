@@ -17,7 +17,8 @@ sys.path.append(dependencies_directory)
 
 from ftrack_perforce_location.constants import SCENARIO_ID
 from ftrack_perforce_location.perforce_handlers.errors import (
-    PerforceValidationError)
+    PerforceValidationError
+)
 from ftrack_perforce_location.validate_workspace import WorkspaceValidator
 
 
@@ -108,7 +109,8 @@ def _register(event, session=None):
 
     location_id = location['id']
     logger.debug('registering post publish hook for location {}'.format(
-        SCENARIO_ID))
+        SCENARIO_ID)
+    )
 
     session.event_hub.subscribe(
         'topic={0} and data.location_id="{1}"'.format(

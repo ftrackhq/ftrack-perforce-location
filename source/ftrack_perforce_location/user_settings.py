@@ -94,7 +94,8 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
         config_data = {}
         config_data['user'] = self.user_value.text()
         config_data['using_workspace'] = self.ws_clients[
-            self.ws_value.currentIndex()]
+            self.ws_value.currentIndex()
+        ]
         config_data['workspace_root'] = self.root_value.text()
         self.settings.write(config_data)
         self.close()

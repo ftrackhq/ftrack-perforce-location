@@ -8,7 +8,8 @@ import re
 from P4 import P4Exception
 
 from ftrack_perforce_location.perforce_handlers.errors import (
-    PerforceFileHandlerException)
+    PerforceFileHandlerException
+)
 
 
 seq_match = re.compile('(%+\d+d)|(#+)|(%d)')

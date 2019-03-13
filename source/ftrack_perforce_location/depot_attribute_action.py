@@ -53,7 +53,8 @@ class PerforceAttributeAction(BaseAction):
         del project['custom_attributes']
         self.session.populate(project, 'custom_attributes')
         current_value = project['custom_attributes'].get(
-            'own_perforce_depot', False)
+            'own_perforce_depot', False
+        )
 
         widgets = [{
             'type': 'boolean',
@@ -74,7 +75,8 @@ class PerforceAttributeAction(BaseAction):
         values = event['data'].get('values', {})
         project = self.session.get(entity_type, entity_id)
         project['custom_attributes']['own_perforce_depot'] = (
-            values['own_depot'])
+            values['own_depot']
+        )
         self.session.commit()
 
         if values['own_depot']:
@@ -90,16 +92,19 @@ class PerforceAttributeAction(BaseAction):
     def connection(self):
         '''Return connection to Perforce server.'''
         perforce_location = self.session.query(
-            'Location where name is "{0}"'.format(SCENARIO_ID)).one()
+            'Location where name is "{0}"'.format(SCENARIO_ID)
+        ).one()
         return perforce_location.resource_identifier_transformer.connection
 
     def _create_attribute(self, project_id):
         admin_role = self.session.query(
-            'SecurityRole where name is "{0}"'.format('Administrator')).one()
+            'SecurityRole where name is "{0}"'.format('Administrator')
+        ).one()
         all_roles = self.session.query('SecurityRole').all()
         attribute_group = self.session.ensure(
             'CustomAttributeGroup',
-            {'name': 'Perforce'})
+            {'name': 'Perforce'}
+        )
         boolean_type = self.session.query(
             'select id from CustomAttributeType where name is "{0}"'.format(
                 'boolean')
@@ -135,7 +140,8 @@ class PerforceAttributeAction(BaseAction):
 
     def _sanitise(self, name):
         perforce_location = self.session.query(
-            'Location where name is "{0}"'.format(SCENARIO_ID)).one()
+            'Location where name is "{0}"'.format(SCENARIO_ID)
+        ).one()
         return perforce_location.structure.sanitise_for_filesystem(name)
 
     def _update_workspace_map(self, new_depot):

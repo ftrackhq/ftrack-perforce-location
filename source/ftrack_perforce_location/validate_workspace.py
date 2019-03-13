@@ -56,16 +56,19 @@ class WorkspaceValidator(object):
 
         if len(list(self._positive_mappings())) == 1:
             self.logger.warning(
-                'Workspace only configured for a single depot.')
+                'Workspace only configured for a single depot.'
+            )
             if len(projects) > 1:
                 raise PerforceValidationError(
                     'Multiple projects specified, but workspace mapping'
-                    ' contains only one depot.')
+                    ' contains only one depot.'
+                )
 
         for project in projects:
             if not self._proj_has_own_depot(project):
                 raise PerforceValidationError(
-                    'Project {0} shares a depot.'.format(project['name']))
+                    'Project {0} shares a depot.'.format(project['name'])
+                )
 
         return True
 
@@ -78,10 +81,12 @@ class WorkspaceValidator(object):
     def _get_ws_mapping(self):
         '''Returns a P4.Map which resolves depot paths to filesystem paths.'''
         self.logger.debug('Creating workspace map for {0}.'.format(
-            self._p4.client))
+            self._p4.client)
+        )
         client_map = P4.Map(self._client_info['View'])
         root_map = P4.Map('//{0}/... {1}/...'.format(
-            self._client_info['Client'], self._prefix))
+            self._client_info['Client'], self._prefix)
+        )
         result = P4.Map.join(client_map, root_map)
 
         self.logger.debug('Client map:\n{0}'.format(client_map))
@@ -121,8 +126,11 @@ class WorkspaceValidator(object):
             )
         project_depots = []
         other_project_depots = []
+        # So that we match only the specific directory later, ensure it has
+        # the correct trailing slash here
         proj_dir = os.path.join(
-            os.path.dirname(self._get_project_dir(project)), '')
+            os.path.dirname(self._get_project_dir(project)), ''
+        )
 
         for lhs, rhs in zip(mapping.lhs(), mapping.rhs()):
             if lhs.startswith('-'):
