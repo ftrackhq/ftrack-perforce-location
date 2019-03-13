@@ -277,12 +277,11 @@ class ActivatePerforceStorageScenario(object):
         perforce_settings_data = perforce_settings.read()
         user_settings_values = perforce_settings_data.values()
 
-        if not all(user_settings_values):
+        while not all(user_settings_values):
             settings_widget = ConfigureUserSettingsWidget(perforce_settings)
             settings_widget.exec_()
-            # Respawn until settings are right!
-            self._connect_to_perforce(event)
             perforce_settings_data = perforce_settings.read()
+            user_settings_values = perforce_settings_data.values()
 
         # Builds p4.port from the protocol, address, and port settings
         perforce_settings.update_port_from_scenario(

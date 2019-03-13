@@ -44,7 +44,7 @@ class WorkspaceValidator(object):
 
         if not os.path.exists(self._prefix):
             raise PerforceValidationError(
-                'Workspace root {0}, does not exist'.format(self._prefix)
+                'Workspace root, {0}, does not exist'.format(self._prefix)
             )
 
         workspace_mappings = self._client_info.get('View')

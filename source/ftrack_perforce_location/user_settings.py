@@ -6,7 +6,8 @@ from QtExt import QtCore, QtWidgets
 import ftrack_connect.ui.theme
 
 from ftrack_perforce_location.perforce_handlers.settings import (
-    PerforceSettingsHandler)
+    PerforceSettingsHandler
+)
 
 
 ICON_URL = 'https://bam.gallerycdn.vsassets.io/extensions/bam/vscode-perforce/1.1.3/1498206133077/Microsoft.VisualStudio.Services.Icons.Default'
@@ -28,10 +29,14 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
         main_layout = QtWidgets.QVBoxLayout()
         self.setLayout(main_layout)
         settings_data = self.settings.read()
+        # Update the Perforce server now that those settings are available.
         self.settings.update_port_from_scenario(settings_data)
-        user = settings_data['user']
-        self.settings.p4.port = settings_data['port']
+        if self.settings.p4.port != settings_data['port']:
+            if self.settings.p4.connected():
+                self.settings.p4.disconnect()
+            self.settings.p4.port = settings_data['port']
         self.settings.p4.connect()
+        user = settings_data['user']
         available_worskpaces = self.settings.p4.run_workspaces('-u', user)
         self.ws_clients = [w['client'] for w in available_worskpaces]
         self.ws_roots = [w['Root'] for w in available_worskpaces]
@@ -79,7 +84,7 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
 
     def setTheme(self):
         '''Set theme to match connect one.'''
-        self.setWindowTitle('Perforce User Settings.')
+        self.setWindowTitle('Perforce User Settings')
         self.resize(600, 200)
         ftrack_connect.ui.theme.applyFont()
         ftrack_connect.ui.theme.applyTheme(self, 'light', 'cleanlooks')
@@ -105,11 +110,6 @@ class ConfigureUserSettingsAction(BaseAction):
     label = 'Configure Perforce User Settings'
     identifier = 'com.ftrack.perforce.configure_user_settings'
     description = 'Configure Perforce User Settings'
-
-    def __init__(self, *args, **kwargs):
-        super(ConfigureUserSettingsAction, self).__init__(*args, **kwargs)
-        perforce_settings = PerforceSettingsHandler()
-        self.settings = ConfigureUserSettingsWidget(perforce_settings)
 
     def validate_selection(self, entities):
         '''Return True if the selection is valid.
@@ -141,5 +141,7 @@ class ConfigureUserSettingsAction(BaseAction):
 
     def launch(self, session, entities, event):
         '''Launch action.'''
+        perforce_settings = PerforceSettingsHandler()
+        self.settings = ConfigureUserSettingsWidget(perforce_settings)
         self.settings.show()
         return True
