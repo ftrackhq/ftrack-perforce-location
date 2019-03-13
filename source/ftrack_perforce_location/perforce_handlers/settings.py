@@ -1,18 +1,17 @@
 # :coding: utf-8
 # :copyright: Copyright (c) 2018 ftrack
 
-import os
-import json
 import appdirs
+import json
 import logging
+import os
 
 from P4 import P4, P4Exception
-
-from ftrack_perforce_location.perforce_handlers.errors import PerforceSettingsHandlerException
+import ftrack_api
 
 
 class PerforceSettingsHandler(object):
-    '''Handles perforce connection settings.'''
+    '''Handles Perforce connection settings.'''
     def __init__(self):
         super(PerforceSettingsHandler, self).__init__()
         self.logger = logging.getLogger(
@@ -31,7 +30,7 @@ class PerforceSettingsHandler(object):
         )
 
     def _get_config_path(self):
-        '''Return the current perforce config file path.'''
+        '''Return the current Perforce config file path.'''
 
         config_file_path = os.path.join(
             appdirs.user_data_dir(
@@ -51,7 +50,8 @@ class PerforceSettingsHandler(object):
             config['workspace_root'] = self.p4.run_info()[0]['clientRoot']
         except P4Exception as error:
             self.logger.debug('Error while querying client root: {0}'.format(
-                error.message))
+                error.message)
+            )
         return config
 
     def write(self, config):
@@ -75,7 +75,8 @@ class PerforceSettingsHandler(object):
         if not os.path.exists(config_file):
             self.logger.debug('Creating default config settings')
             updated_default_config = self._update_config_from_perforce(
-                self._templated_default)
+                self._templated_default
+            )
             self.write(updated_default_config)
 
         if os.path.isfile(config_file):
@@ -83,5 +84,42 @@ class PerforceSettingsHandler(object):
 
             with open(config_file, 'r') as file:
                 config = json.load(file)
+            if any((key not in config) for key in self._templated_default):
+                updated_default_config = self._update_config_from_perforce(
+                    self._templated_default
+                )
+                updated_default_config.update(config)
+                self.write(updated_default_config)
+                config = updated_default_config
 
         return config
+
+    def update_port_from_scenario(self, config, scenario_data=None):
+        if scenario_data is None:
+            scenario_data = self._get_scenario_settings()
+        self._apply_scenario_settings(config, scenario_data)
+
+    def _get_scenario_settings(self):
+        with ftrack_api.Session(auto_connect_event_hub=False,
+                                plugin_paths=list()) as session:
+            setting = session.query(
+                'select value from Setting where name is storage_scenario'
+            ).one()
+        location_data = json.loads(setting['value'])['data']
+        return location_data
+
+    def _apply_scenario_settings(self, config, location_data):
+        try:
+            if location_data['use_ssl']:
+                protocol = 'ssl'
+            else:
+                protocol = 'tcp'
+            p4_port = '{}:{}:{}'.format(
+                protocol,
+                location_data['server'],
+                location_data['port_number']
+            )
+            config['port'] = p4_port
+        except Exception as e:
+            self.logger.warning('Could not read Perforce server settings from'
+                                ' ftrack. Caught exception:\n{}'.format(e))

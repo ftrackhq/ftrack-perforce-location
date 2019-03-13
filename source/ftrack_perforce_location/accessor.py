@@ -24,7 +24,7 @@ class PerforceAccessor(ftrack_api.accessor.disk.DiskAccessor):
 
         ..note::
 
-            We insert the file in the perforce depot.
+            We insert the file in the Perforce depot.
 
         '''
 

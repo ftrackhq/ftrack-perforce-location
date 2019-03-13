@@ -1,11 +1,11 @@
 # :coding: utf-8
 # :copyright: Copyright (c) 2018 ftrack
 
-import os
-import logging
-import logging.config
 import appdirs
 import errno
+import logging
+import logging.config
+import os
 
 
 def get_log_directory():
@@ -30,7 +30,8 @@ def get_log_directory():
     return log_directory
 
 
-def configure_logging(logger_name, level=None, format=None, extra_modules=None):
+def configure_logging(
+        logger_name, level=None, format=None, extra_modules=None):
     '''Configure `loggerName` loggers with console and file handler.
 
     Optionally specify log *level* (default WARNING)

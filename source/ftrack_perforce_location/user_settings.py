@@ -1,11 +1,16 @@
 # :coding: utf-8
 # :copyright: Copyright (c) 2018 ftrack
 
+from ftrack_action_handler.action import BaseAction
 from QtExt import QtCore, QtWidgets
 import ftrack_connect.ui.theme
 
-from ftrack_action_handler.action import BaseAction
-from ftrack_perforce_location.perforce_handlers.settings import PerforceSettingsHandler
+from ftrack_perforce_location.perforce_handlers.settings import (
+    PerforceSettingsHandler
+)
+
+
+ICON_URL = 'https://bam.gallerycdn.vsassets.io/extensions/bam/vscode-perforce/1.1.3/1498206133077/Microsoft.VisualStudio.Services.Icons.Default'
 
 
 class ConfigureUserSettingsWidget(QtWidgets.QDialog):
@@ -24,8 +29,14 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
         main_layout = QtWidgets.QVBoxLayout()
         self.setLayout(main_layout)
         settings_data = self.settings.read()
-        user = settings_data['user']
+        # Update the Perforce server now that those settings are available.
+        self.settings.update_port_from_scenario(settings_data)
+        if self.settings.p4.port != settings_data['port']:
+            if self.settings.p4.connected():
+                self.settings.p4.disconnect()
+            self.settings.p4.port = settings_data['port']
         self.settings.p4.connect()
+        user = settings_data['user']
         available_worskpaces = self.settings.p4.run_workspaces('-u', user)
         self.ws_clients = [w['client'] for w in available_worskpaces]
         self.ws_roots = [w['Root'] for w in available_worskpaces]
@@ -59,6 +70,8 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
         root_label = QtWidgets.QLabel('Workspace Root')
         self.root_value = QtWidgets.QLineEdit(workspace_root)
         self.root_value.setReadOnly(True)
+        if not workspace_root:
+            self.on_workspace_change()
 
         grid.addWidget(root_label, 2, 0)
         grid.addWidget(self.root_value, 2, 1)
@@ -73,7 +86,7 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
 
     def setTheme(self):
         '''Set theme to match connect one.'''
-        self.setWindowTitle('Perforce User Settings.')
+        self.setWindowTitle('Perforce User Settings')
         self.resize(600, 200)
         ftrack_connect.ui.theme.applyFont()
         ftrack_connect.ui.theme.applyTheme(self, 'light', 'cleanlooks')
@@ -87,7 +100,9 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
         '''Qt slot for save button.'''
         config_data = {}
         config_data['user'] = self.user_value.text()
-        config_data['using_workspace'] = self.ws_clients[self.ws_value.currentIndex()]
+        config_data['using_workspace'] = self.ws_clients[
+            self.ws_value.currentIndex()
+        ]
         config_data['workspace_root'] = self.root_value.text()
         self.settings.write(config_data)
         self.close()
@@ -98,21 +113,25 @@ class ConfigureUserSettingsAction(BaseAction):
     identifier = 'com.ftrack.perforce.configure_user_settings'
     description = 'Configure Perforce User Settings'
 
-    def __init__(self, *args, **kwargs):
-        super(ConfigureUserSettingsAction, self).__init__(*args, **kwargs)
-        perforce_settings = PerforceSettingsHandler()
-        self.settings = ConfigureUserSettingsWidget(perforce_settings)
-
     def validate_selection(self, entities):
         '''Return True if the selection is valid.
 
         Utility method to check *entities* validity.
 
         '''
-        if not entities: # show only if nothing is selected.
+        if not entities:  # show only if nothing is selected.
             return True
 
         return False
+
+    def _discover(self, event):
+        '''Inject Perforce icon into the attribute dictionary.'''
+        my_dict = super(ConfigureUserSettingsAction, self)._discover(event)
+        if my_dict is None:
+            return my_dict
+
+        my_dict['items'][0].update({'icon': ICON_URL})
+        return my_dict
 
     def discover(self, session, entities, event):
         '''Return True if the action can be discovered.
@@ -124,5 +143,7 @@ class ConfigureUserSettingsAction(BaseAction):
 
     def launch(self, session, entities, event):
         '''Launch action.'''
+        perforce_settings = PerforceSettingsHandler()
+        self.settings = ConfigureUserSettingsWidget(perforce_settings)
         self.settings.show()
         return True

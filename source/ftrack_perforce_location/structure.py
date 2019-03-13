@@ -3,8 +3,8 @@
 
 import logging
 
-import ftrack_api.symbol
 import ftrack_api.structure.standard
+import ftrack_api.symbol
 
 
 class PerforceStructure(ftrack_api.structure.standard.StandardStructure):

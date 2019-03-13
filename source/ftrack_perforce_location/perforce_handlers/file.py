@@ -1,13 +1,15 @@
 # :coding: utf-8
 # :copyright: Copyright (c) 2018 ftrack
 
+import logging
 import os
 import re
-import logging
 
 from P4 import P4Exception
 
-from ftrack_perforce_location.perforce_handlers.errors import PerforceFileHandlerException
+from ftrack_perforce_location.perforce_handlers.errors import (
+    PerforceFileHandlerException
+)
 
 
 seq_match = re.compile('(%+\d+d)|(#+)|(%d)')
@@ -27,7 +29,7 @@ def seq_to_glob(filepath):
 
 
 class PerforceFileHandler(object):
-    '''Handle perforce files.'''
+    '''Handle Perforce files.'''
 
     @property
     def root(self):
@@ -36,7 +38,7 @@ class PerforceFileHandler(object):
 
     @property
     def change(self):
-        '''Return perforce change handler instance.'''
+        '''Return Perforce change handler instance.'''
         return self._change_handler
 
     @property
@@ -54,7 +56,7 @@ class PerforceFileHandler(object):
 
     def __init__(self, perforce_change_handler):
         '''
-        Initialise perforce file handler.
+        Initialise Perforce file handler.
 
         ** perforce_change_handler ** should be an instance
         of PerforceChangeHandler.

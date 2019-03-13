@@ -4,25 +4,31 @@
 import json
 import logging
 
-import ftrack_api
 from ftrack_api.logging import LazyLogMessage as L
+import ftrack_api
 
 from ftrack_perforce_location import accessor
 from ftrack_perforce_location import resource_transformer
 from ftrack_perforce_location import structure
 from ftrack_perforce_location.constants import (
-    SCENARIO_ID, SCENARIO_DESCRIPTION, SCENARIO_LABEL)
+    SCENARIO_ID, SCENARIO_DESCRIPTION, SCENARIO_LABEL
+)
 from ftrack_perforce_location.perforce_handlers import errors
 from ftrack_perforce_location.perforce_handlers.change import (
-    PerforceChangeHandler)
+    PerforceChangeHandler
+)
 from ftrack_perforce_location.perforce_handlers.connection import (
-    PerforceConnectionHandler)
+    PerforceConnectionHandler
+)
 from ftrack_perforce_location.perforce_handlers.errors import (
-    PerforceValidationError)
+    PerforceValidationError
+)
 from ftrack_perforce_location.perforce_handlers.file import (
-    PerforceFileHandler)
+    PerforceFileHandler
+)
 from ftrack_perforce_location.perforce_handlers.settings import (
-    PerforceSettingsHandler)
+    PerforceSettingsHandler
+)
 from ftrack_perforce_location.user_settings import ConfigureUserSettingsWidget
 from ftrack_perforce_location.validate_workspace import WorkspaceValidator
 
@@ -99,24 +105,29 @@ class ConfigurePerforceStorageScenario(object):
         if next_step == 'select_options':
 
             perforce_server = self.existing_perforce_storage_configuration.get(
-                'server', '127.0.0.1')
+                'server', '127.0.0.1'
+            )
 
             perforce_port = self.existing_perforce_storage_configuration.get(
-                'port_number', '1666')
+                'port_number', '1666'
+            )
 
             perforce_ssl = self.existing_perforce_storage_configuration.get(
-                'use_ssl', True)
+                'use_ssl', True
+            )
 
             one_depot_per_project = (
                 self.existing_perforce_storage_configuration.get(
-                    'one_depot_per_project', True)
+                    'one_depot_per_project', True
+                )
             )
 
             items = [
                 {
                     'type': 'label',
                     'value': (
-                        'Please provide settings for accessing the peforce server.'
+                        'Please provide settings for accessing'
+                        ' the Perforce server.'
                     )
                 }, {
                     'type': 'text',
@@ -138,7 +149,8 @@ class ConfigurePerforceStorageScenario(object):
                     'label': 'Enforce each project having own depot.',
                     'name': 'one_depot_per_project',
                     'value': one_depot_per_project
-                }]
+                }
+            ]
 
         elif next_step == 'review_configuration':
             items = [{
@@ -246,7 +258,7 @@ class ActivatePerforceStorageScenario(object):
         )
 
     def _connect_to_perforce(self, event):
-        '''Create a new perforce connection and raise any issue.'''
+        '''Create a new Perforce connection and raise any issue.'''
         storage_scenario = event['data']['storage_scenario']
 
         try:
@@ -265,23 +277,17 @@ class ActivatePerforceStorageScenario(object):
         perforce_settings_data = perforce_settings.read()
         user_settings_values = perforce_settings_data.values()
 
-        if not all(user_settings_values):
+        while not all(user_settings_values):
             settings_widget = ConfigureUserSettingsWidget(perforce_settings)
             settings_widget.exec_()
-            # Respawn until settings are right!
-            self._connect_to_perforce(event)
             perforce_settings_data = perforce_settings.read()
+            user_settings_values = perforce_settings_data.values()
 
-        if location_data['use_ssl']:
-            perforce_settings_data['port'] = 'ssl:{}:{}'.format(
-                location_data['server'],
-                location_data['port_number']
-            )
-        else:
-            perforce_settings_data['port'] = 'tcp:{}:{}'.format(
-                location_data['server'],
-                location_data['port_number']
-            )
+        # Builds p4.port from the protocol, address, and port settings
+        perforce_settings.update_port_from_scenario(
+            perforce_settings_data, location_data
+        )
+
         try:
             perforce_connection_handler = PerforceConnectionHandler(
                 **perforce_settings_data
