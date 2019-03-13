@@ -7,6 +7,7 @@ import logging
 import os
 
 from P4 import P4, P4Exception
+import ftrack_api
 
 
 class PerforceSettingsHandler(object):
@@ -83,3 +84,33 @@ class PerforceSettingsHandler(object):
                 config = json.load(file)
 
         return config
+
+    def update_port_from_scenario(self, config, scenario_data=None):
+        if scenario_data is None:
+            scenario_data = self._get_scenario_settings()
+        self._apply_scenario_settings(config, scenario_data)
+
+    def _get_scenario_settings(self):
+        with ftrack_api.Session(auto_connect_event_hub=False,
+                                plugin_paths=list()) as session:
+            setting = session.query(
+                'select value from Setting where name is storage_scenario'
+            ).one()
+        location_data = json.loads(setting['value'])['data']
+        return location_data
+
+    def _apply_scenario_settings(self, config, location_data):
+        try:
+            if location_data['use_ssl']:
+                protocol = 'ssl'
+            else:
+                protocol = 'tcp'
+            p4_port = '{}:{}:{}'.format(
+                protocol,
+                location_data['server'],
+                location_data['port_number']
+            )
+            config['port'] = p4_port
+        except Exception as e:
+            self.logger.warning('Could not read Perforce server settings from'
+                                ' ftrack. Caught exception:\n{}'.format(e))

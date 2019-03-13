@@ -28,7 +28,9 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
         main_layout = QtWidgets.QVBoxLayout()
         self.setLayout(main_layout)
         settings_data = self.settings.read()
+        self.settings.update_port_from_scenario(settings_data)
         user = settings_data['user']
+        self.settings.p4.port = settings_data['port']
         self.settings.p4.connect()
         available_worskpaces = self.settings.p4.run_workspaces('-u', user)
         self.ws_clients = [w['client'] for w in available_worskpaces]

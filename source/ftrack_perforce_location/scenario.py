@@ -273,16 +273,11 @@ class ActivatePerforceStorageScenario(object):
             self._connect_to_perforce(event)
             perforce_settings_data = perforce_settings.read()
 
-        if location_data['use_ssl']:
-            perforce_settings_data['port'] = 'ssl:{}:{}'.format(
-                location_data['server'],
-                location_data['port_number']
-            )
-        else:
-            perforce_settings_data['port'] = 'tcp:{}:{}'.format(
-                location_data['server'],
-                location_data['port_number']
-            )
+        # Builds p4.port from the protocol, address, and port settings
+        perforce_settings.update_port_from_scenario(
+            perforce_settings_data, location_data
+        )
+
         try:
             perforce_connection_handler = PerforceConnectionHandler(
                 **perforce_settings_data
