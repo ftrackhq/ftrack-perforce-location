@@ -50,8 +50,6 @@ class ConfigurePerforceStorageScenario(object):
             'where name is "storage_scenario" and group is "STORAGE"'
         ).one()
 
-    # TODO(spetterborg) What is this used for?
-    # and is it named appropriately?
     @property
     def existing_perforce_storage_configuration(self):
         '''Return existing centralized storage configuration.'''
@@ -84,7 +82,7 @@ class ConfigurePerforceStorageScenario(object):
 
         values = event['data'].get('values', {})
 
-        # Get last step from the event or assume we have just started.
+        # Get last step from the event, else assume the menu was just launched.
         previous_step = values.get('step', 'select_scenario')
         next_step = steps[steps.index(previous_step) + 1]
         state = 'configuring'
@@ -388,7 +386,11 @@ class ActivatePerforceStorageScenario(object):
         ))
 
     def register(self, session):
-        '''Subscribe to events on *session*.'''
+        '''Subscribe to events on *session*.
+
+        *session* is an ftrack_api.Session object. The same session must be
+        used to correctly interact with this location.
+        '''
         self.session = session
 
         session.event_hub.subscribe(

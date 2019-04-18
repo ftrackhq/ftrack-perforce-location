@@ -48,8 +48,7 @@ class PerforceAttributeAction(BaseAction):
         self._create_attribute(entity_id)
 
         project = self.session.get(entity_type, entity_id)
-        # Custom attributes are cached, but we want to be sure our value is
-        # up to date
+        # Custom attributes are cached, so clear and fetch current values.
         del project['custom_attributes']
         self.session.populate(project, 'custom_attributes')
         current_value = project['custom_attributes'].get(
@@ -67,7 +66,7 @@ class PerforceAttributeAction(BaseAction):
 
     def launch(self, session, entities, event):
         # It is possible but unlikely that someone has launched the event
-        # directly. Let's make sure the source a valid user.
+        # directly, so ensure the source a valid user.
         if not self.discover(session, entities, event):
             return False
 

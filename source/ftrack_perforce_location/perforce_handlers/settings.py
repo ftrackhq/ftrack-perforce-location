@@ -42,6 +42,11 @@ class PerforceSettingsHandler(object):
         return config_file_path
 
     def _update_config_from_perforce(self, config):
+        '''Return a copy of *config* with values pulled from Perforce.
+
+        *config* is a dictionary used to initialize a
+        PerforceConnectionHandler.
+        '''
         config = dict(config)
         config['user'] = self.p4.user
         config['using_workspace'] = self.p4.client
@@ -67,7 +72,7 @@ class PerforceSettingsHandler(object):
             json.dump(config, file)
 
     def read(self):
-        '''Read config data to file.'''
+        '''Read config data from file, returns a dictioary.'''
 
         config_file = self._get_config_path()
         config = None
@@ -95,11 +100,25 @@ class PerforceSettingsHandler(object):
         return config
 
     def update_port_from_scenario(self, config, scenario_data=None):
+        '''Update the port setting of *config*.
+
+        *config* is a dictionary used to initialize a
+        PerforceConnectionHandler.
+
+        *scenario_data* is a dictionary of user settings stored on the ftrack
+        server by the Perforce storage scenario. If not passed, it will be
+        read from the server.
+        '''
         if scenario_data is None:
             scenario_data = self._get_scenario_settings()
         self._apply_scenario_settings(config, scenario_data)
 
     def _get_scenario_settings(self):
+        '''Returns the settings stored by the Perforce storage scenario.
+
+        Spins up a short-lived ftrack_api.Session to query the ftrack server
+        for settings.
+        '''
         with ftrack_api.Session(auto_connect_event_hub=False,
                                 plugin_paths=list()) as session:
             setting = session.query(
@@ -109,6 +128,14 @@ class PerforceSettingsHandler(object):
         return location_data
 
     def _apply_scenario_settings(self, config, location_data):
+        '''Sets Perforce server address, or "port", in the *config* dictionary.
+
+        *config* is a dictionary used to initialize a
+        PerforceConnectionHandler.
+
+        *location_data* is a dictionary of user settings stored on the ftrack
+        server by the Perforce storage scenario.
+        '''
         try:
             if location_data['use_ssl']:
                 protocol = 'ssl'

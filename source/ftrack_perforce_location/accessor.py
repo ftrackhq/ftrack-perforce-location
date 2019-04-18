@@ -9,8 +9,15 @@ from ftrack_perforce_location.perforce_handlers.file import seq_to_glob
 
 
 class PerforceAccessor(ftrack_api.accessor.disk.DiskAccessor):
-    ''''''
+    '''Extends the DiskAccessor to ensure target file is writable and/or the
+    correct version.
+    '''
     def __init__(self, perforce_file_handler, **kw):
+        '''Store root directory and file handling help.
+
+        *perforce_file_handler*. is an instance of
+        ftrack_perforce_location.perforce_handlers.file.PerforceFileHandler.
+        '''
         self.perforce_file_handler = perforce_file_handler
         self.logger = logging.getLogger(
             __name__ + '.' + self.__class__.__name__
@@ -19,13 +26,11 @@ class PerforceAccessor(ftrack_api.accessor.disk.DiskAccessor):
 
     def open(self, resource_identifier, mode='rb'):
         '''
-
         Return :class:`~ftrack_api.Data` for *resource_identifier*.
 
         ..note::
 
-            We insert the file in the Perforce depot.
-
+            This will add, create, edit, and fetch the file as needed.
         '''
 
         self.logger.debug('opening : {}'.format(resource_identifier))
@@ -41,8 +46,8 @@ class PerforceAccessor(ftrack_api.accessor.disk.DiskAccessor):
 
         .. note::
 
-               Always return False as we work on the same file.
-
+               Always return False since Perforce versions in place, so it is
+               required to overwrite the file.
         '''
 
         self.logger.debug('exists : {}'.format(resource_identifier))
