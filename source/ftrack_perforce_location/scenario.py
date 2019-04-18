@@ -82,7 +82,7 @@ class ConfigurePerforceStorageScenario(object):
 
         values = event['data'].get('values', {})
 
-        # Get last step from the event or assume we have just started.
+        # Get last step from the event, else assume the menu was just launched.
         previous_step = values.get('step', 'select_scenario')
         next_step = steps[steps.index(previous_step) + 1]
         state = 'configuring'

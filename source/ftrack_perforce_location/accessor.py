@@ -30,7 +30,7 @@ class PerforceAccessor(ftrack_api.accessor.disk.DiskAccessor):
 
         ..note::
 
-            We insert the file in the Perforce depot.
+            This will add, create, edit, and fetch the file as needed.
         '''
 
         self.logger.debug('opening : {}'.format(resource_identifier))
@@ -46,7 +46,8 @@ class PerforceAccessor(ftrack_api.accessor.disk.DiskAccessor):
 
         .. note::
 
-               Always return False as we work on the same file.
+               Always return False since Perforce versions in place, so it is
+               required to overwrite the file.
         '''
 
         self.logger.debug('exists : {}'.format(resource_identifier))

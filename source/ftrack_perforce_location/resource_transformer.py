@@ -32,7 +32,7 @@ class PerforceResourceIdentifierTransformer(
 
         .. note::
 
-            We transform here from /file/path to //depot/file/path#version
+            This transforms /file/path to //depot/file/path#version
 
         '''
 
@@ -56,7 +56,7 @@ class PerforceResourceIdentifierTransformer(
 
         .. note::
 
-            We transform here from //depot/file/path#version to /file/path
+            This transforms //depot/file/path#version to /file/path
 
         '''
         depot_pat, version = resource_identifier.split('#')

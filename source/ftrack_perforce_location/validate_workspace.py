@@ -156,7 +156,7 @@ class WorkspaceValidator(object):
             )
         project_depots = []
         other_project_depots = []
-        # So that we match only the specific directory later, ensure it has
+        # So that it matches only the specific directory later, ensure it has
         # the correct trailing slash here
         proj_dir = os.path.join(
             os.path.dirname(self._get_project_dir(project)), ''

@@ -10,7 +10,7 @@ import ftrack_api.symbol
 class PerforceStructure(ftrack_api.structure.standard.StandardStructure):
     '''This structure plugin generates a path based on the project hierarchy
     above a particular entity. It differs from the StandardStructure because
-    we use Perforce for versioning, rather than separate version folders.
+    it uses Perforce for versioning, rather than separate version folders.
     '''
     def __init__(self, perforce_file_handler):
         super(PerforceStructure, self).__init__(
@@ -29,7 +29,8 @@ class PerforceStructure(ftrack_api.structure.standard.StandardStructure):
 
         .. note::
 
-                Modified to remove version folder as we do not need to handle it.
+                Modified to remove version folder since files are versioned in
+                place.
 
         '''
 

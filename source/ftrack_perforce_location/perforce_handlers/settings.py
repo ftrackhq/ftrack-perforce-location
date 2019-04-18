@@ -106,8 +106,8 @@ class PerforceSettingsHandler(object):
         PerforceConnectionHandler.
 
         *scenario_data* is a dictionary of user settings stored on the ftrack
-        server by the Perforce storage scenario. If not passed in, we will
-        read from the server ourselves.
+        server by the Perforce storage scenario. If not passed, it will be
+        read from the server.
         '''
         if scenario_data is None:
             scenario_data = self._get_scenario_settings()
