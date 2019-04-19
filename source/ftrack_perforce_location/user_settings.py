@@ -1,16 +1,26 @@
 # :coding: utf-8
 # :copyright: Copyright (c) 2018 ftrack
 
-from ftrack_action_handler.action import BaseAction
-from QtExt import QtCore, QtWidgets
+import logging
+import os
+import sys
+
+from QtExt import QtCore, QtGui, QtWidgets
 import ftrack_connect.ui.theme
+
+logger = logging.getLogger(
+    'ftrack_perforce_location.configure_user_setting'
+)
+
+# There is a chance this is being run as a script passed to Connect
+# which, do to cx_freeze, does not ordinarily respect PYTHONPATH
+extra_paths = os.environ.get('PYTHONPATH', '').split(os.pathsep)
+for path in extra_paths:
+    sys.path.append(path)
 
 from ftrack_perforce_location.perforce_handlers.settings import (
     PerforceSettingsHandler
 )
-
-
-ICON_URL = 'https://bam.gallerycdn.vsassets.io/extensions/bam/vscode-perforce/1.1.3/1498206133077/Microsoft.VisualStudio.Services.Icons.Default'
 
 
 class ConfigureUserSettingsWidget(QtWidgets.QDialog):
@@ -108,42 +118,9 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
         self.close()
 
 
-class ConfigureUserSettingsAction(BaseAction):
-    label = 'Configure Perforce User Settings'
-    identifier = 'com.ftrack.perforce.configure_user_settings'
-    description = 'Configure Perforce User Settings'
-
-    def validate_selection(self, entities):
-        '''Return True if the selection is valid.
-
-        Utility method to check *entities* validity.
-
-        '''
-        if not entities:  # show only if nothing is selected.
-            return True
-
-        return False
-
-    def _discover(self, event):
-        '''Inject Perforce icon into the attribute dictionary.'''
-        my_dict = super(ConfigureUserSettingsAction, self)._discover(event)
-        if my_dict is None:
-            return my_dict
-
-        my_dict['items'][0].update({'icon': ICON_URL})
-        return my_dict
-
-    def discover(self, session, entities, event):
-        '''Return True if the action can be discovered.
-
-        Check if the current selection can discover this action.
-
-        '''
-        return self.validate_selection(entities)
-
-    def launch(self, session, entities, event):
-        '''Launch action.'''
-        perforce_settings = PerforceSettingsHandler()
-        self.settings = ConfigureUserSettingsWidget(perforce_settings)
-        self.settings.show()
-        return True
+if __name__ == '__main__':
+    perforce_settings = PerforceSettingsHandler()
+    app = QtGui.QApplication(sys.argv)
+    window = ConfigureUserSettingsWidget(perforce_settings)
+    window.show()
+    sys.exit(app.exec_())
