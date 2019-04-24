@@ -1,3 +1,4 @@
+#! /usr/bin/env python
 # :coding: utf-8
 # :copyright: Copyright (c) 2018 ftrack
 
@@ -28,6 +29,13 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
     def __init__(self, settings):
         super(ConfigureUserSettingsWidget, self).__init__()
         self.settings = settings
+        if not self.settings.scenario_is_configured():
+            self.raise_warning_box(
+                'Please ensure Perforce Storage Scenario is configured before'
+                ' running this tool.\n\nWhile Connect is running, the scenario'
+                ' may be configured by an admin logged into ftrack, under'
+                ' System Settings > Media Management > Storage scenario.'
+            )
         self.ws_clients = []
         self.ws_roots = []
         self.setTheme()
@@ -116,6 +124,14 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
         config_data['workspace_root'] = self.root_value.text()
         self.settings.write(config_data)
         self.close()
+
+    def raise_warning_box(self, text):
+        messageBox = QtWidgets.QMessageBox(parent=self)
+        messageBox.setIcon(QtWidgets.QMessageBox.Warning)
+        messageBox.setText(text)
+        ftrack_connect.ui.theme.applyFont()
+        ftrack_connect.ui.theme.applyTheme(messageBox, 'light', 'cleanlooks')
+        messageBox.exec_()
 
 
 if __name__ == '__main__':

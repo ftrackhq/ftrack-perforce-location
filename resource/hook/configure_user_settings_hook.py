@@ -20,7 +20,10 @@ logger = logging.getLogger(
     'ftrack_perforce_location.configure_user_setting'
 )
 
-ICON_URL = 'https://bam.gallerycdn.vsassets.io/extensions/bam/vscode-perforce/1.1.3/1498206133077/Microsoft.VisualStudio.Services.Icons.Default'
+ICON_URL = (
+    'https://bam.gallerycdn.vsassets.io/extensions/bam/vscode-perforce/1.1.3'
+    '/1498206133077/Microsoft.VisualStudio.Services.Icons.Default'
+)
 
 
 class LaunchApplicationAction(object):

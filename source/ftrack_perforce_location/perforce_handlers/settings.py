@@ -127,6 +127,22 @@ class PerforceSettingsHandler(object):
         location_data = json.loads(setting['value'])['data']
         return location_data
 
+    def scenario_is_configured(self):
+        '''Validate that the storage scenario data has all expected keys.'''
+        data = self._get_scenario_settings()
+        existing_keys = set(data.keys())
+        required_keys = set((
+            'server', 'port_number', 'use_ssl', 'one_depot_per_project'
+        ))
+        missing_keys = required_keys.difference(existing_keys)
+
+        if not missing_keys:
+            return True
+
+        self.logger.warning('Missing keys in server settings:\n{0}'.format(
+            ', '.join(missing_keys)))
+        return False
+
     def _apply_scenario_settings(self, config, location_data):
         '''Sets Perforce server address, or "port", in the *config* dictionary.
 
