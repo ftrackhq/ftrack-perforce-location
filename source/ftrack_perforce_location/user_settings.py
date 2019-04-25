@@ -6,6 +6,7 @@ import logging
 import os
 import sys
 
+# from ftrack_connect.ui.widget.data_drop_zone.riffle import browser
 from QtExt import QtCore, QtGui, QtWidgets
 import ftrack_connect.ui.theme
 
@@ -14,28 +15,20 @@ logger = logging.getLogger(
 )
 
 # There is a chance this is being run as a script passed to Connect
-# which, do to cx_freeze, does not ordinarily respect PYTHONPATH
+# which, due to cx_freeze, does not ordinarily respect PYTHONPATH
 extra_paths = os.environ.get('PYTHONPATH', '').split(os.pathsep)
 for path in extra_paths:
     sys.path.append(path)
 
 from ftrack_perforce_location.perforce_handlers.settings import (
-    PerforceSettingsHandler
+    PerforceSettingsHandler, P4Exception
 )
 
 
 class ConfigureUserSettingsWidget(QtWidgets.QDialog):
-
     def __init__(self, settings):
         super(ConfigureUserSettingsWidget, self).__init__()
         self.settings = settings
-        if not self.settings.scenario_is_configured():
-            self.raise_warning_box(
-                'Please ensure Perforce Storage Scenario is configured before'
-                ' running this tool.\n\nWhile Connect is running, the scenario'
-                ' may be configured by an admin logged into ftrack, under'
-                ' System Settings > Media Management > Storage scenario.'
-            )
         self.ws_clients = []
         self.ws_roots = []
         self.setTheme()
@@ -46,16 +39,13 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
         '''Build interface layout and widgets.'''
         main_layout = QtWidgets.QVBoxLayout()
         self.setLayout(main_layout)
+        self.verify_scenario()
         settings_data = self.settings.read()
         # Update the Perforce server now that those settings are available.
         self.settings.update_port_from_scenario(settings_data)
-        if self.settings.p4.port != settings_data['port']:
-            if self.settings.p4.connected():
-                self.settings.p4.disconnect()
-            self.settings.p4.port = settings_data['port']
         self.settings.p4.connect()
         user = settings_data['user']
-        available_worskpaces = self.settings.p4.run_workspaces('-u', user)
+        available_worskpaces = self.get_user_workspaces(user)
         self.ws_clients = [w['client'] for w in available_worskpaces]
         self.ws_roots = [w['Root'] for w in available_worskpaces]
 
@@ -126,12 +116,79 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
         self.close()
 
     def raise_warning_box(self, text):
+        '''Display a warning dialog box with *text*.'''
         messageBox = QtWidgets.QMessageBox(parent=self)
         messageBox.setIcon(QtWidgets.QMessageBox.Warning)
         messageBox.setText(text)
-        ftrack_connect.ui.theme.applyFont()
-        ftrack_connect.ui.theme.applyTheme(messageBox, 'light', 'cleanlooks')
         messageBox.exec_()
+
+    def demand_input(self, label_text):
+        '''Ask the user for input via QInputDialog.'''
+        title = 'Input required'
+        result, ok = QtWidgets.QInputDialog.getText(self, title, label_text)
+        if ok:
+            return result
+
+    def get_user_workspaces(self, user, ensure=True):
+        '''Return list of workspaces belonging to *user*.
+
+        Since this is likely to be the first serious interaction with the
+        Perforce server from this script, prompt the user for additional
+        information as needed.
+        '''
+        unsuccessful = True
+        while unsuccessful:
+            try:
+                user_worskpaces = self.settings.p4.run_workspaces('-u', user)
+            except P4Exception as e:
+                if (len(e.errors) == 1 and
+                        e.errors[0] == self.settings.needs_password):
+                    text = 'Logging in as {0}\n\n{1}'.format(
+                        self.settings.p4.user, e.errors[0]
+                    )
+                    password = self.demand_input(text)
+                    if password:
+                        self.settings.p4.password = str(password)
+            else:
+                unsuccessful = False
+        if ensure and not user_worskpaces:
+            root_dir = self.select_root_dir()
+            user_worskpaces = [self.settings.create_workspace(root_dir)]
+            # Output between p4 client and p4 clients differs.
+            user_worskpaces[0]['client'] = user_worskpaces[0]['Client']
+        return user_worskpaces
+
+    def select_root_dir(self):
+        # dialog = browser.FilesystemBrowser(parent=self)
+        warning_text = (
+            'No workspaces found for user. Choose root directory to continue.'
+        )
+        self.raise_warning_box(warning_text)
+        # Doesn't seem to show up under OSX
+        caption = 'Choose workspace root directory'
+        root_dir = QtGui.QFileDialog().getExistingDirectory(
+            self, caption=caption, directory='~'
+        )
+        return root_dir
+
+    def verify_scenario(self):
+        '''Check whether required settings exist and suggest remediation.'''
+        if not self.settings.scenario_is_configured():
+            warning_text = (
+                'Please ensure Perforce Storage Scenario is configured before'
+                ' running this tool.\n\nWhile Connect is running, the scenario'
+                ' may be configured by an admin logged into ftrack, under'
+                ' System Settings > Media Management > Storage scenario.'
+            )
+            try:
+                warning_text = '{0}\nAlso accessible at: {1}{2}'.format(
+                    warning_text,
+                    os.environ['FTRACK_SERVER'],
+                    '/#view=configure_storage_scenario&itemId=newconfigure'
+                )
+            except Exception:
+                pass
+            self.raise_warning_box(warning_text)
 
 
 if __name__ == '__main__':

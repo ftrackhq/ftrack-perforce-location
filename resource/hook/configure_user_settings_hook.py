@@ -14,15 +14,11 @@ dependencies_directory = os.path.abspath(
 )
 sys.path.append(dependencies_directory)
 
+from ftrack_perforce_location.constants import ICON_URL
 import ftrack_perforce_location
 
 logger = logging.getLogger(
     'ftrack_perforce_location.configure_user_setting'
-)
-
-ICON_URL = (
-    'https://bam.gallerycdn.vsassets.io/extensions/bam/vscode-perforce/1.1.3'
-    '/1498206133077/Microsoft.VisualStudio.Services.Icons.Default'
 )
 
 

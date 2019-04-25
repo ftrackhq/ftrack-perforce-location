@@ -2,12 +2,10 @@
 # :copyright: Copyright (c) 2019 ftrack
 
 from ftrack_action_handler.action import BaseAction
+from ftrack_api.structure.standard import StandardStructure
 import P4
 
-from ftrack_perforce_location.constants import SCENARIO_ID
-
-
-ICON_URL = 'https://bam.gallerycdn.vsassets.io/extensions/bam/vscode-perforce/1.1.3/1498206133077/Microsoft.VisualStudio.Services.Icons.Default'
+from ftrack_perforce_location.constants import SCENARIO_ID, ICON_URL
 
 
 class PerforceAttributeAction(BaseAction):
@@ -138,20 +136,30 @@ class PerforceAttributeAction(BaseAction):
         })
 
     def _sanitise(self, name):
-        perforce_location = self.session.query(
-            'Location where name is "{0}"'.format(SCENARIO_ID)
-        ).one()
-        return perforce_location.structure.sanitise_for_filesystem(name)
+        try:
+            perforce_location = self.session.query(
+                'Location where name is "{0}"'.format(SCENARIO_ID)
+            ).one()
+            return perforce_location.structure.sanitise_for_filesystem(name)
+        except AttributeError:
+            return StandardStructure().sanitise_for_filesystem(name)
 
     def _update_workspace_map(self, new_depot):
         workspace = self.connection.fetch_client('-o')
-        map_ = P4.Map(workspace['View'])
-        map_.insert(
-            '//{0}/... //{1}/{0}/...'.format(
-                new_depot, workspace['Client']
-            )
+        new_mapping = '//{0}/... //{1}/{0}/...'.format(
+            new_depot, workspace['Client']
         )
-        workspace['View'] = map_.as_array()
+        mappings = P4.Map(workspace['View']).as_array()
+        if new_mapping in mappings:
+            self.logger.info(
+                'Depot already in client view. Not adding: {0}'.format(
+                    new_mapping
+                )
+            )
+            return
+
+        mappings.append(new_mapping)
+        workspace['View'] = mappings
         self.connection.save_client(workspace)
 
     def _user_is_admin(self, username, project_id):

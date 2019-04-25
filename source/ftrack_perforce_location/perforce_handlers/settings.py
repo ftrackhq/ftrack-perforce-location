@@ -5,6 +5,8 @@ import appdirs
 import json
 import logging
 import os
+import pprint
+import uuid
 
 from P4 import P4, P4Exception
 import ftrack_api
@@ -12,6 +14,9 @@ import ftrack_api
 
 class PerforceSettingsHandler(object):
     '''Handles Perforce connection settings.'''
+
+    needs_password = 'Perforce password (P4PASSWD) invalid or unset.'
+
     def __init__(self):
         super(PerforceSettingsHandler, self).__init__()
         self.logger = logging.getLogger(
@@ -112,6 +117,17 @@ class PerforceSettingsHandler(object):
         if scenario_data is None:
             scenario_data = self._get_scenario_settings()
         self._apply_scenario_settings(config, scenario_data)
+        try:
+            p4port = config['port']
+        except KeyError:
+            self.logger.warning(
+                'Cannot update p4.port.'
+                ' Is the storage scenario configured correctly?')
+            return
+        if self.p4.port != p4port:
+            if self.p4.connected():
+                self.p4.disconnect()
+            self.p4.port = p4port
 
     def _get_scenario_settings(self):
         '''Returns the settings stored by the Perforce storage scenario.
@@ -125,15 +141,16 @@ class PerforceSettingsHandler(object):
                 'select value from Setting where name is storage_scenario'
             ).one()
         location_data = json.loads(setting['value'])['data']
+        # self.logger.debug(pprint.pformat(location_data))
         return location_data
 
     def scenario_is_configured(self):
         '''Validate that the storage scenario data has all expected keys.'''
         data = self._get_scenario_settings()
         existing_keys = set(data.keys())
-        required_keys = set((
-            'server', 'port_number', 'use_ssl', 'one_depot_per_project'
-        ))
+        required_keys = set(
+            ('server', 'port_number', 'use_ssl', 'one_depot_per_project')
+        )
         missing_keys = required_keys.difference(existing_keys)
 
         if not missing_keys:
@@ -166,3 +183,12 @@ class PerforceSettingsHandler(object):
         except Exception as e:
             self.logger.warning('Could not read Perforce server settings from'
                                 ' ftrack. Caught exception:\n{}'.format(e))
+
+    def create_workspace(self, client_root, client_name=None):
+        if client_name is None:
+            client_name = 'ftrack-{0}'.format(uuid.uuid4())
+        workspace = self.p4.fetch_client('-o', client_name)
+        workspace['Root'] = str(client_root)
+        self.p4.save_client(workspace)
+        self.logger.debug(pprint.pformat(workspace))
+        return workspace
