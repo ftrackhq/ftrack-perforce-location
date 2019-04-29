@@ -187,7 +187,7 @@ class PerforceSettingsHandler(object):
     def create_workspace(self, client_root, client_name=None):
         if client_name is None:
             client_name = 'ftrack-{0}'.format(uuid.uuid4())
-        workspace = self.p4.fetch_client('-o', client_name)
+        workspace = self.p4.fetch_client(client_name)
         workspace['Root'] = str(client_root)
         self.p4.save_client(workspace)
         self.logger.debug(pprint.pformat(workspace))

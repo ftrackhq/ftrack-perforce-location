@@ -153,9 +153,8 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
                 unsuccessful = False
         if ensure and not user_worskpaces:
             root_dir = self.select_root_dir()
-            user_worskpaces = [self.settings.create_workspace(root_dir)]
-            # Output between p4 client and p4 clients differs.
-            user_worskpaces[0]['client'] = user_worskpaces[0]['Client']
+            self.settings.create_workspace(root_dir)
+            user_worskpaces = self.settings.p4.run_workspaces('-u', user)
         return user_worskpaces
 
     def select_root_dir(self):

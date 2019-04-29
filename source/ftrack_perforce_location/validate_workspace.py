@@ -34,7 +34,7 @@ class WorkspaceValidator(object):
         self._projects = projects
         self._sanitise = sanitise
 
-        self._client_info = self._p4.run_client('-o')[0]
+        self._client_info = self._p4.fetch_client()
         self._prefix = os.path.normpath(self._client_info['Root'])
         self._ws_map = self._get_ws_mapping()
         self._case_insensitive = (
@@ -148,7 +148,7 @@ class WorkspaceValidator(object):
         if prefix is None:
             prefix = self._prefix
         proj_dir = os.path.join(prefix, self._get_filesystem_name(project), '...')
-        return proj_dir 
+        return proj_dir
 
     def _proj_has_own_depot(self, project, mapping=None):
         '''Check that the given *project* will be written to a depot which no

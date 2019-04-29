@@ -25,7 +25,7 @@ class PerforceConnectionHandler(object):
     @property
     def info(self):
         '''Return informations about the current connection.'''
-        return self.connection.run('info')[0]
+        return self.connection.run_info()[0]
 
     @property
     def port(self):
@@ -98,6 +98,8 @@ class PerforceConnectionHandler(object):
 
         try:
             p4.connect()
+            if p4.port.startswith('ssl'):
+                p4.run_trust('-y')
         except P4Exception as error:
             raise PerforceConnectionHandlerException(error)
 
