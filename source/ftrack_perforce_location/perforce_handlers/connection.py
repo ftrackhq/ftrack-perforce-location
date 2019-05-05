@@ -3,12 +3,17 @@
 
 import logging
 import socket
+import uuid
 
 from P4 import P4, P4Exception
 
 from ftrack_perforce_location.perforce_handlers.errors import (
-    PerforceConnectionHandlerException
+    PerforceConnectionHandlerException, PerforceSessionExpiredException
 )
+
+
+expired_session_message = 'Your session has expired, please login again.'
+invalid_password_message = 'Perforce password (P4PASSWD) invalid or unset.'
 
 
 class PerforceConnectionHandler(object):
@@ -135,6 +140,9 @@ class PerforceConnectionHandler(object):
         try:
             self._connection.run_login(self._user)
         except P4Exception as error:
+            if (len(error.errors) == 1 and
+                    error.errors[0] == expired_session_message):
+                raise PerforceSessionExpiredException(error)
             raise PerforceConnectionHandlerException(error)
 
     def disconnect(self):
@@ -142,3 +150,11 @@ class PerforceConnectionHandler(object):
         if self.connection.connected():
             self.connection.disconnect()
         self._connection = None
+
+    def create_workspace(self, client_root, client_name=None):
+        if client_name is None:
+            client_name = 'ftrack-{0}'.format(uuid.uuid4())
+        workspace = self.connection.fetch_client(client_name)
+        workspace['Root'] = str(client_root)
+        self.connection.save_client(workspace)
+        return workspace

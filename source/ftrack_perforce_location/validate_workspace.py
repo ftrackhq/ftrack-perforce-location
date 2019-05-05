@@ -6,7 +6,9 @@ import os
 
 import P4
 
-from perforce_handlers.errors import PerforceValidationError
+from ftrack_perforce_location.perforce_handlers.errors import (
+    PerforceValidationError
+)
 
 
 class WorkspaceValidator(object):

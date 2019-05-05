@@ -20,6 +20,12 @@ extra_paths = os.environ.get('PYTHONPATH', '').split(os.pathsep)
 for path in extra_paths:
     sys.path.append(path)
 
+from ftrack_perforce_location.perforce_handlers.connection import (
+    invalid_password_message, PerforceConnectionHandler
+)
+from ftrack_perforce_location.perforce_handlers.errors import (
+    PerforceSessionExpiredException
+)
 from ftrack_perforce_location.perforce_handlers.settings import (
     PerforceSettingsHandler, P4Exception
 )
@@ -40,10 +46,8 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
         main_layout = QtWidgets.QVBoxLayout()
         self.setLayout(main_layout)
         self.verify_scenario()
+        self.p4_handler = self.create_connection()
         settings_data = self.settings.read()
-        # Update the Perforce server now that those settings are available.
-        self.settings.update_port_from_scenario(settings_data)
-        self.settings.p4.connect()
         user = settings_data['user']
         available_worskpaces = self.get_user_workspaces(user)
         self.ws_clients = [w['client'] for w in available_worskpaces]
@@ -129,6 +133,20 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
         if ok:
             return result
 
+    def create_connection(self):
+        perforce_settings_data = self.settings.read()
+        self.settings.update_port_from_scenario(perforce_settings_data)
+        try:
+            connection = PerforceConnectionHandler(**perforce_settings_data)
+        except PerforceSessionExpiredException as e:
+            perforce_error_message = e.args[0].errors[0]
+            text = 'Please re-enter password for {0}\n\n{1}\n'.format(
+                perforce_settings_data['user'], perforce_error_message
+            )
+            perforce_settings_data['password'] = self.demand_input(text)
+            connection = PerforceConnectionHandler(**perforce_settings_data)
+        return connection
+
     def get_user_workspaces(self, user, ensure=True):
         '''Return list of workspaces belonging to *user*.
 
@@ -139,22 +157,25 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
         unsuccessful = True
         while unsuccessful:
             try:
-                user_worskpaces = self.settings.p4.run_workspaces('-u', user)
+                user_worskpaces = (
+                    self.p4_handler.connection.run_workspaces('-u', user)
+                )
             except P4Exception as e:
                 if (len(e.errors) == 1 and
-                        e.errors[0] == self.settings.needs_password):
+                        e.errors[0] == invalid_password_message):
                     text = 'Logging in as {0}\n\n{1}'.format(
-                        self.settings.p4.user, e.errors[0]
+                        self.p4_handler.user, e.errors[0]
                     )
                     password = self.demand_input(text)
                     if password:
-                        self.settings.p4.password = str(password)
+                        self.p4_handler.connection.password = str(password)
+                        self.p4_handler._login()
             else:
                 unsuccessful = False
         if ensure and not user_worskpaces:
             root_dir = self.select_root_dir()
-            self.settings.create_workspace(root_dir)
-            user_worskpaces = self.settings.p4.run_workspaces('-u', user)
+            self.p4_handler.create_workspace(root_dir)
+            user_worskpaces = self.p4_handler.run_workspaces('-u', user)
         return user_worskpaces
 
     def select_root_dir(self):

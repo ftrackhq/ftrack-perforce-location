@@ -5,24 +5,23 @@ import appdirs
 import json
 import logging
 import os
-import pprint
-import uuid
 
 from P4 import P4, P4Exception
 import ftrack_api
 
+from ftrack_perforce_location.perforce_handlers.connection import (
+    PerforceConnectionHandler
+)
+
 
 class PerforceSettingsHandler(object):
     '''Handles Perforce connection settings.'''
-
-    needs_password = 'Perforce password (P4PASSWD) invalid or unset.'
 
     def __init__(self):
         super(PerforceSettingsHandler, self).__init__()
         self.logger = logging.getLogger(
             __name__ + '.' + self.__class__.__name__
         )
-        self.p4 = P4()
 
     @property
     def _templated_default(self):
@@ -53,11 +52,15 @@ class PerforceSettingsHandler(object):
         PerforceConnectionHandler.
         '''
         config = dict(config)
-        config['user'] = self.p4.user
-        config['using_workspace'] = self.p4.client
+        p4 = P4()
+        config['user'] = p4.user
+        config['using_workspace'] = p4.client
         try:
-            self.p4.connect()
-            config['workspace_root'] = self.p4.run_info()[0]['clientRoot']
+            p4.port = config['port']
+            p4.connect()
+            if p4.port.startswith('ssl'):
+                p4.run_trust('-y')
+            config['workspace_root'] = p4.run_info()[0]['clientRoot']
         except P4Exception as error:
             self.logger.debug('Error while querying client root: {0}'.format(
                 error.message)
@@ -84,10 +87,10 @@ class PerforceSettingsHandler(object):
 
         if not os.path.exists(config_file):
             self.logger.debug('Creating default config settings')
-            updated_default_config = self._update_config_from_perforce(
-                self._templated_default
-            )
-            self.write(updated_default_config)
+            new_config = self._templated_default
+            self.update_port_from_scenario(new_config)
+            new_config = self._update_config_from_perforce(new_config)
+            self.write(new_config)
 
         if os.path.isfile(config_file):
             self.logger.info(u'Reading config from {0}'.format(config_file))
@@ -95,12 +98,14 @@ class PerforceSettingsHandler(object):
             with open(config_file, 'r') as file:
                 config = json.load(file)
             if any((key not in config) for key in self._templated_default):
-                updated_default_config = self._update_config_from_perforce(
-                    self._templated_default
+                new_config = self._templated_default
+                self.update_port_from_scenario(new_config)
+                new_config = self._update_config_from_perforce(
+                    new_config
                 )
-                updated_default_config.update(config)
-                self.write(updated_default_config)
-                config = updated_default_config
+                new_config.update(config)
+                self.write(new_config)
+                config = new_config
 
         return config
 
@@ -124,10 +129,6 @@ class PerforceSettingsHandler(object):
                 'Cannot update p4.port.'
                 ' Is the storage scenario configured correctly?')
             return
-        if self.p4.port != p4port:
-            if self.p4.connected():
-                self.p4.disconnect()
-            self.p4.port = p4port
 
     def _get_scenario_settings(self):
         '''Returns the settings stored by the Perforce storage scenario.
@@ -183,12 +184,3 @@ class PerforceSettingsHandler(object):
         except Exception as e:
             self.logger.warning('Could not read Perforce server settings from'
                                 ' ftrack. Caught exception:\n{}'.format(e))
-
-    def create_workspace(self, client_root, client_name=None):
-        if client_name is None:
-            client_name = 'ftrack-{0}'.format(uuid.uuid4())
-        workspace = self.p4.fetch_client(client_name)
-        workspace['Root'] = str(client_root)
-        self.p4.save_client(workspace)
-        self.logger.debug(pprint.pformat(workspace))
-        return workspace

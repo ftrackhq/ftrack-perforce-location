@@ -14,6 +14,10 @@ class PerforceConnectionHandlerException(PerforceHandlerException):
     '''Perforce connection exception.'''
 
 
+class PerforceSessionExpiredException(PerforceConnectionHandlerException):
+    '''Perforce expired session exception.'''
+
+
 class PerforceFileHandlerException(PerforceHandlerException):
     '''Perforce file exception.'''
 
