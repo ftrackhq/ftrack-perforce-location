@@ -7,13 +7,7 @@ import uuid
 
 from P4 import P4, P4Exception
 
-from ftrack_perforce_location.perforce_handlers.errors import (
-    PerforceConnectionHandlerException, PerforceSessionExpiredException
-)
-
-
-expired_session_message = 'Your session has expired, please login again.'
-invalid_password_message = 'Perforce password (P4PASSWD) invalid or unset.'
+from ftrack_perforce_location.perforce_handlers import errors
 
 
 class PerforceConnectionHandler(object):
@@ -106,7 +100,7 @@ class PerforceConnectionHandler(object):
             if p4.port.startswith('ssl'):
                 p4.run_trust('-y')
         except P4Exception as error:
-            raise PerforceConnectionHandlerException(error)
+            raise errors.PerforceConnectionHandlerException(error)
 
         self._connection = p4
         return True
@@ -122,12 +116,26 @@ class PerforceConnectionHandler(object):
             ws for
             ws in filtered_workspaces
             if ws.get('client') == self._using_workspace]
-        if not filtered_workspaces:
-            raise PerforceConnectionHandlerException(
-                'No workspace found named : {}'.format(self._using_workspace)
+        if filtered_workspaces:
+            workspace = filtered_workspaces[0].get('client')
+        else:
+            self.logger.info(
+                'Could not find valid workspace for {0} on {1}'.format(
+                    self._user, self.host
+                )
             )
-
-        workspace = filtered_workspaces[0].get('client')
+            self.logger.info('Creating new workspace . . .')
+            # Either the workspace exists and belongs to someone/somewher else
+            # and a new name is required, or else the name is available to use.
+            if self.connection.run_clients('-e', self._using_workspace):
+                new_workspace = self.create_workspace(
+                    self._workspace_root
+                )
+            else:
+                new_workspace = self.create_workspace(
+                    self._workspace_root, self._using_workspace
+                )
+            workspace = new_workspace['Client']
         self.logger.debug('getting workspace :{}'.format(workspace))
         return workspace
 
@@ -140,10 +148,12 @@ class PerforceConnectionHandler(object):
         try:
             self._connection.run_login(self._user)
         except P4Exception as error:
-            if (len(error.errors) == 1 and
-                    error.errors[0] == expired_session_message):
-                raise PerforceSessionExpiredException(error)
-            raise PerforceConnectionHandlerException(error)
+            if len(error.errors) != 1:
+                raise errors.PerforceConnectionHandlerException(error)
+            if error.errors[0] == errors.expired_session_message:
+                raise errors.PerforceSessionExpiredException(error)
+            if error.errors[0] == errors.invalid_password_message:
+                raise errors.PerforceInvalidPasswordException(error)
 
     def disconnect(self):
         '''Handles server disconnection.'''

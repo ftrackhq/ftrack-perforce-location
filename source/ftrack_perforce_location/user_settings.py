@@ -21,11 +21,9 @@ for path in extra_paths:
     sys.path.append(path)
 
 from ftrack_perforce_location.perforce_handlers.connection import (
-    invalid_password_message, PerforceConnectionHandler
+    PerforceConnectionHandler
 )
-from ftrack_perforce_location.perforce_handlers.errors import (
-    PerforceSessionExpiredException
-)
+from ftrack_perforce_location.perforce_handlers import errors
 from ftrack_perforce_location.perforce_handlers.settings import (
     PerforceSettingsHandler, P4Exception
 )
@@ -54,6 +52,8 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
         self.ws_roots = [w['Root'] for w in available_worskpaces]
 
         using_workspace = settings_data['using_workspace']
+        if using_workspace not in self.ws_clients:
+            using_workspace = self.ws_clients[0]
         workspace_root = settings_data['workspace_root']
 
         grid = QtWidgets.QGridLayout()
@@ -138,12 +138,17 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
         self.settings.update_port_from_scenario(perforce_settings_data)
         try:
             connection = PerforceConnectionHandler(**perforce_settings_data)
-        except PerforceSessionExpiredException as e:
+        except (errors.PerforceInvalidPasswordException,
+                errors.PerforceSessionExpiredException) as e:
             perforce_error_message = e.args[0].errors[0]
             text = 'Please re-enter password for {0}\n\n{1}\n'.format(
                 perforce_settings_data['user'], perforce_error_message
             )
             perforce_settings_data['password'] = self.demand_input(text)
+            connection = PerforceConnectionHandler(**perforce_settings_data)
+        except errors.PerforceWorkspaceException as e:
+            root_dir = self.select_root_dir()
+            perforce_settings_data['workspace_root'] = root_dir
             connection = PerforceConnectionHandler(**perforce_settings_data)
         return connection
 
@@ -162,7 +167,7 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
                 )
             except P4Exception as e:
                 if (len(e.errors) == 1 and
-                        e.errors[0] == invalid_password_message):
+                        e.errors[0] == errors.invalid_password_message):
                     text = 'Logging in as {0}\n\n{1}'.format(
                         self.p4_handler.user, e.errors[0]
                     )

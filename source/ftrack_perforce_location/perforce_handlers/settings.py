@@ -61,6 +61,8 @@ class PerforceSettingsHandler(object):
             if p4.port.startswith('ssl'):
                 p4.run_trust('-y')
             config['workspace_root'] = p4.run_info()[0]['clientRoot']
+            if config['workspace_root'] == 'None':
+                config['workspace_root'] = None
         except P4Exception as error:
             self.logger.debug('Error while querying client root: {0}'.format(
                 error.message)

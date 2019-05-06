@@ -1,6 +1,9 @@
 # :coding: utf-8
 # :copyright: Copyright (c) 2018 ftrack
 
+expired_session_message = 'Your session has expired, please login again.'
+invalid_password_message = 'Perforce password (P4PASSWD) invalid or unset.'
+
 
 class PerforceLocationError(Exception):
     '''Base Location exception.'''
@@ -12,6 +15,14 @@ class PerforceHandlerException(Exception):
 
 class PerforceConnectionHandlerException(PerforceHandlerException):
     '''Perforce connection exception.'''
+
+
+class PerforceInvalidPasswordException(PerforceConnectionHandlerException):
+    '''Perforce invalid password exception.'''
+
+
+class PerforceWorkspaceException(PerforceConnectionHandlerException):
+    '''Perforce workspace exception.'''
 
 
 class PerforceSessionExpiredException(PerforceConnectionHandlerException):
