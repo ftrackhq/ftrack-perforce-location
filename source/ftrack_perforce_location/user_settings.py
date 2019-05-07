@@ -36,6 +36,9 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
         self.ws_clients = []
         self.ws_roots = []
         self.setTheme()
+        if not self.verify_scenario():
+            self.reject()
+            return
         self.build()
         self.post_build()
 
@@ -43,7 +46,6 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
         '''Build interface layout and widgets.'''
         main_layout = QtWidgets.QVBoxLayout()
         self.setLayout(main_layout)
-        self.verify_scenario()
         self.p4_handler = self.create_connection()
         settings_data = self.settings.read()
         user = settings_data['user']
@@ -198,27 +200,29 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
 
     def verify_scenario(self):
         '''Check whether required settings exist and suggest remediation.'''
-        if not self.settings.scenario_is_configured():
-            warning_text = (
-                'Please ensure Perforce Storage Scenario is configured before'
-                ' running this tool.\n\nWhile Connect is running, the scenario'
-                ' may be configured by an admin logged into ftrack, under'
-                ' System Settings > Media Management > Storage scenario.'
+        if self.settings.scenario_is_configured():
+            return True
+        warning_text = (
+            'Please ensure that Perforce Storage Scenario is configured before'
+            ' running this tool.\n\nWhile Connect is running, the scenario may'
+            ' be configured by an admin logged into ftrack, under System'
+            ' Settings > Media Management > Storage scenario.'
+        )
+        try:
+            warning_text = '{0} Also accessible at:\n{1}{2}'.format(
+                warning_text,
+                os.environ['FTRACK_SERVER'],
+                '/#view=configure_storage_scenario&itemId=newconfigure'
             )
-            try:
-                warning_text = '{0}\nAlso accessible at: {1}{2}'.format(
-                    warning_text,
-                    os.environ['FTRACK_SERVER'],
-                    '/#view=configure_storage_scenario&itemId=newconfigure'
-                )
-            except Exception:
-                pass
-            self.raise_warning_box(warning_text)
+        except Exception:
+            pass
+        self.raise_warning_box(warning_text)
 
 
 if __name__ == '__main__':
     perforce_settings = PerforceSettingsHandler()
     app = QtGui.QApplication(sys.argv)
     window = ConfigureUserSettingsWidget(perforce_settings)
-    window.show()
+    window.exec_()
+    # TODO exit after closing verification warning.
     sys.exit(app.exec_())

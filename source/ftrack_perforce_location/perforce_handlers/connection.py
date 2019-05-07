@@ -90,7 +90,7 @@ class PerforceConnectionHandler(object):
         p4.password = str(self._password)
 
         self.logger.debug(
-            'Connecting to {}'.format(
+            'Connecting to {0}'.format(
                 p4.__repr__()
             )
         )
@@ -124,19 +124,18 @@ class PerforceConnectionHandler(object):
                     self._user, self.host
                 )
             )
-            self.logger.info('Creating new workspace . . .')
-            # Either the workspace exists and belongs to someone/somewher else
-            # and a new name is required, or else the name is available to use.
             if self.connection.run_clients('-e', self._using_workspace):
-                new_workspace = self.create_workspace(
-                    self._workspace_root
+                raise errors.PerforceWorkspaceException(
+                    'Specified workspace already in use: {0}'.format(
+                        self._using_workspace
+                    )
                 )
-            else:
-                new_workspace = self.create_workspace(
-                    self._workspace_root, self._using_workspace
-                )
+            self.logger.info('Creating new workspace . . .')
+            new_workspace = self.create_workspace(
+                self._workspace_root, self._using_workspace
+            )
             workspace = new_workspace['Client']
-        self.logger.debug('getting workspace :{}'.format(workspace))
+        self.logger.debug('getting workspace :{0}'.format(workspace))
         return workspace
 
     def _login(self):
