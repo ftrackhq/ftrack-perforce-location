@@ -145,7 +145,7 @@ class PerforceConnectionHandler(object):
             'Logging in as: {0}'.format(self._user)
         )
         try:
-            self._connection.run_login(self._user)
+            self._connection.run_login('-u', self._user)
         except P4Exception as error:
             if len(error.errors) != 1:
                 raise errors.PerforceConnectionHandlerException(error)
