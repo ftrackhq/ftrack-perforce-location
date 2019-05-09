@@ -135,23 +135,29 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
         if ok:
             return result
 
-    def create_connection(self):
-        perforce_settings_data = self.settings.read()
+    def create_connection(self, perforce_settings_data=None):
+        perforce_settings_data = perforce_settings_data or self.settings.read()
         self.settings.update_port_from_scenario(perforce_settings_data)
+        logger.debug('perforce_settings_data: {}'.format(perforce_settings_data))
+
         try:
             connection = PerforceConnectionHandler(**perforce_settings_data)
         except (errors.PerforceInvalidPasswordException,
                 errors.PerforceSessionExpiredException) as e:
+            logger.debug('exception: {}'.format(str(e)))
             perforce_error_message = e.args[0].errors[0]
             text = 'Please re-enter password for {0}\n\n{1}\n'.format(
                 perforce_settings_data['user'], perforce_error_message
             )
             perforce_settings_data['password'] = self.demand_input(text)
-            connection = PerforceConnectionHandler(**perforce_settings_data)
+            connection = self.create_connection(perforce_settings_data)
         except errors.PerforceWorkspaceException as e:
+            logger.debug('exception: {}'.format(str(e)))
             root_dir = self.select_root_dir()
             perforce_settings_data['workspace_root'] = root_dir
-            connection = PerforceConnectionHandler(**perforce_settings_data)
+            connection = self.create_connection(perforce_settings_data)
+
+        self.settings.write(perforce_settings_data)
         return connection
 
     def get_user_workspaces(self, user, ensure=True):

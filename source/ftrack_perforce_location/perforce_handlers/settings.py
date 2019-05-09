@@ -55,22 +55,27 @@ class PerforceSettingsHandler(object):
         p4 = P4()
         config['user'] = p4.user
         config['using_workspace'] = p4.client
+        p4.port = config['port']
         try:
-            p4.port = config['port']
             p4.connect()
             if p4.port.startswith('ssl'):
                 p4.run_trust('-y')
-            config['workspace_root'] = p4.run_info()[0]['clientRoot']
-            if config['workspace_root'] == 'None':
-                config['workspace_root'] = None
+                config['workspace_root'] = p4.fetch_client(p4.client)['Root']
+                if config['workspace_root'] == 'None':
+                    config['workspace_root'] = None
         except P4Exception as error:
             self.logger.debug('Error while querying client root: {0}'.format(
                 error.message)
             )
+
+        self.logger.debug('updated config from perforce with: {}'.format(config))
+
         return config
 
     def write(self, config):
         '''Write **config** data to file.'''
+
+        self.logger.debug('saving settings:{}'.format(config))
 
         config_file = self._get_config_path()
         # Create folder if it does not exist.
@@ -88,7 +93,8 @@ class PerforceSettingsHandler(object):
         config = None
 
         if not os.path.exists(config_file):
-            self.logger.debug('Creating default config settings')
+            self.logger.debug('Creating default config settings in :{}'.format(config_file))
+
             new_config = self._templated_default
             self.update_port_from_scenario(new_config)
             new_config = self._update_config_from_perforce(new_config)
