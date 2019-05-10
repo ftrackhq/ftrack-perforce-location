@@ -4,6 +4,7 @@
 from ftrack_action_handler.action import BaseAction
 from ftrack_api.structure.standard import StandardStructure
 import P4
+from P4 import P4Exception
 
 from ftrack_perforce_location.constants import SCENARIO_ID, ICON_URL
 
@@ -128,12 +129,15 @@ class PerforceAttributeAction(BaseAction):
         return perforce_attribute
 
     def _create_depot(self, depot_name):
-        self.connection.save_depot({
-            'Depot': depot_name,
-            'Map': '{0}/...'.format(depot_name),
-            'Description': 'Created by ftrack.',
-            'Type': 'local'
-        })
+        try:
+            self.connection.save_depot({
+                'Depot': depot_name,
+                'Map': '{0}/...'.format(depot_name),
+                'Description': 'Created by ftrack.',
+                'Type': 'local'
+            })
+        except P4Exception as error:
+            self.logger.exception(error)
 
     def _sanitise(self, name):
         try:
