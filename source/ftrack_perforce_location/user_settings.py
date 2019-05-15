@@ -163,6 +163,10 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
             perforce_settings_data['using_workspace'] = None
             connection = self.create_connection(perforce_settings_data)
 
+        # ensure password is not saved
+        if 'password' in perforce_settings_data:
+            del perforce_settings_data['password']
+
         self.settings.write(perforce_settings_data)
         return connection
 
