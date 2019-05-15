@@ -181,7 +181,7 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
                 )
             except P4Exception as e:
                 if (len(e.errors) == 1 and
-                        e.errors[0] == errors.invalid_password_message):
+                        e.errors[0] == errors.invalid_or_unset_password_message):
                     text = 'Logging in as {0}\n\n{1}'.format(
                         self.p4_handler.user, e.errors[0]
                     )

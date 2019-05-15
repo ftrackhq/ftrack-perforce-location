@@ -151,7 +151,7 @@ class PerforceConnectionHandler(object):
                 raise errors.PerforceConnectionHandlerException(error)
             if error.errors[0] == errors.expired_session_message:
                 raise errors.PerforceSessionExpiredException(error)
-            if error.errors[0] == errors.invalid_password_message:
+            if error.errors[0] in [errors.invalid_or_unset_password_message, errors.invalid_password_message]:
                 raise errors.PerforceInvalidPasswordException(error)
             raise errors.PerforceConnectionHandlerException(error)
 
