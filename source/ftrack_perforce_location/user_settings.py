@@ -128,10 +128,10 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
         messageBox.setText(text)
         messageBox.exec_()
 
-    def demand_input(self, label_text):
+    def demand_input(self, label_text, mode=QtWidgets.QLineEdit.Normal):
         '''Ask the user for input via QInputDialog.'''
         title = 'Input required'
-        result, ok = QtWidgets.QInputDialog.getText(self, title, label_text)
+        result, ok = QtWidgets.QInputDialog.getText(self, title, label_text, mode)
         if ok:
             return result
 
@@ -149,12 +149,18 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
             text = 'Please re-enter password for {0}\n\n{1}\n'.format(
                 perforce_settings_data['user'], perforce_error_message
             )
-            perforce_settings_data['password'] = self.demand_input(text)
+            perforce_settings_data['password'] = self.demand_input(
+                text,
+                mode=QtWidgets.QLineEdit.Password
+            )
             connection = self.create_connection(perforce_settings_data)
         except errors.PerforceWorkspaceException as e:
             logger.debug('exception: {}'.format(str(e)))
             root_dir = self.select_root_dir()
             perforce_settings_data['workspace_root'] = root_dir
+            # There's likely a conflict with the selected workspace, so force
+            # the creation of a new one.
+            perforce_settings_data['using_workspace'] = None
             connection = self.create_connection(perforce_settings_data)
 
         self.settings.write(perforce_settings_data)
@@ -179,7 +185,10 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
                     text = 'Logging in as {0}\n\n{1}'.format(
                         self.p4_handler.user, e.errors[0]
                     )
-                    password = self.demand_input(text)
+                    password = self.demand_input(
+                        text,
+                        mode=QtWidgets.QLineEdit.Password
+                    )
                     if password:
                         self.p4_handler.connection.password = str(password)
                         self.p4_handler._login()

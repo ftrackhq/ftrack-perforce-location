@@ -145,7 +145,7 @@ class PerforceConnectionHandler(object):
             'Logging in as: {0}'.format(self._user)
         )
         try:
-            self._connection.run_login('-u', self._user)
+            self._connection.run_login(self._user)
         except P4Exception as error:
             if len(error.errors) != 1:
                 raise errors.PerforceConnectionHandlerException(error)
@@ -153,6 +153,7 @@ class PerforceConnectionHandler(object):
                 raise errors.PerforceSessionExpiredException(error)
             if error.errors[0] == errors.invalid_password_message:
                 raise errors.PerforceInvalidPasswordException(error)
+            raise errors.PerforceConnectionHandlerException(error)
 
     def disconnect(self):
         '''Handles server disconnection.'''
