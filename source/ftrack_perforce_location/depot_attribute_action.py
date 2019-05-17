@@ -161,4 +161,7 @@ class PerforceAttributeAction(BaseAction):
             ' and (is_all_projects is True'
             ' or projects any (id is "{1}"))'.format(
                 username, project_id)).first()
-        return appropriate_admin_role is not None
+
+        perforce_super_role = self.connection.run_protects()[0]['perm']
+
+        return appropriate_admin_role is not None and perforce_super_role == "super"
