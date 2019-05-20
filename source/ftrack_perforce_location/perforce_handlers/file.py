@@ -90,8 +90,12 @@ class PerforceFileHandler(object):
             client = self.connection.fetch_client('-t', self.connection.client)
             # As of ftrack_api 1.7, filename must be a string
             client._root = str(self.root)
-            self.connection.save_client(client)
-            self.connection.run_add(filepath)
+            try:
+                self.connection.save_client(client)
+                self.connection.run_add(filepath)
+            except Exception as error:
+                self.logger.exception(error)
+
         else:
             # 'p4 edit' requires that the file exists in the client
             if not os.path.exists(filepath):

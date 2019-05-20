@@ -3,12 +3,11 @@
 
 import logging
 import socket
+import uuid
 
 from P4 import P4, P4Exception
 
-from ftrack_perforce_location.perforce_handlers.errors import (
-    PerforceConnectionHandlerException
-)
+from ftrack_perforce_location.perforce_handlers import errors
 
 
 class PerforceConnectionHandler(object):
@@ -25,7 +24,7 @@ class PerforceConnectionHandler(object):
     @property
     def info(self):
         '''Return informations about the current connection.'''
-        return self.connection.run('info')[0]
+        return self.connection.run_info()[0]
 
     @property
     def port(self):
@@ -91,15 +90,17 @@ class PerforceConnectionHandler(object):
         p4.password = str(self._password)
 
         self.logger.debug(
-            'Connecting to {}'.format(
+            'Connecting to {0}'.format(
                 p4.__repr__()
             )
         )
 
         try:
             p4.connect()
+            if p4.port.startswith('ssl'):
+                p4.run_trust('-y')
         except P4Exception as error:
-            raise PerforceConnectionHandlerException(error)
+            raise errors.PerforceConnectionHandlerException(error)
 
         self._connection = p4
         return True
@@ -115,13 +116,26 @@ class PerforceConnectionHandler(object):
             ws for
             ws in filtered_workspaces
             if ws.get('client') == self._using_workspace]
-        if not filtered_workspaces:
-            raise PerforceConnectionHandlerException(
-                'No workspace found named : {}'.format(self._using_workspace)
+        if filtered_workspaces:
+            workspace = filtered_workspaces[0].get('client')
+        else:
+            self.logger.info(
+                'Could not find valid workspace for {0} on {1}'.format(
+                    self._user, self.host
+                )
             )
-
-        workspace = filtered_workspaces[0].get('client')
-        self.logger.debug('getting workspace :{}'.format(workspace))
+            if self.connection.run_clients('-e', self._using_workspace):
+                raise errors.PerforceWorkspaceException(
+                    'Specified workspace already in use: {0}'.format(
+                        self._using_workspace
+                    )
+                )
+            self.logger.info('Creating new workspace . . .')
+            new_workspace = self.create_workspace(
+                self._workspace_root, self._using_workspace
+            )
+            workspace = new_workspace['Client']
+        self.logger.debug('getting workspace :{0}'.format(workspace))
         return workspace
 
     def _login(self):
@@ -131,12 +145,26 @@ class PerforceConnectionHandler(object):
             'Logging in as: {0}'.format(self._user)
         )
         try:
-            self._connection.run_login(self._user)
+            self._connection.run_login('--remote-user', self._user)
         except P4Exception as error:
-            raise PerforceConnectionHandlerException(error)
+            if len(error.errors) != 1:
+                raise errors.PerforceConnectionHandlerException(error)
+            if error.errors[0] == errors.expired_session_message:
+                raise errors.PerforceSessionExpiredException(error)
+            if error.errors[0] in [errors.invalid_or_unset_password_message, errors.invalid_password_message]:
+                raise errors.PerforceInvalidPasswordException(error)
+            raise errors.PerforceConnectionHandlerException(error)
 
     def disconnect(self):
         '''Handles server disconnection.'''
         if self.connection.connected():
             self.connection.disconnect()
         self._connection = None
+
+    def create_workspace(self, client_root, client_name=None):
+        if client_name is None:
+            client_name = 'ftrack-{0}'.format(uuid.uuid4())
+        workspace = self.connection.fetch_client(client_name)
+        workspace['Root'] = str(client_root)
+        self.connection.save_client(workspace)
+        return workspace
