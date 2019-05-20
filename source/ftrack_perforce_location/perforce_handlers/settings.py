@@ -107,7 +107,6 @@ class PerforceSettingsHandler(object):
                 config = json.load(file)
             if any((key not in config) for key in self._templated_default):
                 new_config = self._templated_default
-                self.update_port_from_scenario(new_config)
                 new_config = self._update_config_from_perforce(
                     new_config
                 )
@@ -115,6 +114,8 @@ class PerforceSettingsHandler(object):
                 self.write(new_config)
                 config = new_config
 
+        config = self.update_port_from_scenario(config)
+        self.logger.info('Returning config data :{}'.format(config))
         return config
 
     def update_port_from_scenario(self, config, scenario_data=None):
@@ -127,16 +128,20 @@ class PerforceSettingsHandler(object):
         server by the Perforce storage scenario. If not passed, it will be
         read from the server.
         '''
-        if scenario_data is None:
-            scenario_data = self._get_scenario_settings()
+        scenario_data = scenario_data or self._get_scenario_settings()
+
+        self.logger.info('Updating port from scenario: {}'.format(scenario_data))
         self._apply_scenario_settings(config, scenario_data)
+
         try:
-            p4port = config['port']
+            config['port']
         except KeyError:
             self.logger.warning(
                 'Cannot update p4.port.'
                 ' Is the storage scenario configured correctly?')
             return
+
+        return config
 
     def _get_scenario_settings(self):
         '''Returns the settings stored by the Perforce storage scenario.
@@ -150,7 +155,7 @@ class PerforceSettingsHandler(object):
                 'select value from Setting where name is storage_scenario'
             ).one()
         location_data = json.loads(setting['value'])['data']
-        # self.logger.debug(pprint.pformat(location_data))
+        self.logger.debug('scenario data :{}'.format(location_data))
         return location_data
 
     def scenario_is_configured(self):
