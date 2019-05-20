@@ -150,7 +150,7 @@ class PerforceAttributeAction(BaseAction):
 
     def _update_workspace_map(self, new_depot):
         workspace = self.connection.fetch_client('-o')
-        new_mapping = '//{0}/... //{1}/{0}/...'.format(
+        new_mapping = '//{0}/... "//{1}/{0}/..."'.format(
             new_depot, workspace['Client']
         )
         mappings = P4.Map(workspace['View']).as_array()
