@@ -99,15 +99,10 @@ class PerforceAttributeAction(BaseAction):
     @property
     def connection(self):
         '''Return connection to Perforce server.'''
-        perforce_settings = settings.PerforceSettingsHandler()
-        perforce_settings_data = perforce_settings.read()
-        self.logger.info('perforce_settings_data: {}'.format(perforce_settings_data))
-
-        connection = P4.P4()
-        connection.port = str(perforce_settings_data['port'])
-        connection.user = str(perforce_settings_data['user'])
-        connection.connect()
-        return connection
+        perforce_location = self.session.query(
+            'Location where name is "{0}"'.format(SCENARIO_ID)
+        ).one()
+        return perforce_location.resource_identifier_transformer.connection
 
     def _create_attribute(self, project_id):
         self.logger.debug('Creating custom attributes on project id : {}'.format(project_id))
