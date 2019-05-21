@@ -13,6 +13,7 @@ ftrack perforce location
    :maxdepth: 2
    :caption: Contents:
 
+   installing.rst
    release/index.rst
 
 
