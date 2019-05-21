@@ -33,3 +33,8 @@ Release Notes
         :tags: workspace
 
         User's workspace is created on first run if not already available.
+
+    .. change:: new
+        :tags: docs
+
+        Init documentation.
