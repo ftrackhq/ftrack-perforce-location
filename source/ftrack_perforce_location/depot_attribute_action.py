@@ -195,7 +195,7 @@ class PerforceAttributeAction(BaseAction):
                 username, project_id)).first()
 
         # check perforce super role
-        perforce_super_role = self.connection.run_protects()[0]['perm'] == 'super'
+        perforce_super_role = any(protect for protect in self.connection.run_protects() if protect['perm'] == 'super')
 
         role_status = appropriate_admin_role is not None and perforce_super_role is True
         self.logger.debug(
