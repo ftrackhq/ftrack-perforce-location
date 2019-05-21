@@ -10,10 +10,14 @@ Release Notes
 .. release:: Upcoming
 
     .. change:: fixed
+        :tags: action
+
+        User settings crashes under osx and windows platform.
+
+    .. change:: fixed
         :tags: login
 
-        Perforce password is not properly stored.
-
+        Perforce password is not properly set.
 
     .. change:: fixed
         :tags: workspace
@@ -25,3 +29,7 @@ Release Notes
 
         Admin role for action gets checked against perforce roles too.
 
+    .. change:: new
+        :tags: workspace
+
+        User's workspace is created on first run if not already available.
