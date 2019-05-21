@@ -3,3 +3,4 @@ build/**
 .idea/**
 .eggs/*
 venv/**
+doc/build/**
