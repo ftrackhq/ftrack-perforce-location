@@ -6,7 +6,9 @@ import os
 
 import P4
 
-from perforce_handlers.errors import PerforceValidationError
+from ftrack_perforce_location.perforce_handlers.errors import (
+    PerforceValidationError
+)
 
 
 class WorkspaceValidator(object):
@@ -34,7 +36,7 @@ class WorkspaceValidator(object):
         self._projects = projects
         self._sanitise = sanitise
 
-        self._client_info = self._p4.run_client('-o')[0]
+        self._client_info = self._p4.fetch_client()
         self._prefix = os.path.normpath(self._client_info['Root'])
         self._ws_map = self._get_ws_mapping()
         self._case_insensitive = (
@@ -95,6 +97,8 @@ class WorkspaceValidator(object):
 
         '''
         name = project['name']
+        if self._case_insensitive:
+            name = name.lower()
         if self._sanitise is not None:
             name = self._sanitise(name)
         return name
@@ -105,7 +109,7 @@ class WorkspaceValidator(object):
             self._p4.client)
         )
         client_map = P4.Map(self._client_info['View'])
-        root_map = P4.Map('//{0}/... {1}/...'.format(
+        root_map = P4.Map('//{0}/... "{1}/..."'.format(
             self._client_info['Client'], self._prefix)
         )
         result = P4.Map.join(client_map, root_map)
@@ -113,6 +117,14 @@ class WorkspaceValidator(object):
         self.logger.debug('Client map:\n{0}'.format(client_map))
         self.logger.debug('Client root map:\n{0}'.format(root_map))
         self.logger.debug('Result:\n{0}'.format(result))
+
+        #  Avoid the weird mix of (back)slashes on Windows.
+        result = P4.Map([
+            os.path.normpath(row)
+            for row in result.as_array()
+        ])
+
+        self.logger.debug('Normalized Result:\n{0}'.format(result))
 
         return result
 
@@ -137,7 +149,8 @@ class WorkspaceValidator(object):
         '''
         if prefix is None:
             prefix = self._prefix
-        return os.path.join(prefix, self._get_filesystem_name(project), '...')
+        proj_dir = os.path.join(prefix, self._get_filesystem_name(project), '...')
+        return proj_dir
 
     def _proj_has_own_depot(self, project, mapping=None):
         '''Check that the given *project* will be written to a depot which no
@@ -169,9 +182,9 @@ class WorkspaceValidator(object):
                 rhs = rhs.lower()
                 proj_dir = proj_dir.lower()
             if rhs.startswith(proj_dir):
-                project_depots.append(lhs.split('/')[2])
+                project_depots.append(lhs.split(os.sep)[2])
             else:
-                other_project_depots.append(lhs.split('/')[2])
+                other_project_depots.append(lhs.split(os.sep)[2])
         for depot in project_depots:
             if depot in other_project_depots:
                 return False
@@ -187,4 +200,7 @@ class WorkspaceValidator(object):
         if mapping is None:
             mapping = self._ws_map
         proj_dir_as_string = str(self._get_project_dir(project))
-        return mapping.reverse().includes(proj_dir_as_string)
+        # Setting the second argument to False translates in the backwards
+        # direction, converting filesystem paths to depot paths, if valid.
+        included = mapping.translate(proj_dir_as_string, False) is not None
+        return included

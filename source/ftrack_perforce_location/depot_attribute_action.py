@@ -1,19 +1,27 @@
 # :coding: utf-8
 # :copyright: Copyright (c) 2019 ftrack
-
+import logging
+import json
 from ftrack_action_handler.action import BaseAction
+from ftrack_api.structure.standard import StandardStructure
 import P4
+from P4 import P4Exception
 
-from ftrack_perforce_location.constants import SCENARIO_ID
-
-
-ICON_URL = 'https://bam.gallerycdn.vsassets.io/extensions/bam/vscode-perforce/1.1.3/1498206133077/Microsoft.VisualStudio.Services.Icons.Default'
+from ftrack_perforce_location.constants import SCENARIO_ID, ICON_URL
+from ftrack_perforce_location.perforce_handlers import connection
+from ftrack_perforce_location.perforce_handlers import settings
 
 
 class PerforceAttributeAction(BaseAction):
     label = 'Configure Project Perforce'
     identifier = 'com.ftrack.ftrack_perforce_location.perforce_attribute'
     description = 'Configure various Perforce options for the current project'
+
+    def __init__(self, session):
+        super(PerforceAttributeAction, self).__init__(session)
+        self.logger = logging.getLogger(
+            __name__ + '.' + self.__class__.__name__
+        )
 
     def _discover(self, event):
         '''Inject Perforce icon into the attribute dictionary.'''
@@ -27,6 +35,7 @@ class PerforceAttributeAction(BaseAction):
     def discover(self, session, entities, event):
         '''Return True to be discovered when *entities* is a single Project.
         '''
+        print self.logger.name
         if not entities or len(entities) != 1:
             return False
 
@@ -96,6 +105,8 @@ class PerforceAttributeAction(BaseAction):
         return perforce_location.resource_identifier_transformer.connection
 
     def _create_attribute(self, project_id):
+        self.logger.debug('Creating custom attributes on project id : {}'.format(project_id))
+
         admin_role = self.session.query(
             'SecurityRole where name is "{0}"'.format('Administrator')
         ).one()
@@ -130,35 +141,61 @@ class PerforceAttributeAction(BaseAction):
         return perforce_attribute
 
     def _create_depot(self, depot_name):
-        self.connection.save_depot({
-            'Depot': depot_name,
-            'Map': '{0}/...'.format(depot_name),
-            'Description': 'Created by ftrack.',
-            'Type': 'local'
-        })
+        self.logger.debug('Creating new depot : {}'.format(depot_name))
+        try:
+            self.connection.save_depot({
+                'Depot': depot_name,
+                'Map': '{0}/...'.format(depot_name),
+                'Description': 'Created by ftrack.',
+                'Type': 'local'
+            })
+        except P4Exception as error:
+            self.logger.exception(error)
 
     def _sanitise(self, name):
-        perforce_location = self.session.query(
-            'Location where name is "{0}"'.format(SCENARIO_ID)
-        ).one()
-        return perforce_location.structure.sanitise_for_filesystem(name)
+        try:
+            perforce_location = self.session.query(
+                'Location where name is "{0}"'.format(SCENARIO_ID)
+            ).one()
+            return perforce_location.structure.sanitise_for_filesystem(name)
+        except AttributeError:
+            return StandardStructure().sanitise_for_filesystem(name)
 
     def _update_workspace_map(self, new_depot):
+        self.logger.debug('Updating workspace map with : {}'.format(new_depot))
         workspace = self.connection.fetch_client('-o')
-        map_ = P4.Map(workspace['View'])
-        map_.insert(
-            '//{0}/... //{1}/{0}/...'.format(
-                new_depot, workspace['Client']
-            )
+        new_mapping = '//{0}/... "//{1}/{0}/..."'.format(
+            new_depot, workspace['Client']
         )
-        workspace['View'] = map_.as_array()
+        mappings = P4.Map(workspace['View']).as_array()
+        if new_mapping in mappings:
+            self.logger.info(
+                'Depot already in client view. Not adding: {0}'.format(
+                    new_mapping
+                )
+            )
+            return
+
+        mappings.append(new_mapping)
+        workspace['View'] = mappings
         self.connection.save_client(workspace)
 
     def _user_is_admin(self, username, project_id):
+        # check ftrack admin role
         appropriate_admin_role = self.session.query(
             'UserSecurityRole where user.username is "{0}"'
             ' and security_role.name is "Administrator"'
             ' and (is_all_projects is True'
             ' or projects any (id is "{1}"))'.format(
                 username, project_id)).first()
-        return appropriate_admin_role is not None
+
+        # check perforce super role
+        perforce_super_role = any(protect for protect in self.connection.run_protects() if protect['perm'] == 'super')
+
+        role_status = appropriate_admin_role is not None and perforce_super_role is True
+        self.logger.debug(
+            'User {} is ftrack admin: {} is perforce super : {}'.format(
+                username, bool(appropriate_admin_role), perforce_super_role
+            )
+        )
+        return role_status

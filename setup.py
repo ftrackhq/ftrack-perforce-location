@@ -91,6 +91,11 @@ setup(
     package_dir={
         '': 'source'
     },
+    setup_requires=[
+        'sphinx >= 1.2.2, < 2',
+        'sphinx_rtd_theme >= 0.1.6, < 1',
+        'lowdown >= 0.1.0, < 2'
+    ],
     install_requires=[
         'appdirs == 1.4.0',
         'p4python == 2018.2.1743033',

@@ -6,6 +6,7 @@ import logging
 from P4 import P4
 
 from ftrack_perforce_location.configure_logging import configure_logging
+from ftrack_perforce_location._version import __version__
 
 configure_logging(__name__)
 P4.logger = logging.getLogger(__name__)

@@ -2,3 +2,5 @@ build/**
 **.pyc
 .idea/**
 .eggs/*
+venv/**
+doc/build/**
