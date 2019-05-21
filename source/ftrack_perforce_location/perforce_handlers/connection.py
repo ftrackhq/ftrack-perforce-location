@@ -135,23 +135,42 @@ class PerforceConnectionHandler(object):
                 self._workspace_root, self._using_workspace
             )
             workspace = new_workspace['Client']
-        self.logger.debug('getting workspace :{0}'.format(workspace))
+        self.logger.debug('getting workspace: {0}'.format(workspace))
         return workspace
 
     def _login(self):
         '''Handles login to the server.'''
 
+        try:
+            self._connection.run_clients()
+        except P4Exception as error:
+            if len(error.errors) != 1:
+                raise errors.PerforceConnectionHandlerException(error)
+            if error.errors[0] in [
+                errors.invalid_or_unset_password_message,
+                errors.invalid_password_message,
+            ]:
+                pass
+        else:
+            self.logger.debug(
+                'Already logged in as: {0}'.format(self._connection.user)
+            )
+            return
+
         self.logger.debug(
             'Logging in as: {0}'.format(self._user)
         )
         try:
-            self._connection.run_login('--remote-user', self._user)
+            self._connection.run_login()
         except P4Exception as error:
             if len(error.errors) != 1:
                 raise errors.PerforceConnectionHandlerException(error)
             if error.errors[0] == errors.expired_session_message:
                 raise errors.PerforceSessionExpiredException(error)
-            if error.errors[0] in [errors.invalid_or_unset_password_message, errors.invalid_password_message]:
+            if error.errors[0] in [
+                errors.invalid_or_unset_password_message,
+                errors.invalid_password_message,
+            ]:
                 raise errors.PerforceInvalidPasswordException(error)
             raise errors.PerforceConnectionHandlerException(error)
 

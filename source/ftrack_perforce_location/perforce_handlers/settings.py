@@ -9,10 +9,6 @@ import os
 from P4 import P4, P4Exception
 import ftrack_api
 
-from ftrack_perforce_location.perforce_handlers.connection import (
-    PerforceConnectionHandler
-)
-
 
 class PerforceSettingsHandler(object):
     '''Handles Perforce connection settings.'''

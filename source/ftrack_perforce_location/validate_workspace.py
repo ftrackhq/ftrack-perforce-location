@@ -109,7 +109,7 @@ class WorkspaceValidator(object):
             self._p4.client)
         )
         client_map = P4.Map(self._client_info['View'])
-        root_map = P4.Map('//{0}/... {1}/...'.format(
+        root_map = P4.Map('//{0}/... "{1}/..."'.format(
             self._client_info['Client'], self._prefix)
         )
         result = P4.Map.join(client_map, root_map)
