@@ -10,7 +10,7 @@ ftrack perforce location
     User documentation can be found at `help.ftrack.com <https://help.ftrack.com/connect/integrations/perforce-version-control>`_
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Contents:
 
    installing.rst
