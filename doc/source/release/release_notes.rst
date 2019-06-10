@@ -7,6 +7,14 @@
 Release Notes
 *************
 
+.. release:: upcoming
+
+    .. change:: new
+
+        Plugin archive will be named for the platform (osx, linux, or windows),
+        on which it is built.
+
+
 .. release:: 0.1.0
     :date: 2019-05-21
 

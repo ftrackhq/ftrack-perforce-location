@@ -17,11 +17,11 @@ Perforce
 --------
 * Ensure that a Perforce server is available and reachable.
 * Ensure that a user is registered to the Perforce server.
-* Ensure that the user has created a workspace on their machine.
 
 ftrack
 ------
-* Revert to the default centralized storage scenario.
+* Configure the Perforce Storage Scenario with your Perforce server protocol,
+address and port.
 
 Building the plugin
 ===================
@@ -33,15 +33,9 @@ Building the plugin
 TODO
 ====
 * Import file published
-* Configure Perforce user ui
 
 Known issues
 ============
-* User must login to Perforce themselves, either on command line as below, or
-  with another client.::
-
-    $ p4 login
-
 * In case of :: [Warning]: '<FILEPATH> - file(s) not in client view.'#
 
 .. code::bash
@@ -62,15 +56,10 @@ Configuration
 
 Perforce configuration is locally stored in perforce_config.json, inside the
 ftrack-connect settings directory. The fist time this plugin is run, the
-settings file will be created and an error raised if the config is empty.
+settings file will be created, and the following attributes will be read from
+Perforce if available. They may need to be set manually if no environment
+variables or Perforce config files are setup.
 
-Please manually edit the file to include:
-
-* **host** , the hostname to identify as.
-* **port** , server address (e.g. ssl:1666). Format: [protocol:][address:]port
 * **user** , your Perforce user.
-* **password** , your Perforce password.
 * **using_workspace** , the Perforce workspace to be used.
 * **workspace_root** , the root of the workspace.
-
-

@@ -4,6 +4,7 @@
 import os
 import re
 import shutil
+import sys
 from pip._internal import main as pip_main  # pip >= 10
 
 from setuptools import setup, find_packages, Command
@@ -16,7 +17,13 @@ README_PATH = os.path.join(ROOT_PATH, 'README.rst')
 RESOURCE_PATH = os.path.join(ROOT_PATH, 'resource')
 HOOK_PATH = os.path.join(RESOURCE_PATH, 'hook')
 
-
+# For naming the archive
+if sys.platform == 'darwin':
+    PLATFORM = 'osx'
+elif sys.platform.startswith('linux'):
+    PLATFORM = 'linux'
+elif sys.platform == 'win32':
+    PLATFORM = 'windows'
 
 # Read version from source.
 with open(os.path.join(
@@ -69,7 +76,7 @@ class BuildPlugin(Command):
         result_path = shutil.make_archive(
             os.path.join(
                 BUILD_PATH,
-                'ftrack-perforce-location-{0}'.format(VERSION)
+                'ftrack-perforce-location-{0}-{1}'.format(VERSION, PLATFORM)
             ),
             'zip',
             STAGING_PATH
