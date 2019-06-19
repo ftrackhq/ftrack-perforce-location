@@ -181,21 +181,6 @@ class PerforceAttributeAction(BaseAction):
         self.connection.save_client(workspace)
 
     def _user_is_admin(self, username, project_id):
-        # check ftrack admin role
-        appropriate_admin_role = self.session.query(
-            'UserSecurityRole where user.username is "{0}"'
-            ' and security_role.name is "Administrator"'
-            ' and (is_all_projects is True'
-            ' or projects any (id is "{1}"))'.format(
-                username, project_id)).first()
-
         # check perforce super role
         perforce_super_role = any(protect for protect in self.connection.run_protects() if protect['perm'] == 'super')
-
-        role_status = appropriate_admin_role is not None and perforce_super_role is True
-        self.logger.debug(
-            'User {} is ftrack admin: {} is perforce super : {}'.format(
-                username, bool(appropriate_admin_role), perforce_super_role
-            )
-        )
-        return role_status
+        return perforce_super_role
