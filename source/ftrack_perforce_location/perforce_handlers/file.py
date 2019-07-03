@@ -73,9 +73,9 @@ class PerforceFileHandler(object):
         )
         self._ensure_folder(self.root)
 
-    def file_to_depot(self, filepath):
+    def file_to_depot(self, filepath, perforce_filemode='binary'):
         '''Publish **filepath** to server.'''
-        self.logger.debug('moving file {} to depot'.format(filepath))
+        self.logger.debug('moving file {} to depot with mode {}'.format(filepath, perforce_filemode))
         if not filepath.startswith(self.root):
             raise IOError('File is not in {}'.format(self.root))
         stats = []
@@ -92,7 +92,7 @@ class PerforceFileHandler(object):
             client._root = str(self.root)
             try:
                 self.connection.save_client(client)
-                self.connection.run_add(filepath)
+                self.connection.run_add('-t', perforce_filemode, filepath)
             except Exception as error:
                 self.logger.exception(error)
 

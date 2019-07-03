@@ -1,6 +1,7 @@
 # :coding: utf-8
 # :copyright: Copyright (c) 2018 ftrack
 
+import os
 import logging
 
 import ftrack_api.accessor.disk
@@ -36,10 +37,13 @@ class PerforceAccessor(ftrack_api.accessor.disk.DiskAccessor):
             This will add, create, edit, and fetch the file as needed.
         '''
 
+        _. ext = os.path.splitext(resource_identifier)
+        perforce_filemode = self._typemap.get(ext.lower(), 'binary')
+
         self.logger.debug('opening : {}'.format(resource_identifier))
         filesystem_path = self.get_filesystem_path(resource_identifier)
         filesystem_path = seq_to_glob(filesystem_path)
-        self.perforce_file_handler.file_to_depot(filesystem_path)
+        self.perforce_file_handler.file_to_depot(filesystem_path, perforce_filemode)
         return super(PerforceAccessor, self).open(
             resource_identifier, mode=mode)
 
