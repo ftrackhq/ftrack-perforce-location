@@ -353,6 +353,11 @@ class ActivatePerforceStorageScenario(object):
             identifying_keys=['name']
         )
 
+        typemap = self.session.event_hub.publish(
+            ftrack_api.event.base.Event(topic="ftrack.perforce.typemap.register"),
+            synchronous=True,
+        )
+
         self.logger.debug('Creating Location {}.'.format(location))
 
         perforce_connection_handler = self._connect_to_perforce(event)
@@ -366,7 +371,8 @@ class ActivatePerforceStorageScenario(object):
         )
 
         location.accessor = accessor.PerforceAccessor(
-            perforce_file_handler=perforce_file_handler
+            perforce_file_handler=perforce_file_handler,
+            typemap=typemap
         )
         location.structure = structure.PerforceStructure(
             perforce_file_handler=perforce_file_handler,

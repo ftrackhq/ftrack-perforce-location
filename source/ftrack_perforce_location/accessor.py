@@ -12,16 +12,19 @@ class PerforceAccessor(ftrack_api.accessor.disk.DiskAccessor):
     '''Extends the DiskAccessor to ensure target file is writable and/or the
     correct version.
     '''
-    def __init__(self, perforce_file_handler, **kw):
+
+    def __init__(self, perforce_file_handler, typemap, **kw):
         '''Store root directory and file handling help.
 
         *perforce_file_handler*. is an instance of
         ftrack_perforce_location.perforce_handlers.file.PerforceFileHandler.
         '''
+        self._typemap = typemap
         self.perforce_file_handler = perforce_file_handler
         self.logger = logging.getLogger(
             __name__ + '.' + self.__class__.__name__
         )
+        self.logger.info('typemap: {}'.format(typemap))
         self.prefix = perforce_file_handler.root
 
     def open(self, resource_identifier, mode='rb'):
