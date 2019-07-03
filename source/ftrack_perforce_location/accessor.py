@@ -37,7 +37,7 @@ class PerforceAccessor(ftrack_api.accessor.disk.DiskAccessor):
             This will add, create, edit, and fetch the file as needed.
         '''
 
-        _. ext = os.path.splitext(resource_identifier)
+        _, ext = os.path.splitext(resource_identifier)
         perforce_filemode = self._typemap.get(ext.lower(), 'binary')
 
         self.logger.debug('opening : {}'.format(resource_identifier))
