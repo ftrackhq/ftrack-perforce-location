@@ -1,7 +1,7 @@
 import ftrack_api
 
 BINARY = 'binary'
-BINARYF = 'binary+Fl'
+BINARYFL = 'binary+Fl'
 BINARYW = 'binary+w'
 BINARYL = 'binary+l'
 BINARYLS = 'binary+lS'
@@ -9,6 +9,14 @@ BINARYLS = 'binary+lS'
 TEXT = 'text'
 TEXTL = 'text+l'
 
+
+def register_images_typemap(event):
+    return {
+        '.bmp': BINARY,
+        '.tga': BINARYL,
+        '.jpg': BINARYL
+
+    }
 
 def register_autodesk_typemap(event):
 
@@ -25,9 +33,9 @@ def register_autodesk_typemap(event):
 def register_adobe_typemap(event):
 
     return {
-        '.psd': BINARYF,
-        '.ai': BINARYF,
-        '.aep': BINARYF
+        '.psd': BINARYFL,
+        '.ai': BINARYFL,
+        '.aep': BINARYFL
     }
 
 
@@ -41,7 +49,6 @@ def register_unreal_typemap(event):
         '.dylib': BINARYW,
         '.stub': BINARYW,
         '.ipa': BINARYW,
-        '.bmp': BINARY,
         '.ini': TEXT,
         '.config': TEXT,
         '.cpp': TEXT,
@@ -67,7 +74,22 @@ def register_unity_typemap(event):
         '.cm': TEXTL,
         '.proc': TEXTL,
         '.md5mesh': TEXTL,
-        '.md5anim': TEXTL
+        '.md5anim': TEXTL,
+        '.dll': BINARY,
+        '.exe': BINARY,
+        '.response': BINARY,
+        '.lib': BINARY,
+        '.u': BINARY,
+        '.ini': BINARY,
+        '.stub': BINARY,
+        '.ip': BINARY,
+        '.prefab': BINARYL,
+        '.mat': BINARYL,
+        '.psb': BINARYL,
+        '.mp3': BINARYL,
+        '.unity': BINARYL,
+        '.asset': BINARYL,
+        '.aas': BINARYL,
     }
 
 
@@ -81,6 +103,12 @@ def register(api_object, **kw):
     if not isinstance(api_object, ftrack_api.Session):
         # Exit to avoid registering this plugin again.
         return
+
+    # IMAGES
+    api_object.event_hub.subscribe(
+        'topic=ftrack.perforce.typemap.register',
+        register_images_typemap
+    )
 
     # AUTODESK
     api_object.event_hub.subscribe(
