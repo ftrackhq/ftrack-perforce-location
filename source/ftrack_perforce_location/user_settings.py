@@ -242,6 +242,4 @@ if __name__ == '__main__':
     perforce_settings = PerforceSettingsHandler()
     app = QtGui.QApplication(sys.argv)
     window = ConfigureUserSettingsWidget(perforce_settings)
-    window.exec_()
-    # TODO exit after closing verification warning.
-    sys.exit(app.exec_())
+    sys.exit(window.exec_())

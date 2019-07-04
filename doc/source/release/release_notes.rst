@@ -9,6 +9,10 @@ Release Notes
 
 .. release:: upcoming
 
+    .. change:: fix
+
+        User settings widget leave zombie processes at application exit.
+
     .. change:: new
 
         Plugin archive will be named for the platform (osx, linux, or windows),
