@@ -1,11 +1,13 @@
 import ftrack_api
 
+# Binary formats
 BINARY = 'binary'
 BINARYFL = 'binary+Fl'
 BINARYW = 'binary+w'
 BINARYL = 'binary+l'
 BINARYLS = 'binary+lS'
 
+# Ascii formats
 TEXT = 'text'
 TEXTL = 'text+l'
 
@@ -13,20 +15,19 @@ TEXTL = 'text+l'
 def register_images_typemap(event):
     return {
         '.bmp': BINARY,
-        '.tga': BINARYL,
-        '.jpg': BINARYL
-
+        '.jpg': BINARYL,
+        '.tga': BINARYL
     }
 
 def register_autodesk_typemap(event):
 
     return {
-        '.mb': BINARYL,
-        '.ma': TEXTL,
-        '.pdb': BINARY,
         '.abc': BINARYL,
         '.fbx': BINARYL,
-        '.max': BINARYL
+        '.mb': BINARYL,
+        '.ma': TEXTL,
+        '.max': BINARYL,
+        '.pdb': BINARY,
     }
 
 
@@ -42,22 +43,22 @@ def register_adobe_typemap(event):
 def register_unreal_typemap(event):
     # https://docs.unrealengine.com/en-US/Engine/Basics/SourceControl/Perforce/index.html
     return {
-        '.exe': BINARYW,
-        '.dll': BINARYW,
-        '.lib': BINARYW,
         '.app': BINARYW,
-        '.dylib': BINARYW,
-        '.stub': BINARYW,
-        '.ipa': BINARYW,
-        '.ini': TEXT,
+        '.c': TEXT,
         '.config': TEXT,
         '.cpp': TEXT,
-        '.h': TEXT,
-        '.c': TEXT,
         '.cs': TEXT,
+        '.dll': BINARYW,
+        '.dylib': BINARYW,
+        '.exe': BINARYW,
+        '.ipa': BINARYW,
+        '.ini': TEXT,
+        '.lib': BINARYW,
+        '.h': TEXT,
         '.m': TEXT,
         '.mm': TEXT,
         '.py': TEXT,
+        '.stub': BINARYW,
         '.uasset': BINARYL,
         '.umap': BINARYL,
         '.upk': BINARYL,
@@ -67,29 +68,29 @@ def register_unreal_typemap(event):
 def register_unity_typemap(event):
     # https://community.perforce.com/s/article/15244
     return {
-        '.js': TEXT,
-        '.cs': TEXT,
-        '.shader': TEXT,
-        '.meta': TEXT,
-        '.cm': TEXTL,
-        '.proc': TEXTL,
-        '.md5mesh': TEXTL,
-        '.md5anim': TEXTL,
-        '.dll': BINARY,
-        '.exe': BINARY,
-        '.response': BINARY,
-        '.lib': BINARY,
-        '.u': BINARY,
-        '.ini': BINARY,
-        '.stub': BINARY,
-        '.ip': BINARY,
-        '.prefab': BINARYL,
-        '.mat': BINARYL,
-        '.psb': BINARYL,
-        '.mp3': BINARYL,
-        '.unity': BINARYL,
         '.asset': BINARYL,
         '.aas': BINARYL,
+        '.cm': TEXTL,
+        '.cs': TEXT,
+        '.dll': BINARY,
+        '.exe': BINARY,
+        '.ini': BINARY,
+        '.ip': BINARY,
+        '.js': TEXT,
+        '.lib': BINARY,
+        '.mat': BINARYL,
+        '.md5anim': TEXTL,
+        '.md5mesh': TEXTL,
+        '.meta': TEXT,
+        '.mp3': BINARYL,
+        '.prefab': BINARYL,
+        '.proc': TEXTL,
+        '.psb': BINARYL,
+        '.response': BINARY,
+        '.shader': TEXT,
+        '.stub': BINARY,
+        '.u': BINARY,
+        '.unity': BINARYL,
     }
 
 
