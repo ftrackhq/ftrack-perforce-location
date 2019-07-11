@@ -9,6 +9,10 @@ Release Notes
 
 .. release:: upcoming
 
+    .. change:: add
+
+        Provide default file encode mapping based on the file extension.
+
     .. change:: new
 
         Plugin archive will be named for the platform (osx, linux, or windows),
