@@ -240,6 +240,9 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
 
 if __name__ == '__main__':
     perforce_settings = PerforceSettingsHandler()
-    app = QtGui.QApplication(sys.argv)
+    app = QtGui.QApplication.instance()
+    if not app:
+        app = QtGui.QApplication(sys.argv)
     window = ConfigureUserSettingsWidget(perforce_settings)
-    sys.exit(window.exec_())
+    window.show()
+    sys.exit(app.exec_())
