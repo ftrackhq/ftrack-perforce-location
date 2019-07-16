@@ -16,6 +16,7 @@ SOURCE_PATH = os.path.join(ROOT_PATH, 'source')
 README_PATH = os.path.join(ROOT_PATH, 'README.rst')
 RESOURCE_PATH = os.path.join(ROOT_PATH, 'resource')
 HOOK_PATH = os.path.join(RESOURCE_PATH, 'hook')
+MODULES_PATH = os.path.join(RESOURCE_PATH, 'modules')
 
 # For naming the archive
 if sys.platform == 'darwin':
@@ -61,6 +62,12 @@ class BuildPlugin(Command):
         shutil.copytree(
             HOOK_PATH,
             os.path.join(STAGING_PATH, 'hook')
+        )
+
+        # Copy modules
+        shutil.copytree(
+            MODULES_PATH,
+            os.path.join(STAGING_PATH, 'modules')
         )
 
         pip_main(
