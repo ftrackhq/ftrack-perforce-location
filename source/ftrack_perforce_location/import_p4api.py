@@ -3,24 +3,20 @@ import sys
 
 
 def import_p4():
-    print 'TRYING TO IMPORT P4'
     cwd = os.path.dirname(__file__)
     p4_modules = os.path.abspath(os.path.join(cwd, '..', '..', 'modules'))
-    print 'LOOKING IN PATH:', p4_modules
     modules = os.listdir(p4_modules)
     for module in modules:
-        if module not in sys.path:
-            print "ADDING", module, 'TO PATH'
-            sys.path.append(module)
-
+        full_path = os.path.join(p4_modules, module)
+        if full_path not in sys.path:
+            sys.path.append(full_path)
         try:
             # attempt to import P4
-            print 'TRYING TO IMPORT....'
             from P4 import P4
-        except:
+        except Exception as error:
             # failed to load so lets remove it from the path!
-            print "FAILED TO IMPORT", module, "CLEANING UP PATH..."
-            if sys.path[-1] == module:
+            if sys.path[-1] == full_path:
                 del sys.path[-1]
         else:
+            print 'SUCCESSFULLY LOADED', full_path
             break
