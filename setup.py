@@ -112,7 +112,6 @@ setup(
     ],
     install_requires=[
         'appdirs == 1.4.0',
-        'p4python == 2018.2.1743033',
         'ftrack-action-handler'
     ],
     tests_require=[
