@@ -12,7 +12,7 @@ def import_p4():
             sys.path.append(full_path)
         try:
             # attempt to import P4
-            from P4 import P4
+            from P4 import P4 as _P4test, P4Exception as _P4ExceptionTest
         except Exception as error:
             # failed to load so lets remove it from the path!
             if sys.path[-1] == full_path:
