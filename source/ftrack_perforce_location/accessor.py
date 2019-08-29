@@ -1,6 +1,7 @@
 # :coding: utf-8
 # :copyright: Copyright (c) 2018 ftrack
 
+import os
 import logging
 
 import ftrack_api.accessor.disk
@@ -12,12 +13,14 @@ class PerforceAccessor(ftrack_api.accessor.disk.DiskAccessor):
     '''Extends the DiskAccessor to ensure target file is writable and/or the
     correct version.
     '''
-    def __init__(self, perforce_file_handler, **kw):
+
+    def __init__(self, perforce_file_handler, typemap, **kw):
         '''Store root directory and file handling help.
 
         *perforce_file_handler*. is an instance of
         ftrack_perforce_location.perforce_handlers.file.PerforceFileHandler.
         '''
+        self._typemap = typemap
         self.perforce_file_handler = perforce_file_handler
         self.logger = logging.getLogger(
             __name__ + '.' + self.__class__.__name__
@@ -33,10 +36,13 @@ class PerforceAccessor(ftrack_api.accessor.disk.DiskAccessor):
             This will add, create, edit, and fetch the file as needed.
         '''
 
+        _, ext = os.path.splitext(resource_identifier)
+        perforce_filemode = self._typemap.get(ext.lower(), 'binary')  # If is unknown let's piggy back on binary format.
+
         self.logger.debug('opening : {}'.format(resource_identifier))
         filesystem_path = self.get_filesystem_path(resource_identifier)
         filesystem_path = seq_to_glob(filesystem_path)
-        self.perforce_file_handler.file_to_depot(filesystem_path)
+        self.perforce_file_handler.file_to_depot(filesystem_path, perforce_filemode)
         return super(PerforceAccessor, self).open(
             resource_identifier, mode=mode)
 

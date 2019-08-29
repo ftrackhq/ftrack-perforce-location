@@ -13,6 +13,10 @@ Release Notes
 
         User settings widget leave zombie processes at application exit.
 
+    .. change:: add
+
+        Provide default file encode mapping based on the file extension.
+
     .. change:: new
 
         Plugin archive will be named for the platform (osx, linux, or windows),
