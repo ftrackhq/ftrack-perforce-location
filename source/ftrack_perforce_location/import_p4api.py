@@ -1,6 +1,8 @@
 import os
 import sys
+import logging
 
+logger = logging.getLogger(__name__)
 
 def import_p4():
     cwd = os.path.dirname(__file__)
@@ -18,5 +20,5 @@ def import_p4():
             if sys.path[-1] == full_path:
                 del sys.path[-1]
         else:
-            print 'SUCCESSFULLY LOADED', full_path
+            logger.warning('SUCCESSFULLY LOADED {}'.format(full_path))
             break
