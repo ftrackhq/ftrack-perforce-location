@@ -18,14 +18,6 @@ RESOURCE_PATH = os.path.join(ROOT_PATH, 'resource')
 HOOK_PATH = os.path.join(RESOURCE_PATH, 'hook')
 MODULES_PATH = os.path.join(RESOURCE_PATH, 'modules')
 
-# For naming the archive
-if sys.platform == 'darwin':
-    PLATFORM = 'osx'
-elif sys.platform.startswith('linux'):
-    PLATFORM = 'linux'
-elif sys.platform == 'win32':
-    PLATFORM = 'windows'
-
 # Read version from source.
 with open(os.path.join(
     SOURCE_PATH, 'ftrack_perforce_location', '_version.py'
@@ -83,7 +75,7 @@ class BuildPlugin(Command):
         result_path = shutil.make_archive(
             os.path.join(
                 BUILD_PATH,
-                'ftrack-perforce-location-{0}-{1}'.format(VERSION, PLATFORM)
+                'ftrack-perforce-location-{0}'.format(VERSION)
             ),
             'zip',
             STAGING_PATH
