@@ -11,6 +11,9 @@ from ftrack_perforce_location.perforce_handlers.errors import (
     PerforceFileHandlerException
 )
 
+logger = logging.getLogger(
+            __name__
+)
 
 seq_match = re.compile('(%+\d+d)|(#+)|(%d)')
 
@@ -21,9 +24,12 @@ def seq_to_glob(filepath):
     and replace it with wildcard *.
     '''
     found = seq_match.search(filepath)
+    logger.debug('parsing {} for file sequence'.format(filepath))
+
     if found:
         match = found.group()
         filepath = filepath.replace(match, '*')
+        logger.debug('transforming path to {}'.format(filepath))
 
     return filepath
 
