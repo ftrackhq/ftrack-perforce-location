@@ -7,7 +7,7 @@ from __future__ import print_function
     This uses the Python type P4API.P4Adapter, which is a wrapper for the
     Perforce ClientApi object.
     
-    $Id: //depot/r15.1/p4-python/P4.py#1 $
+    $Id: //depot/r18.2/p4-python/P4.py#1 $
     
     #*******************************************************************************
     # Copyright (c) 2007-2010, Perforce Software, Inc.  All rights reserved.
@@ -318,7 +318,7 @@ class Progress:
         pass
 
 class TextProgress(Progress):
-    TYPES = [ "Unknown", "Submit", "Sync" ]
+    TYPES = [ "Unknown", "Submit", "Sync", "Clone" ]
     UNITS = [ "Unknown", "Percent", "Files", "KBytes", "MBytes" ]
     
     def __init__(self):
@@ -565,7 +565,17 @@ class P4(P4API.P4Adapter):
     def identify(cls):
         return P4API.identify()
     identify = classmethod(identify)
+
+    def log_messages(self):
+        for message in self.messages:
+            if message.severity == 3:
+                self.logger.error(message)
+            elif message.severity == 2:
+                self.logger.warning(message)
+            elif message.severity == 1:
+                self.logger.info(message)
     
+        
     def run(self, *args, **kargs):
         "Generic run method"
         context = {}
@@ -580,10 +590,28 @@ class P4(P4API.P4Adapter):
             setattr(self, k, v)
                 
         flatArgs = self.__flatten(args)
+        
+        # if encoding is set, translate to Bytes
+        if hasattr(self,"encoding") and self.encoding and not self.encoding == 'raw':
+            result = []
+            for s in flatArgs:
+                result.append( s.encode(self.encoding) )
+            flatArgs = result
+        
         if self.logger:
             self.logger.info("p4 " + " ".join(flatArgs))
         
-        result = P4API.P4Adapter.run(self, *flatArgs)
+        try:
+            result = P4API.P4Adapter.run(self, *flatArgs)
+        except P4Exception as e:
+            if self.logger:
+                self.log_messages()
+            for (k,v) in list(context.items()):
+                setattr( self, k, v)
+            raise e
+        
+        if self.logger:
+            self.log_messages()
         
         if resultLogging and self.logger:
             self.logger.debug(result)
@@ -625,12 +653,18 @@ class P4(P4API.P4Adapter):
         nargs = ['-d'] + nargs
         return self.run("shelve", *nargs, **kargs)
     
-    def run_login(self, *args):
+    def run_login(self, *args, **kargs):
         "Simple interface to make login easier"
-        self.input = self.password
-        return self.run("login", *args)
+        
+        if "password" in kargs:
+            password = kargs["password"]
+            self.input = password
+            del kargs["password"]
+        else:
+            self.input = self.password
+        return self.run("login", *args, **kargs)
     
-    def run_password( self, oldpass, newpass ):
+    def run_password( self, oldpass, newpass, *args, **kargs ):
         "Simple interface to allow setting of the password"
         if( oldpass and len(oldpass) > 0 ):
             self.input = [ oldpass, newpass, newpass ]
@@ -638,7 +672,7 @@ class P4(P4API.P4Adapter):
             self.input = [ newpass, newpass ]
         
         try:
-            return self.run( "password" )
+            return self.run( "password" , *args, **kargs)
         except P4Exception as e:
             if self.errors and self.errors[0] == "Passwords don't match.":
                 raise P4Exception("Password invalid.")
@@ -774,22 +808,28 @@ class P4(P4API.P4Adapter):
     def while_tagged( self, t ):
         old = self.tagged
         self.tagged = t
-        yield
-        self.tagged = old
+        try:
+            yield
+        finally:
+            self.tagged = old
     
     @contextmanager
     def at_exception_level( self, e ):
         old = self.exception_level
         self.exception_level = e
-        yield
-        self.exception_level = old
+        try:
+            yield
+        finally:
+            self.exception_level = old
     
     @contextmanager
     def using_handler( self, c ):
         old = self.handler
         self.handler = c
-        yield
-        self.handler = old
+        try:
+            yield
+        finally:
+            self.handler = old
     
     @contextmanager
     def saved_context( self , **kargs):
@@ -802,17 +842,18 @@ class P4(P4API.P4Adapter):
         for (k,v) in list(kargs.items()):
             setattr( self, k, v)
         
-        yield
-        
-        # now restore the context again. Ignore AttributeError exception
-        # Exception is expected because some attributes only have getters, no setters
-        
-        for (k,v) in list(saved_context.items()):
-            if k not in ("port", "track"):
-                try:
-                    setattr( self, k, v )
-                except AttributeError:
-                    pass # expected for server_level and p4config_file
+        try:
+            yield
+        finally:
+            # now restore the context again. Ignore AttributeError exception
+            # Exception is expected because some attributes only have getters, no setters
+            
+            for (k,v) in list(saved_context.items()):
+                if k not in ("port", "track"):
+                    try:
+                        setattr( self, k, v )
+                    except AttributeError:
+                        pass # expected for server_level and p4config_file
 
     @contextmanager
     def temp_client( self, prefix, template ):
@@ -834,9 +875,14 @@ class P4(P4API.P4Adapter):
             oldName = self.client
             self.client = name
             
+            oldCwd = self.cwd
+            self.cwd = root
+            
             yield ws
 
+            self.cwd = oldCwd
             self.client = oldName
+            
         finally:
             self.delete_client(name)
             shutil.rmtree(root)
@@ -896,11 +942,35 @@ class Map(P4API.P4Map):
             P4API.P4Map.insert(self, left, right )
 
 
-def init(*args, **kargs):
-    return __run_dvcs("init", args, **kargs)
+def init(*args, **kargs):  
+    keywords = ("user", "client", "directory", "port", "casesensitive", "unicode")
+    
+    new_kargs = dict((x,kargs[x]) for x in kargs if x in keywords)
+
+    result = P4API.dvcs_init(*args, **new_kargs)
+    
+    return __dvcs_post_process(result, *args, **kargs)
 
 def clone(*args, **kargs):
-    return __run_dvcs("clone", args, **kargs)
+    keywords = ("user", "client", "directory", "depth", "verbose", "port", "remote", "file", "noarchive", "progress")
+
+    new_kargs = dict((x,kargs[x]) for x in kargs if x in keywords)
+    
+    result = P4API.dvcs_clone(*args, **new_kargs)
+
+    return __dvcs_post_process(result, *args, **kargs)
+
+def __dvcs_post_process(result, *args, **kargs):
+    
+    excluded = ("directory", "unicode", "casesensitive", "depth", "verbose", "port", "remote", "file", "noarchive", "progress" )
+    
+    new_kargs = dict((x,kargs[x]) for x in kargs if x not in excluded)
+    new_kargs["cwd"] = os.getcwd() # this is a hack for now, the dvcs commands do not set the environment variable CWD
+    
+    p4 = P4(**new_kargs)
+    p4.messages.extend(result)
+    
+    return p4
 
 def __run_dvcs(cmd, *args, **kargs):
     __check_paths()
@@ -969,7 +1039,7 @@ def __run_dvcs(cmd, *args, **kargs):
         
     # create a copy of kargs without the "directory" key - make it compatible with Python 2.6
     # new_kargs = { x:kargs[x] for x in kargs if x != "directory" }
-    new_kargs = dict((x,kargs[x]) for x in kargs if x != "directory" )
+    new_kargs = dict((x,kargs[x]) for x in kargs if x not in ("directory", "unicode", "casesensitive" ))
     
     return P4(**new_kargs)
     
