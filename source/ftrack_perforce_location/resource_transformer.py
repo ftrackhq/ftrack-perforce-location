@@ -40,6 +40,8 @@ class PerforceResourceIdentifierTransformer(
         fullpath = os.path.join(root, resource_identifier)
         fullpath = seq_to_glob(fullpath)
         stats = self.connection.run_fstat(fullpath)
+        self.logger.debug('stats: {}'.format(stats))
+
         # format result path as: //depot/,,,,#<revision>
         encoded_path = '{0}#{1}'.format(
             stats[0].get('depotFile'),
@@ -67,7 +69,6 @@ class PerforceResourceIdentifierTransformer(
         try:
             self.connection.run_sync(resource_identifier)
         except P4Exception as error:
-            self.logger.debug(error)
             pass
 
         stats = self.connection.run_fstat(depot_pat)
