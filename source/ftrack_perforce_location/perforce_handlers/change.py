@@ -2,7 +2,7 @@
 # :copyright: Copyright (c) 2018 ftrack
 
 import logging
-
+import glob
 from P4 import P4Exception
 
 from ftrack_perforce_location.perforce_handlers.errors import (
@@ -51,12 +51,22 @@ class PerforceChangeHandler(object):
 
     def add(self, change, filepath):
         '''Add **filepath** to *change*.'''
+        files = []
 
-        self.logger.debug(
-            'adding file {0} to change: {1}'.format(filepath, change)
-        )
+        if '*' in filepath:
+            files = glob.glob(filepath)
+
+        if not files:
+            files = [filepath]
+
+        self.logger.info('adding files : {}'.format(files))
+
         try:
-            self.connection.run_reopen('-c', str(change), filepath)
+            for file in files:
+                self.logger.debug(
+                    'adding file {0} to change: {1}'.format(file, change)
+                )
+                self.connection.run_reopen('-c', str(change), file)
         except P4Exception as error:
             raise PerforceChangeHanderException(error)
 
@@ -65,7 +75,7 @@ class PerforceChangeHandler(object):
 
         change = self.create(description)
         self.logger.debug(
-            'submitting change : {0} for path {1}, is_sequence: {2}'.format(change, filepath, is_sequence)
+            'submitting change : {0} for path {1}'.format(change, filepath)
         )
         self.add(change, filepath)
 
