@@ -34,7 +34,7 @@ def register_autodesk_typemap(event):
 def register_adobe_typemap(event):
 
     return {
-        '.prproj', BINARYFL,
+        '.prproj': BINARYFL,
         '.psd': BINARYFL,
         '.ai': BINARYFL,
         '.aep': BINARYFL
