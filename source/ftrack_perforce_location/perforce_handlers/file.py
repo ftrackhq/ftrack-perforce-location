@@ -89,8 +89,10 @@ class PerforceFileHandler(object):
             raise IOError('File is not in {}'.format(self.root))
         stats = []
 
+        glob_filepath, is_sequence = seq_to_glob(filepath)
+
         try:
-            stats = self.connection.run_fstat(filepath)
+            stats = self.connection.run_fstat(glob_filepath)
         except P4Exception as error:
             pass
 
@@ -101,7 +103,7 @@ class PerforceFileHandler(object):
             client._root = str(self.root)
             try:
                 self.connection.save_client(client)
-                self.connection.run_add('-t', perforce_filemode, '-f', filepath)
+                self.connection.run_add('-t', perforce_filemode, '-f', glob_filepath)
             except Exception as error:
                 self.logger.exception(error)
 
@@ -112,4 +114,4 @@ class PerforceFileHandler(object):
                 if not os.path.exists(basedir):
                     os.makedirs(basedir)
                 open(filepath, 'a').close()
-            self.connection.run_edit(filepath)
+            self.connection.run_edit('-t', perforce_filemode, glob_filepath)

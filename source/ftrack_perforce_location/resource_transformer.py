@@ -39,7 +39,7 @@ class PerforceResourceIdentifierTransformer(
         root = self._perforce_file_handler.root
         fullpath = os.path.join(root, resource_identifier)
         seq_fullpath , is_sequence = seq_to_glob(fullpath)
-        stats = self.connection.run_fstat(fullpath)
+        stats = self.connection.run_fstat(seq_fullpath)
         self.logger.debug('stats: {} for path: {} , is sequence : {}'.format(stats, fullpath, is_sequence))
 
         # format result path as: //depot/,,,,#<revision>
@@ -71,7 +71,7 @@ class PerforceResourceIdentifierTransformer(
         except P4Exception as error:
             pass
 
-        stats = self.connection.run_fstat(depot_pat)
+        stats = self.connection.run_fstat(seq_depot_pat)
         decoded_path = stats[0].get('clientFile')
         self.logger.debug('decode {0} as {1}'.format(
             resource_identifier, decoded_path)

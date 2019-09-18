@@ -63,7 +63,6 @@ class PerforceChangeHandler(object):
     def submit(self, filepath, description):
         '''Submit **filepath** with **description** to server.'''
 
-        filepath, is_sequence = seq_to_glob(filepath)
         change = self.create(description)
         self.logger.debug(
             'submitting change : {0} for path {1}, is_sequence: {2}'.format(change, filepath, is_sequence)
