@@ -38,9 +38,9 @@ class PerforceResourceIdentifierTransformer(
 
         root = self._perforce_file_handler.root
         fullpath = os.path.join(root, resource_identifier)
-        fullpath = seq_to_glob(fullpath)
+        fullpath , is_sequence = seq_to_glob(fullpath)
         stats = self.connection.run_fstat(fullpath)
-        self.logger.debug('stats: {}'.format(stats))
+        self.logger.debug('stats: {} for path: {} , is sequence : {}'.format(stats, fullpath, is_sequence))
 
         # format result path as: //depot/,,,,#<revision>
         encoded_path = '{0}#{1}'.format(
@@ -62,9 +62,9 @@ class PerforceResourceIdentifierTransformer(
 
         '''
         depot_pat, version = resource_identifier.split('#')
-        depot_pat = seq_to_glob(depot_pat)
+        depot_pat, is_sequence = seq_to_glob(depot_pat)
 
-        self.logger.info('Sync {}'.format(resource_identifier))
+        self.logger.info('Sync {} , is_sequence: {}'.format(resource_identifier, is_sequence))
 
         try:
             self.connection.run_sync(resource_identifier)

@@ -55,19 +55,26 @@ class PerforceChangeHandler(object):
         self.logger.debug(
             'adding file {0} to change: {1}'.format(filepath, change)
         )
+        filepath, is_sequence = seq_to_glob(filepath)
 
-        try:
-            self.connection.run_reopen('-c', str(change), filepath)
-        except P4Exception as error:
-            raise PerforceChangeHanderException(error)
+        if not is_sequence:
+            try:
+                self.connection.run_reopen('-c', str(change), filepath)
+            except P4Exception as error:
+                raise PerforceChangeHanderException(error)
+        else:
+            try:
+                self.connection.run_reopen('-c', str(change), '-f', filepath)
+            except P4Exception as error:
+                raise PerforceChangeHanderException(error)
 
     def submit(self, filepath, description):
         '''Submit **filepath** with **description** to server.'''
 
-        filepath = seq_to_glob(filepath)
+        filepath, is_sequence = seq_to_glob(filepath)
         change = self.create(description)
         self.logger.debug(
-            'submitting change : {0} for path {1}'.format(change, filepath)
+            'submitting change : {0} for path {1}, is_sequence: {2}'.format(change, filepath, is_sequence)
         )
         self.add(change, filepath)
 

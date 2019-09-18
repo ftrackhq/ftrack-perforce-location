@@ -15,14 +15,15 @@ logger = logging.getLogger(
             __name__
 )
 
-seq_match = re.compile('(%+\d+d)|(#+)|(%d)')
-
 
 def seq_to_glob(filepath):
     '''
     Search for file sequence signatures in **filepath**
     and replace it with wildcard *.
     '''
+    seq_match = re.compile('(%+\d+d)|(#+)|(%d)|(\d+)')
+
+    is_seq = False
     found = seq_match.search(filepath)
     logger.debug('parsing {} for file sequence'.format(filepath))
 
@@ -30,8 +31,9 @@ def seq_to_glob(filepath):
         match = found.group()
         filepath = filepath.replace(match, '*')
         logger.debug('transforming path to {}'.format(filepath))
+        is_seq = True
 
-    return filepath
+    return filepath, is_seq
 
 
 class PerforceFileHandler(object):
