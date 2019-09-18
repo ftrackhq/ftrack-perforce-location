@@ -21,7 +21,8 @@ def seq_to_glob(filepath):
     Search for file sequence signatures in **filepath**
     and replace it with wildcard *.
     '''
-    seq_match = re.compile('\.((%+\d+d)|(#+)|(%d)|(\d+))\.')
+    # https://www.regular-expressions.info/lookaround.html
+    seq_match = re.compile('(?<=\.)((%+\d+d)|(#+)|(%d)|(\d+))(?=\.)')
 
     is_seq = False
     found = seq_match.search(filepath)
@@ -95,17 +96,12 @@ class PerforceFileHandler(object):
 
         # no stats file has to be added to the depot
         if not stats:
-            glob_path, is_sequence = seq_to_glob(filepath)
             client = self.connection.fetch_client('-t', self.connection.client)
             # As of ftrack_api 1.7, filename must be a string
             client._root = str(self.root)
             try:
                 self.connection.save_client(client)
-                if not is_sequence:
-                    self.connection.run_add('-t', perforce_filemode, filepath)
-                else:
-                    self.connection.run_add('-t', perforce_filemode, '-f', glob_path)
-
+                self.connection.run_add('-t', perforce_filemode, '-f', filepath)
             except Exception as error:
                 self.logger.exception(error)
 

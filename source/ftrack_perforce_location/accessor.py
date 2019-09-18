@@ -40,8 +40,6 @@ class PerforceAccessor(ftrack_api.accessor.disk.DiskAccessor):
         perforce_filemode = self._typemap.get(ext.lower(), 'binary')  # If is unknown let's piggy back on binary format.
 
         filesystem_path = self.get_filesystem_path(resource_identifier)
-        filesystem_path, is_sequence = seq_to_glob(filesystem_path)
-        self.logger.debug('opening : {} , is sequence: {}'.format(resource_identifier, is_sequence))
         self.perforce_file_handler.file_to_depot(filesystem_path, perforce_filemode)
         return super(PerforceAccessor, self).open(
             resource_identifier, mode=mode)
