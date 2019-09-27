@@ -357,7 +357,7 @@ class ActivatePerforceStorageScenario(object):
             ftrack_api.event.base.Event(topic="ftrack.perforce.typemap.register"),
             synchronous=True,
         )
-        typemap = {k: v for d in typemaps for k, v in d.items()}
+        typemap = {k: v for d in typemaps if d for k, v in d.items()}
 
         self.logger.debug('Creating Location {}.'.format(location))
 
