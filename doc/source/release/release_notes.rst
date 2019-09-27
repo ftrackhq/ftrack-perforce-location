@@ -15,6 +15,10 @@ Release Notes
 
     .. change:: new
 
+        Enforce perforce username to be the same as the ftrack user logged in.
+
+    .. change:: new
+
         Plugin archive will be named for the platform (osx, linux, or windows),
         on which it is built.
 

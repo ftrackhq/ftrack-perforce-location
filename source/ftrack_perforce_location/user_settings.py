@@ -5,6 +5,7 @@
 import logging
 import os
 import sys
+import ftrack_api
 
 # from ftrack_connect.ui.widget.data_drop_zone.riffle import browser
 from QtExt import QtCore, QtGui, QtWidgets
@@ -239,7 +240,8 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
 
 
 if __name__ == '__main__':
-    perforce_settings = PerforceSettingsHandler()
+    session = ftrack_api.Session(plugin_paths=list(), auto_connect_event_hub=False)
+    perforce_settings = PerforceSettingsHandler(session)
     app = QtGui.QApplication(sys.argv)
     window = ConfigureUserSettingsWidget(perforce_settings)
     window.exec_()
