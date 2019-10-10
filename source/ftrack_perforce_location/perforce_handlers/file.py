@@ -26,7 +26,7 @@ def to_file_list(filepath):
         match = found.group()
         filepath = filepath.replace(match, '*')
 
-    return filepath, clique.assemble(glob.glob(filepath))
+    return filepath, glob.glob(filepath)
 
 
 class PerforceFileHandler(object):
@@ -93,7 +93,7 @@ class PerforceFileHandler(object):
             client._root = str(self.root)
             try:
                 self.connection.save_client(client)
-                self.connection.run_add('-t', perforce_filemode, filepath)
+                self.connection.run_add('-t', perforce_filemode, '-f', filepath)
             except Exception as error:
                 self.logger.exception(error)
 

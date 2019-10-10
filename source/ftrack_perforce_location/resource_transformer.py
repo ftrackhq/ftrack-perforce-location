@@ -4,6 +4,8 @@
 import logging
 import os
 
+import clique
+
 from P4 import P4Exception
 import ftrack_api.resource_identifier_transformer.base as base_transformer
 
