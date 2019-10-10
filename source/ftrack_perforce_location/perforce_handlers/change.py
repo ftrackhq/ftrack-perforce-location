@@ -8,7 +8,7 @@ from P4 import P4Exception
 from ftrack_perforce_location.perforce_handlers.errors import (
     PerforceChangeHanderException
 )
-from ftrack_perforce_location.perforce_handlers.file import seq_to_glob
+from ftrack_perforce_location.perforce_handlers.file import to_file_list
 
 
 class PerforceChangeHandler(object):
@@ -64,7 +64,7 @@ class PerforceChangeHandler(object):
     def submit(self, filepath, description):
         '''Submit **filepath** with **description** to server.'''
 
-        filepath = seq_to_glob(filepath)
+        mangled_path, files = to_file_list(filepath)
         change = self.create(description)
         self.logger.debug(
             'submitting change : {0} for path {1}'.format(change, filepath)

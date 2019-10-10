@@ -7,7 +7,7 @@ import os
 from P4 import P4Exception
 import ftrack_api.resource_identifier_transformer.base as base_transformer
 
-from ftrack_perforce_location.perforce_handlers.file import seq_to_glob
+from ftrack_perforce_location.perforce_handlers.file import to_file_list
 
 
 class PerforceResourceIdentifierTransformer(
@@ -38,8 +38,8 @@ class PerforceResourceIdentifierTransformer(
 
         root = self._perforce_file_handler.root
         fullpath = os.path.join(root, resource_identifier)
-        fullpath = seq_to_glob(fullpath)
-        stats = self.connection.run_fstat(fullpath)
+        mangled_path, files = to_file_list(fullpath)
+        stats = self.connection.run_fstat(mangled_path)
         # format result path as: //depot/,,,,#<revision>
         encoded_path = '{0}#{1}'.format(
             stats[0].get('depotFile'),
@@ -60,7 +60,7 @@ class PerforceResourceIdentifierTransformer(
 
         '''
         depot_pat, version = resource_identifier.split('#')
-        depot_pat = seq_to_glob(depot_pat)
+        mangled_path, files = to_file_list(depot_pat)
 
         self.logger.info('Sync {}'.format(resource_identifier))
 
@@ -70,7 +70,7 @@ class PerforceResourceIdentifierTransformer(
             self.logger.debug(error)
             pass
 
-        stats = self.connection.run_fstat(depot_pat)
+        stats = self.connection.run_fstat(mangled_path)
         decoded_path = stats[0].get('clientFile')
         self.logger.debug('decode {0} as {1}'.format(
             resource_identifier, decoded_path)

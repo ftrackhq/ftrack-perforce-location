@@ -6,7 +6,7 @@ import logging
 
 import ftrack_api.accessor.disk
 
-from ftrack_perforce_location.perforce_handlers.file import seq_to_glob
+from ftrack_perforce_location.perforce_handlers.file import to_file_list
 
 
 class PerforceAccessor(ftrack_api.accessor.disk.DiskAccessor):
@@ -41,8 +41,8 @@ class PerforceAccessor(ftrack_api.accessor.disk.DiskAccessor):
 
         self.logger.debug('opening : {}'.format(resource_identifier))
         filesystem_path = self.get_filesystem_path(resource_identifier)
-        filesystem_path = seq_to_glob(filesystem_path)
-        self.perforce_file_handler.file_to_depot(filesystem_path, perforce_filemode)
+        mangled_path, files = to_file_list(filesystem_path)
+        self.perforce_file_handler.file_to_depot(mangled_path, perforce_filemode)
         return super(PerforceAccessor, self).open(
             resource_identifier, mode=mode)
 

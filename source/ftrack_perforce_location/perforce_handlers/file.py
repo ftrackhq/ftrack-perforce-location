@@ -4,7 +4,8 @@
 import logging
 import os
 import re
-
+import glob
+import clique
 from P4 import P4Exception
 
 from ftrack_perforce_location.perforce_handlers.errors import (
@@ -12,20 +13,20 @@ from ftrack_perforce_location.perforce_handlers.errors import (
 )
 
 
-seq_match = re.compile('(%+\d+d)|(#+)|(%d)')
+seq_match = re.compile('(?<=\.)((%+\d+d)|(#+)|(%d)|(\d+))(?=\.)')
 
 
-def seq_to_glob(filepath):
+def to_file_list(filepath):
     '''
     Search for file sequence signatures in **filepath**
-    and replace it with wildcard *.
+    and return a list of files.
     '''
     found = seq_match.search(filepath)
     if found:
         match = found.group()
         filepath = filepath.replace(match, '*')
 
-    return filepath
+    return filepath, clique.assemble(glob.glob(filepath))
 
 
 class PerforceFileHandler(object):
