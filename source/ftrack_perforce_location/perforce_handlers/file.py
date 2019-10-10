@@ -74,15 +74,17 @@ class PerforceFileHandler(object):
         )
         self._ensure_folder(self.root)
 
-    def file_to_depot(self, filepath, perforce_filemode='binary'):
+    def file_to_depot(self, filepaths, perforce_filemode='binary'):
         '''Publish **filepath** to server.'''
-        self.logger.debug('moving file {} to depot with mode {}'.format(filepath, perforce_filemode))
-        if not filepath.startswith(self.root):
-            raise IOError('File is not in {}'.format(self.root))
+        for filepath in filepaths:
+            if not filepath.startswith(self.root):
+                raise IOError('File is not in {}'.format(self.root))
         stats = []
 
+        self.logger.debug('moving file {} to depot with mode {}'.format(filepaths, perforce_filemode))
+
         try:
-            stats = self.connection.run_fstat(filepath)
+            stats = self.connection.run_fstat(filepaths)
         except P4Exception as error:
             pass
 
@@ -93,15 +95,17 @@ class PerforceFileHandler(object):
             client._root = str(self.root)
             try:
                 self.connection.save_client(client)
-                self.connection.run_add('-t', perforce_filemode, '-f', filepath)
+                for filepath in filepaths:
+                    self.connection.run_add('-t', perforce_filemode, filepath)
             except Exception as error:
                 self.logger.exception(error)
 
         else:
-            # 'p4 edit' requires that the file exists in the client
-            if not os.path.exists(filepath):
-                basedir = os.path.dirname(filepath)
-                if not os.path.exists(basedir):
-                    os.makedirs(basedir)
-                open(filepath, 'a').close()
-            self.connection.run_edit(filepath)
+            for filepath in filepaths:
+                # 'p4 edit' requires that the file exists in the client
+                if not os.path.exists(filepath):
+                    basedir = os.path.dirname(filepath)
+                    if not os.path.exists(basedir):
+                        os.makedirs(basedir)
+                    open(filepath, 'a').close()
+                self.connection.run_edit(filepath)
