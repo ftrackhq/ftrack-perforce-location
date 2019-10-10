@@ -76,6 +76,9 @@ class PerforceFileHandler(object):
 
     def file_to_depot(self, filepaths, perforce_filemode='binary'):
         '''Publish **filepath** to server.'''
+
+        self.logger.info('adding {} to depot'.format(filepaths))
+
         for filepath in filepaths:
             if not filepath.startswith(self.root):
                 raise IOError('File is not in {}'.format(self.root))

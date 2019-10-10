@@ -42,11 +42,16 @@ class PerforceResourceIdentifierTransformer(
         fullpath = os.path.join(root, resource_identifier)
         mangled_path, files = to_file_list(fullpath)
         stats = self.connection.run_fstat(mangled_path)
-        # format result path as: //depot/,,,,#<revision>
-        encoded_path = '{0}#{1}'.format(
-            stats[0].get('depotFile'),
+
+        if '%d' in resource_identifier:
+            resource_identifier = resource_identifier.replace('%d', '*')
+
+        # # format result path as: //depot/,,,,#<revision>
+        encoded_path = '//{0}#{1}'.format(
+            resource_identifier,
             int(stats[0].get('headRev', 0)) + 1
         )
+
         self.logger.debug('encode {0} as {1}'.format(
             resource_identifier, encoded_path)
         )
@@ -64,18 +69,23 @@ class PerforceResourceIdentifierTransformer(
         depot_pat, version = resource_identifier.split('#')
         mangled_path, files = to_file_list(depot_pat)
 
-        self.logger.info('Sync {}'.format(resource_identifier))
+        decoded_path = None
 
-        try:
-            self.connection.run_sync(resource_identifier)
-        except P4Exception as error:
-            self.logger.debug(error)
-            pass
+        for file in files:
+            try:
+                self.logger.info('Sync {}'.format(file))
+                self.connection.run_sync(file)
+            except P4Exception as error:
+                self.logger.debug(error)
+                pass
 
         stats = self.connection.run_fstat(mangled_path)
-        decoded_path = stats[0].get('clientFile')
-        self.logger.debug('decode {0} as {1}'.format(
-            resource_identifier, decoded_path)
+        for stat in stats:
+            if os.path.basename(depot_pat) in stat['clientFile']:
+                decoded_path= stat['clientFile']
+                self.logger.debug('decode {0} as {1}'.format(
+                    resource_identifier, decoded_path)
+                )
+                break
 
-        )
         return decoded_path
