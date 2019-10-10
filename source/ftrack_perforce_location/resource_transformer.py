@@ -37,7 +37,7 @@ class PerforceResourceIdentifierTransformer(
             This transforms /file/path to //depot/file/path#version
 
         '''
-
+        self.logger.info('encoding: {}'.format(resource_identifier))
         root = self._perforce_file_handler.root
         fullpath = os.path.join(root, resource_identifier)
         mangled_path, files = to_file_list(fullpath)
@@ -66,26 +66,29 @@ class PerforceResourceIdentifierTransformer(
             This transforms //depot/file/path#version to /file/path
 
         '''
-        depot_pat, version = resource_identifier.split('#')
-        mangled_path, files = to_file_list(depot_pat)
-
         decoded_path = None
 
-        for file in files:
-            try:
-                self.logger.info('Sync {}'.format(file))
-                self.connection.run_sync(file)
-            except P4Exception as error:
-                self.logger.debug(error)
-                pass
+        self.logger.info('decoding : {}'.format(resource_identifier))
 
-        stats = self.connection.run_fstat(mangled_path)
+        depot_pat, version = resource_identifier.split('#')
+        depot_pat , _ = to_file_list(depot_pat)
+        depot_path_name = os.path.basename(depot_pat)
+        self.logger.info('Sync {}'.format(resource_identifier))
+
+        try:
+            self.connection.run_sync(resource_identifier)
+        except P4Exception as error:
+            pass
+
+        stats = self.connection.run_fstat(depot_pat)
         for stat in stats:
-            if os.path.basename(depot_pat) in stat['clientFile']:
-                decoded_path= stat['clientFile']
+            self.logger.info('checking for {} in {}'.format(depot_path_name, stat['clientFile']))
+            if depot_path_name in stat['clientFile']:
+                decoded_path = stat['clientFile']
                 self.logger.debug('decode {0} as {1}'.format(
                     resource_identifier, decoded_path)
                 )
                 break
-
+        decoded_path = decoded_path or os.path.join(os.path.dirname(stats[0]['clientFile']), depot_path_name)
+        self.logger.info('returing decoded path for {} as {}'.format(resource_identifier, decoded_path))
         return decoded_path
