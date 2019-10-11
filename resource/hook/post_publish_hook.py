@@ -36,9 +36,6 @@ def post_publish_callback(session, event):
     component_id = event['data'].get('component_id')
     perforce_component = session.get('Component', component_id)
 
-    if not perforce_component['container']:
-        return
-
     try:
         perforce_path = perforce_location.get_filesystem_path(perforce_component)
     except Exception:
@@ -48,7 +45,11 @@ def post_publish_callback(session, event):
     logger.info('Publishing {} to perforce'.format(perforce_path))
     logger.info('Handling component {}'.format(perforce_component.items()))
 
-    project_id = perforce_component['version']['link'][0]['id']
+    # if the file is in a container, let's use that to get the project
+    if perforce_component['container']:
+        project_id = perforce_component['container']['version']['link'][0]['id']
+    else:
+        project_id = perforce_component['version']['link'][0]['id']
 
     project = session.query(
         'select id, name from Project where id is "{0}"'.format(project_id)
