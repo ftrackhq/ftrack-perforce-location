@@ -36,6 +36,9 @@ def post_publish_callback(session, event):
     component_id = event['data'].get('component_id')
     perforce_component = session.get('Component', component_id)
 
+    if not perforce_component['container']:
+        return
+
     try:
         perforce_path = perforce_location.get_filesystem_path(perforce_component)
     except Exception:
