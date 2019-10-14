@@ -2,7 +2,7 @@
 # :copyright: Copyright (c) 2018 ftrack
 
 import logging
-
+import os
 from P4 import P4Exception
 
 from ftrack_perforce_location.perforce_handlers.errors import (
@@ -43,6 +43,7 @@ class PerforceChangeHandler(object):
                     raise PerforceChangeHanderException(error)
 
         except P4Exception as error:
+            self.logger.exception('error on save changes')
             raise PerforceChangeHanderException(error)
 
         self.logger.debug('created change : {}'.format(change))
@@ -54,18 +55,21 @@ class PerforceChangeHandler(object):
 
         try:
             for filepath in filepaths:
+                file_exists = os.path.exists(filepath)
+
                 self.logger.debug(
-                    'adding file {0} to change: {1}'.format(filepath, change)
+                    'adding file {0} to change: {1}, file exists: {2}'.format(filepath, change, file_exists)
                 )
                 self.connection.run_reopen('-c', str(change), filepath)
         except P4Exception as error:
+            self.logger.exception('error on reopen')
             raise PerforceChangeHanderException(error)
 
-    def submit(self, filepath, description):
+    def submit(self, filepath, description, change=None):
         '''Submit **filepath** with **description** to server.'''
 
         mangled_path, files = to_file_list(filepath)
-        change = self.create(description)
+        change = change or self.create(description)
         self.logger.debug(
             'submitting change : {0} for path {1}'.format(change, filepath)
         )
@@ -75,4 +79,8 @@ class PerforceChangeHandler(object):
             change_specs = self.connection.fetch_change('-o', str(change))
             self.connection.run_submit(change_specs)
         except P4Exception as error:
+            self.logger.exception('error on fetch changes')
+
             raise PerforceChangeHanderException(error)
+
+        return change
