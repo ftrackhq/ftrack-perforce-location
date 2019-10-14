@@ -59,9 +59,9 @@ class PerforceChangeHandler(object):
             )
             self.connection.run_reopen('-c', str(change), filepaths)
         except P4Exception as error:
-            pass
-            # self.logger.exception('error on reopen')
+            self.logger.error(str(error))
             # raise PerforceChangeHanderException(error)
+            pass
 
     def submit(self, filepath, description, existing_change=None):
         '''Submit **filepath** with **description** to server.'''
@@ -77,8 +77,8 @@ class PerforceChangeHandler(object):
             change_specs = self.connection.fetch_change('-o', str(change))
             self.connection.run_submit(change_specs)
         except P4Exception as error:
-            self.logger.exception('error on fetch changes')
-
-            raise PerforceChangeHanderException(error)
+            self.logger.error(str(error))
+            # raise PerforceChangeHanderException(error)
+            pass
 
         return change
