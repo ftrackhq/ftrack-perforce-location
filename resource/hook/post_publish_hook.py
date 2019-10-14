@@ -35,18 +35,15 @@ def post_publish_callback(session, event):
 
     component_id = event['data'].get('component_id')
     perforce_component = session.get('Component', component_id)
-    change = perforce_component['metadata'].get('change')
-
-    logger.info('component type:{}, change {}'.format(perforce_component.entity_type, change))
 
     # if the file is in a container, let's use that to get the project
     if perforce_component['container']:
         project_id = perforce_component['container']['version']['link'][0]['id']
-        perforce_path = perforce_location.get_filesystem_path(perforce_component['container'])
-
+        # perforce_path = perforce_location.get_filesystem_path(perforce_component['container'])
     else:
         project_id = perforce_component['version']['link'][0]['id']
-        perforce_path = perforce_location.get_filesystem_path(perforce_component)
+
+    perforce_path = perforce_location.get_filesystem_path(perforce_component)
 
     logger.info('Publishing {} to perforce'.format(perforce_path))
 
@@ -98,13 +95,11 @@ def post_publish_callback(session, event):
 
     # PUBLISH RESULT FILE IN PERFORCE
     change = perforce_location.accessor.perforce_file_handler.change.submit(
-        perforce_path, 'published with ftrack', change
+        perforce_path, 'published with ftrack'
     )
 
     logger.info('adding change {} to component {}'.format(change, perforce_component))
-    perforce_component['metadata']['change'] = change
 
-    session.commit()
 
 
 def _register(event, session=None):

@@ -73,7 +73,7 @@ class PerforceResourceIdentifierTransformer(
         depot_pat, version = resource_identifier.split('#')
         depot_path_name = os.path.basename(depot_pat)
 
-        depot_pat , _ = to_file_list(depot_pat)
+        # depot_pat , _ = to_file_list(depot_pat)
         self.logger.info('Sync {}'.format(resource_identifier))
 
         try:

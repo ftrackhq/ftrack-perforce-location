@@ -54,22 +54,20 @@ class PerforceChangeHandler(object):
         '''Add **filepath** to *change*.'''
 
         try:
-            for filepath in filepaths:
-                file_exists = os.path.exists(filepath)
-
-                self.logger.debug(
-                    'adding file {0} to change: {1}, file exists: {2}'.format(filepath, change, file_exists)
-                )
-                self.connection.run_reopen('-c', str(change), filepath)
+            self.logger.debug(
+                'adding file {0} to change: {1}'.format(filepaths, change)
+            )
+            self.connection.run_reopen('-c', str(change), filepaths)
         except P4Exception as error:
-            self.logger.exception('error on reopen')
-            raise PerforceChangeHanderException(error)
+            pass
+            # self.logger.exception('error on reopen')
+            # raise PerforceChangeHanderException(error)
 
-    def submit(self, filepath, description, change=None):
+    def submit(self, filepath, description, existing_change=None):
         '''Submit **filepath** with **description** to server.'''
 
         mangled_path, files = to_file_list(filepath)
-        change = change or self.create(description)
+        change = existing_change or self.create(description)
         self.logger.debug(
             'submitting change : {0} for path {1}'.format(change, filepath)
         )
