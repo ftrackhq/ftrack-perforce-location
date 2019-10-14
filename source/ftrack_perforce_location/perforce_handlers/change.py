@@ -59,7 +59,7 @@ class PerforceChangeHandler(object):
             )
             self.connection.run_reopen('-c', str(change), filepaths)
         except P4Exception as error:
-            self.logger.error(str(error))
+            # self.logger.error(str(error))
             # raise PerforceChangeHanderException(error)
             pass
 
@@ -77,7 +77,7 @@ class PerforceChangeHandler(object):
             change_specs = self.connection.fetch_change('-o', str(change))
             self.connection.run_submit(change_specs)
         except P4Exception as error:
-            self.logger.error(str(error))
+            # self.logger.error(str(error))
             # raise PerforceChangeHanderException(error)
             pass
 
