@@ -36,16 +36,19 @@ def post_publish_callback(session, event):
     component_id = event['data'].get('component_id')
     perforce_component = session.get('Component', component_id)
 
+    if isinstance(perforce_component,  session.types['SequenceComponent']):
+        logger.info('Skipping {}'.format(perforce_component))
+        return
+
     # if the file is in a container, let's use that to get the project
     if perforce_component['container']:
         project_id = perforce_component['container']['version']['link'][0]['id']
-        # perforce_path = perforce_location.get_filesystem_path(perforce_component['container'])
     else:
         project_id = perforce_component['version']['link'][0]['id']
 
     perforce_path = perforce_location.get_filesystem_path(perforce_component)
 
-    logger.info('Publishing {} to perforce'.format(perforce_path))
+    logger.warning('Publishing {} :: {} to perforce '.format(perforce_component, perforce_path))
 
     project = session.query(
         'select id, name from Project where id is "{0}"'.format(project_id)
@@ -55,6 +58,7 @@ def post_publish_callback(session, event):
         'select value from Setting '
         'where name is "storage_scenario" and group is "STORAGE"'
     ).one()
+
     configuration = json.loads(storage_scenario['value'])
     location_data = configuration.get('data', {})
     require_one_depot_per_project = location_data.get(

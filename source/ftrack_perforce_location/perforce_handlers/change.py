@@ -59,26 +59,23 @@ class PerforceChangeHandler(object):
             )
             self.connection.run_reopen('-c', str(change), filepaths)
         except P4Exception as error:
-            # self.logger.error(str(error))
-            # raise PerforceChangeHanderException(error)
-            pass
+            self.logger.error(str(error))
+            raise PerforceChangeHanderException(error)
 
     def submit(self, filepath, description, existing_change=None):
         '''Submit **filepath** with **description** to server.'''
 
-        mangled_path, files = to_file_list(filepath)
         change = existing_change or self.create(description)
         self.logger.debug(
             'submitting change : {0} for path {1}'.format(change, filepath)
         )
-        self.add(change, files)
+        self.add(change, filepath)
 
         try:
             change_specs = self.connection.fetch_change('-o', str(change))
             self.connection.run_submit(change_specs)
         except P4Exception as error:
-            # self.logger.error(str(error))
-            # raise PerforceChangeHanderException(error)
-            pass
+            self.logger.error(str(error))
+            raise PerforceChangeHanderException(error)
 
         return change

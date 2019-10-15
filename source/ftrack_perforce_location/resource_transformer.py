@@ -37,7 +37,6 @@ class PerforceResourceIdentifierTransformer(
             This transforms /file/path to //depot/file/path#version
 
         '''
-        self.logger.info('encoding: {}'.format(resource_identifier))
         root = self._perforce_file_handler.root
         fullpath = os.path.join(root, resource_identifier)
         mangled_path, files = to_file_list(fullpath)
@@ -67,16 +66,11 @@ class PerforceResourceIdentifierTransformer(
 
         '''
         decoded_path = None
-
-        self.logger.info('decoding : {}'.format(resource_identifier))
-
         depot_pat, version = resource_identifier.split('#')
         depot_path_name = os.path.basename(depot_pat)
 
-        # depot_pat , _ = to_file_list(depot_pat)
-        self.logger.info('Sync {}'.format(resource_identifier))
-
         try:
+            self.logger.info('Sync {}'.format(resource_identifier))
             self.connection.run_sync(resource_identifier)
         except P4Exception as error:
             pass
@@ -91,5 +85,5 @@ class PerforceResourceIdentifierTransformer(
                 )
                 break
         decoded_path = decoded_path or os.path.join(os.path.dirname(stats[0]['clientFile']), depot_path_name)
-        self.logger.info('returing decoded path for {} as {}'.format(resource_identifier, decoded_path))
+        self.logger.info('returning decoded path for {} as {}'.format(resource_identifier, decoded_path))
         return decoded_path
