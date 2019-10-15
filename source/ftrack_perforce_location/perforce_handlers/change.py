@@ -51,8 +51,9 @@ class PerforceChangeHandler(object):
 
         return change
 
-    def add(self, change, filepath):
+    def add(self, existing_change, filepath, description):
         '''Add **filepath** to *change*.'''
+        change = existing_change or self.create(description)
 
         self.logger.debug(
             'adding file {0} to change: {1}'.format(filepath, change)
@@ -63,16 +64,14 @@ class PerforceChangeHandler(object):
         except P4Exception as error:
             raise PerforceChangeHanderException(error)
 
-    def submit(self, filepath, description):
+        return change
+
+    def submit(self, change):
         '''Submit **filepath** with **description** to server.'''
 
-        filepath = seq_to_glob(filepath)
-        change = self.create(description)
         self.logger.debug(
-            'submitting change : {0} for path {1}'.format(change, filepath)
+            'submitting change : {0}'.format(change)
         )
-        self.add(change, filepath)
-
         try:
             change_specs = self.connection.fetch_change('-o', str(change))
             self.connection.run_submit(change_specs)

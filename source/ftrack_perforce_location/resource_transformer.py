@@ -6,7 +6,6 @@ import os
 from ftrack_perforce_location.import_p4api import import_p4
 
 import_p4()
-import clique
 
 from P4 import P4Exception
 import ftrack_api.resource_identifier_transformer.base as base_transformer
