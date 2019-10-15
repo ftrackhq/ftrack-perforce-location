@@ -66,6 +66,7 @@ class PerforceResourceIdentifierTransformer(
             This transforms //depot/file/path#version to /file/path
 
         '''
+        decoded_path = None
         depot_pat, version = resource_identifier.split('#')
         depot_path_name = os.path.basename(depot_pat)
 
@@ -76,8 +77,14 @@ class PerforceResourceIdentifierTransformer(
             pass
 
         stats = self.connection.run_fstat(depot_pat)
-        decoded_path = stats[0]['clientFile']
-
+        for stat in stats:
+            self.logger.info('checking for {} in {}'.format(depot_path_name, stat['clientFile']))
+            if depot_path_name in stat['clientFile']:
+                decoded_path = stat['clientFile']
+                self.logger.debug('decode {0} as {1}'.format(
+                    resource_identifier, decoded_path)
+                )
+                break
         decoded_path = decoded_path or os.path.join(os.path.dirname(stats[0]['clientFile']), depot_path_name)
         self.logger.info('returning decoded path for {} as {}'.format(resource_identifier, decoded_path))
         return decoded_path

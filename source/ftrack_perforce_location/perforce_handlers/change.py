@@ -55,11 +55,10 @@ class PerforceChangeHandler(object):
         '''Add **filepath** to *change*.'''
         change = existing_change or self.create(description)
 
-        self.logger.debug(
-            'adding file {0} to change: {1}'.format(filepath, change)
-        )
-
         try:
+            self.logger.debug(
+                'adding file {0} to change: {1}'.format(filepath, change)
+            )
             self.connection.run_reopen('-c', str(change), filepath)
         except P4Exception as error:
             self.logger.error(str(error))
