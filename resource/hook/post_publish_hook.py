@@ -36,19 +36,17 @@ def post_publish_callback(session, event):
     component_id = event['data'].get('component_id')
     perforce_component = session.get('Component', component_id)
 
-    if isinstance(perforce_component,  session.types['SequenceComponent']):
-        logger.info('Skipping {}'.format(perforce_component))
-        return
-
+    change = None
     # if the file is in a container, let's use that to get the project
     if perforce_component['container']:
         project_id = perforce_component['container']['version']['link'][0]['id']
+        change = perforce_component['container']['metadata'].get('change')
     else:
         project_id = perforce_component['version']['link'][0]['id']
 
     perforce_path = perforce_location.get_filesystem_path(perforce_component)
 
-    logger.warning('Publishing {} :: {} to perforce '.format(perforce_component, perforce_path))
+    logger.info('Publishing {} :: {} to perforce '.format(perforce_component, perforce_path))
 
     project = session.query(
         'select id, name from Project where id is "{0}"'.format(project_id)
@@ -97,12 +95,24 @@ def post_publish_callback(session, event):
                 )
                 raise PerforceValidationError(error_message)
 
-    # PUBLISH RESULT FILE IN PERFORCE
-    change = perforce_location.accessor.perforce_file_handler.change.submit(
-        perforce_path, 'published with ftrack'
+    change = perforce_location.accessor.perforce_file_handler.change.add(
+        change, perforce_path, 'published with ftrack',
     )
 
-    logger.info('adding change {} to component {}'.format(change, perforce_component))
+    if perforce_component['container']:
+        # add change to current container
+        perforce_component['container']['metadata']['change'] = change
+
+    logger.info('adding change {} to component {} as change {}'.format(change, perforce_component, change))
+    session.commit()
+
+    if (
+            isinstance(perforce_component, session.types['SequenceComponent'])
+            or not perforce_component['container']
+    ):
+        # PUBLISH RESULT FILE IN PERFORCE
+        logger.info('submitting change: {}'.format(change))
+        perforce_location.accessor.perforce_file_handler.change.submit(change)
 
 
 
