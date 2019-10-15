@@ -4,8 +4,9 @@
 import logging
 import os
 
-import P4
+from ftrack_perforce_location.import_p4api import import_p4
 
+import P4
 from ftrack_perforce_location.perforce_handlers.errors import (
     PerforceValidationError
 )

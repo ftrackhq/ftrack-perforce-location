@@ -16,14 +16,7 @@ SOURCE_PATH = os.path.join(ROOT_PATH, 'source')
 README_PATH = os.path.join(ROOT_PATH, 'README.rst')
 RESOURCE_PATH = os.path.join(ROOT_PATH, 'resource')
 HOOK_PATH = os.path.join(RESOURCE_PATH, 'hook')
-
-# For naming the archive
-if sys.platform == 'darwin':
-    PLATFORM = 'osx'
-elif sys.platform.startswith('linux'):
-    PLATFORM = 'linux'
-elif sys.platform == 'win32':
-    PLATFORM = 'windows'
+MODULES_PATH = os.path.join(RESOURCE_PATH, 'modules')
 
 # Read version from source.
 with open(os.path.join(
@@ -63,6 +56,12 @@ class BuildPlugin(Command):
             os.path.join(STAGING_PATH, 'hook')
         )
 
+        # Copy modules
+        shutil.copytree(
+            MODULES_PATH,
+            os.path.join(STAGING_PATH, 'modules')
+        )
+
         pip_main(
             [
                 'install',
@@ -76,7 +75,7 @@ class BuildPlugin(Command):
         result_path = shutil.make_archive(
             os.path.join(
                 BUILD_PATH,
-                'ftrack-perforce-location-{0}-{1}'.format(VERSION, PLATFORM)
+                'ftrack-perforce-location-{0}'.format(VERSION)
             ),
             'zip',
             STAGING_PATH
@@ -105,7 +104,6 @@ setup(
     ],
     install_requires=[
         'appdirs == 1.4.0',
-        'p4python == 2018.2.1743033',
         'ftrack-action-handler'
     ],
     tests_require=[

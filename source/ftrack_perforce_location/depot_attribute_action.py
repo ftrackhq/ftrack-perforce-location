@@ -4,8 +4,11 @@ import logging
 import json
 from ftrack_action_handler.action import BaseAction
 from ftrack_api.structure.standard import StandardStructure
+from ftrack_perforce_location.import_p4api import import_p4
+
 import P4
 from P4 import P4Exception
+
 
 from ftrack_perforce_location.constants import SCENARIO_ID, ICON_URL
 from ftrack_perforce_location.perforce_handlers import connection
