@@ -8,7 +8,6 @@ from P4 import P4Exception
 from ftrack_perforce_location.perforce_handlers.errors import (
     PerforceChangeHanderException
 )
-from ftrack_perforce_location.perforce_handlers.file import to_file_list
 
 
 class PerforceChangeHandler(object):

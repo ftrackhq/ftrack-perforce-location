@@ -103,9 +103,6 @@ def post_publish_callback(session, event):
         # add change to current container
         perforce_component['container']['metadata']['change'] = change
 
-    logger.info('adding change {} to component {} as change {}'.format(change, perforce_component, change))
-    session.commit()
-
     if (
             isinstance(perforce_component, session.types['SequenceComponent'])
             or not perforce_component['container']
@@ -114,6 +111,8 @@ def post_publish_callback(session, event):
         logger.info('submitting change: {}'.format(change))
         perforce_location.accessor.perforce_file_handler.change.submit(change)
 
+    logger.info('adding change {} to component {} as change {}'.format(change, perforce_component, change))
+    session.commit()
 
 
 def _register(event, session=None):

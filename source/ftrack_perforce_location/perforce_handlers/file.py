@@ -13,10 +13,10 @@ from ftrack_perforce_location.perforce_handlers.errors import (
 )
 
 
-seq_match = re.compile('(?<=\.)((%+\d+d)|(#+)|(%d)|(\d+))(?=\.)')
+seq_match = re.compile('(%+\d+d)|(#+)|(%d)')
 
 
-def to_file_list(filepath):
+def seq_to_glob(filepath):
     '''
     Search for file sequence signatures in **filepath**
     and return a list of files.
@@ -26,7 +26,7 @@ def to_file_list(filepath):
         match = found.group()
         filepath = filepath.replace(match, '*')
 
-    return filepath, glob.glob(filepath)
+    return filepath
 
 
 class PerforceFileHandler(object):

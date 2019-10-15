@@ -9,7 +9,7 @@ import clique
 from P4 import P4Exception
 import ftrack_api.resource_identifier_transformer.base as base_transformer
 
-from ftrack_perforce_location.perforce_handlers.file import to_file_list
+from ftrack_perforce_location.perforce_handlers.file import seq_to_glob
 
 
 class PerforceResourceIdentifierTransformer(
@@ -39,7 +39,7 @@ class PerforceResourceIdentifierTransformer(
         '''
         root = self._perforce_file_handler.root
         fullpath = os.path.join(root, resource_identifier)
-        mangled_path, files = to_file_list(fullpath)
+        mangled_path = seq_to_glob(fullpath)
         stats = self.connection.run_fstat(mangled_path)
 
         if '%d' in resource_identifier:

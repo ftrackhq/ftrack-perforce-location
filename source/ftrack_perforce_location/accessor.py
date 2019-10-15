@@ -6,9 +6,6 @@ import logging
 
 import ftrack_api.accessor.disk
 
-from ftrack_perforce_location.perforce_handlers.file import to_file_list
-
-
 class PerforceAccessor(ftrack_api.accessor.disk.DiskAccessor):
     '''Extends the DiskAccessor to ensure target file is writable and/or the
     correct version.
