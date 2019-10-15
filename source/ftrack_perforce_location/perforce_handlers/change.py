@@ -62,6 +62,7 @@ class PerforceChangeHandler(object):
         try:
             self.connection.run_reopen('-c', str(change), filepath)
         except P4Exception as error:
+            self.logger.error(str(error))
             raise PerforceChangeHanderException(error)
 
         return change
