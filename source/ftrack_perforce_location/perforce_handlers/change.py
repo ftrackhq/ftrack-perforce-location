@@ -2,12 +2,15 @@
 # :copyright: Copyright (c) 2018 ftrack
 
 import logging
-import os
+from ftrack_perforce_location.import_p4api import import_p4
+
+import_p4()
 from P4 import P4Exception
 
 from ftrack_perforce_location.perforce_handlers.errors import (
     PerforceChangeHanderException
 )
+from ftrack_perforce_location.perforce_handlers.file import seq_to_glob
 
 
 class PerforceChangeHandler(object):
@@ -42,38 +45,36 @@ class PerforceChangeHandler(object):
                     raise PerforceChangeHanderException(error)
 
         except P4Exception as error:
-            self.logger.exception('error on save changes')
             raise PerforceChangeHanderException(error)
 
         self.logger.debug('created change : {}'.format(change))
 
         return change
 
-    def add(self, existing_change, filepath, description):
+    def add(self, change, filepath):
         '''Add **filepath** to *change*.'''
-        change = existing_change or self.create(description)
-
-        try:
-            self.logger.debug(
-                'adding file {0} to change: {1}'.format(filepath, change)
-            )
-            self.connection.run_reopen('-c', str(change), filepath)
-        except P4Exception as error:
-            self.logger.error(str(error))
-            raise PerforceChangeHanderException(error)
-
-        return change
-
-    def submit(self, change):
-        '''Submit **filepath** with **description** to server.'''
 
         self.logger.debug(
-            'submitting change : {0}'.format(change)
+            'adding file {0} to change: {1}'.format(filepath, change)
         )
+
+        try:
+            self.connection.run_reopen('-c', str(change), filepath)
+        except P4Exception as error:
+            raise PerforceChangeHanderException(error)
+
+    def submit(self, filepath, description):
+        '''Submit **filepath** with **description** to server.'''
+
+        filepath = seq_to_glob(filepath)
+        change = self.create(description)
+        self.logger.debug(
+            'submitting change : {0} for path {1}'.format(change, filepath)
+        )
+        self.add(change, filepath)
 
         try:
             change_specs = self.connection.fetch_change('-o', str(change))
             self.connection.run_submit(change_specs)
         except P4Exception as error:
-            self.logger.error(str(error))
             raise PerforceChangeHanderException(error)

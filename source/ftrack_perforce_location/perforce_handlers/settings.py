@@ -5,7 +5,9 @@ import appdirs
 import json
 import logging
 import os
+from ftrack_perforce_location.import_p4api import import_p4
 
+import_p4()
 from P4 import P4, P4Exception
 import ftrack_api
 

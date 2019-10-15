@@ -9,6 +9,11 @@ Release Notes
 
 .. release:: upcoming
 
+
+    .. change:: fixed
+
+        Perforce modules cannot be imported and used in DCC applications.
+
     .. change:: add
 
         Provide default file encode mapping based on the file extension.
@@ -17,10 +22,6 @@ Release Notes
 
         Enforce perforce username to be the same as the ftrack user logged in.
 
-    .. change:: new
-
-        Plugin archive will be named for the platform (osx, linux, or windows),
-        on which it is built.
 
 
 .. release:: 0.1.0

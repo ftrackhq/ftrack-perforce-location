@@ -7,7 +7,6 @@ import re
 import glob
 import clique
 from P4 import P4Exception
-
 from ftrack_perforce_location.perforce_handlers.errors import (
     PerforceFileHandlerException
 )

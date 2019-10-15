@@ -3,7 +3,9 @@
 
 import logging
 import os
+from ftrack_perforce_location.import_p4api import import_p4
 
+import_p4()
 import clique
 
 from P4 import P4Exception
@@ -37,20 +39,16 @@ class PerforceResourceIdentifierTransformer(
             This transforms /file/path to //depot/file/path#version
 
         '''
+
         root = self._perforce_file_handler.root
         fullpath = os.path.join(root, resource_identifier)
-        mangled_path = seq_to_glob(fullpath)
-        stats = self.connection.run_fstat(mangled_path)
-
-        if '%d' in resource_identifier:
-            resource_identifier = resource_identifier.replace('%d', '*')
-
-        # # format result path as: //depot/,,,,#<revision>
-        encoded_path = '//{0}#{1}'.format(
-            resource_identifier,
+        fullpath = seq_to_glob(fullpath)
+        stats = self.connection.run_fstat(fullpath)
+        # format result path as: //depot/,,,,#<revision>
+        encoded_path = '{0}#{1}'.format(
+            stats[0].get('depotFile'),
             int(stats[0].get('headRev', 0)) + 1
         )
-
         self.logger.debug('encode {0} as {1}'.format(
             resource_identifier, encoded_path)
         )
@@ -65,25 +63,21 @@ class PerforceResourceIdentifierTransformer(
             This transforms //depot/file/path#version to /file/path
 
         '''
-        decoded_path = None
         depot_pat, version = resource_identifier.split('#')
-        depot_path_name = os.path.basename(depot_pat)
+        depot_pat = seq_to_glob(depot_pat)
+
+        self.logger.info('Sync {}'.format(resource_identifier))
 
         try:
-            self.logger.info('Sync {}'.format(resource_identifier))
             self.connection.run_sync(resource_identifier)
         except P4Exception as error:
+            self.logger.debug(error)
             pass
 
         stats = self.connection.run_fstat(depot_pat)
-        for stat in stats:
-            self.logger.info('checking for {} in {}'.format(depot_path_name, stat['clientFile']))
-            if depot_path_name in stat['clientFile']:
-                decoded_path = stat['clientFile']
-                self.logger.debug('decode {0} as {1}'.format(
-                    resource_identifier, decoded_path)
-                )
-                break
-        decoded_path = decoded_path or os.path.join(os.path.dirname(stats[0]['clientFile']), depot_path_name)
-        self.logger.info('returning decoded path for {} as {}'.format(resource_identifier, decoded_path))
+        decoded_path = stats[0].get('clientFile')
+        self.logger.debug('decode {0} as {1}'.format(
+            resource_identifier, decoded_path)
+
+        )
         return decoded_path

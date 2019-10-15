@@ -6,7 +6,6 @@ import socket
 import uuid
 
 from P4 import P4, P4Exception
-
 from ftrack_perforce_location.perforce_handlers import errors
 
 
