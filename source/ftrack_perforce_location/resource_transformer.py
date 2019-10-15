@@ -46,7 +46,7 @@ class PerforceResourceIdentifierTransformer(
         if '%d' in resource_identifier:
             resource_identifier = resource_identifier.replace('%d', '*')
 
-        # # format result path as: //depot/,,,,#<revision>
+        # format result path as: //depot/,,,,#<revision>
         encoded_path = '//{0}#{1}'.format(
             resource_identifier,
             int(stats[0].get('headRev', 0)) + 1

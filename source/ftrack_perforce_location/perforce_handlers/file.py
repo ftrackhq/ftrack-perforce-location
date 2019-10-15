@@ -21,7 +21,7 @@ seq_match = re.compile('(%+\d+d)|(#+)|(%d)')
 def seq_to_glob(filepath):
     '''
     Search for file sequence signatures in **filepath**
-    and return a list of files.
+-    and replace it with wildcard *.
     '''
     found = seq_match.search(filepath)
     if found:
