@@ -18,6 +18,11 @@ Release Notes
 
         Provide default file encode mapping based on the file extension.
 
+    .. change:: new
+
+        Enforce perforce username to be the same as the ftrack user logged in.
+
+
 
 .. release:: 0.1.0
     :date: 2019-05-21

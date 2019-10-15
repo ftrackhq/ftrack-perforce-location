@@ -271,7 +271,7 @@ class ActivatePerforceStorageScenario(object):
                 'Unable to configure location based on scenario.'
             )
 
-        perforce_settings = PerforceSettingsHandler()
+        perforce_settings = PerforceSettingsHandler(self.session)
         perforce_settings_data = perforce_settings.read()
         user_settings_values = perforce_settings_data.values()
 

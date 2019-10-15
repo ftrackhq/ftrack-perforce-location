@@ -15,11 +15,16 @@ import ftrack_api
 class PerforceSettingsHandler(object):
     '''Handles Perforce connection settings.'''
 
-    def __init__(self):
+    def __init__(self, session):
         super(PerforceSettingsHandler, self).__init__()
+        self._session = session
         self.logger = logging.getLogger(
             __name__ + '.' + self.__class__.__name__
         )
+
+    @property
+    def session(self):
+        return self._session
 
     @property
     def _templated_default(self):
@@ -43,6 +48,24 @@ class PerforceSettingsHandler(object):
 
         return config_file_path
 
+    @staticmethod
+    def _sanitize_username(name, illegal_character_substitute='_'):
+        '''Convert a *name* to a valid Perforce username.
+
+        We split username at the first @ sign, if present, then replace
+        every other prohibited character sequence ('...', '*', '%%',
+        and '#') with '_' or *illegal_character_substitute* if given.
+
+        Note that many of these characters are a bad idea in an ftrack
+        username anyway.
+        '''
+        name = name.split('@')[0]
+        for illegal_sequence in ('...', '*', '%%', '#'):
+            name = name.replace(illegal_sequence, illegal_character_substitute)
+        if name.isdigit():
+            name = '{}_'.format(name)
+        return str(name)
+
     def _update_config_from_perforce(self, config):
         '''Return a copy of *config* with values pulled from Perforce.
 
@@ -51,7 +74,7 @@ class PerforceSettingsHandler(object):
         '''
         config = dict(config)
         p4 = P4()
-        config['user'] = p4.user
+        config['user'] = self._sanitize_username(self.session.api_user)
         config['using_workspace'] = p4.client
         p4.port = config['port']
         try:
