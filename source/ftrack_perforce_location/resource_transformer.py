@@ -86,5 +86,10 @@ class PerforceResourceIdentifierTransformer(
                 )
                 break
         decoded_path = decoded_path or os.path.join(os.path.dirname(stats[0]['clientFile']), depot_path_name)
+        if '*' in decoded_path:
+            decoded_path = decoded_path.replace('*', '%d')
+
         self.logger.info('returning decoded path for {} as {}'.format(resource_identifier, decoded_path))
+
+
         return decoded_path

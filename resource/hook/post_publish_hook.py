@@ -29,29 +29,38 @@ logger = logging.getLogger(
 
 def post_publish_callback(session, event):
     '''Event callback to publish the result file in Perforce depot.'''
-
+    # collect location
     location_id = event['data'].get('location_id')
     perforce_location = session.get('Location', location_id)
 
+    # collect component
     component_id = event['data'].get('component_id')
-    perforce_component = session.get('Component', component_id)
+    component = session.get('Component', component_id)
 
+    # store initial states
     change = None
+    file_path = None
 
-    # if the file is in a container, let's use that to get the project
-    if perforce_component['container']:
-        project_id = perforce_component['container']['version']['link'][0]['id']
+    # check components we are about to publish
+    component_is_in_container = component['container']
+    component_is_container = isinstance(
+        component, session.types['SequenceComponent']
+    )
+
+    # get the project id,and potentially a change
+    if component_is_in_container:
+        project_id = component['container']['version']['link'][0]['id']
+
+        # if the component is in a container
+        # check the container for the current change set
         try:
-            change = perforce_component['container']['metadata'].get('change')
+            change = component['container']['metadata'].get('change')
         except ValueError as error:
             logger.error(error)
             pass
     else:
-        project_id = perforce_component['version']['link'][0]['id']
+        project_id = component['version']['link'][0]['id']
 
-    perforce_path = perforce_location.get_filesystem_path(perforce_component)
-
-    logger.info('Publishing {} :: {} to perforce '.format(perforce_component, perforce_path))
 
     project = session.query(
         'select id, name from Project where id is "{0}"'.format(project_id)
@@ -62,6 +71,8 @@ def post_publish_callback(session, event):
         'where name is "storage_scenario" and group is "STORAGE"'
     ).one()
 
+
+    # check if we require one depot per project
     configuration = json.loads(storage_scenario['value'])
     location_data = configuration.get('data', {})
     require_one_depot_per_project = location_data.get(
@@ -95,31 +106,42 @@ def post_publish_callback(session, event):
                 error_message = (
                     'Cannot checkin {}.\n'
                     'Project {} requires its own depot.'.format(
-                        perforce_path, project['name']
+                        file_path, project['name']
                     )
                 )
                 raise PerforceValidationError(error_message)
 
-    change = perforce_location.accessor.perforce_file_handler.change.add(
-        change, perforce_path, 'published with ftrack',
-    )
+    # we don't want to publish the sequence representation itself
+    if not component_is_container:
+        file_path = perforce_location.get_filesystem_path(component)
 
-    logger.info(
-        'adding component {} to change {}'.format(
-            perforce_component, change
+    if file_path:
+        # add file_path
+        logger.info(
+            'Adding {} :: {} to perforce '.format(component, file_path))
+
+        change = perforce_location.accessor.perforce_file_handler.change.add(
+            change, file_path, 'published with ftrack',
         )
-    )
 
-    if perforce_component['container']:
+        logger.info(
+            'Added  {} to change {}'.format(
+                file_path, change
+            )
+        )
+
+    if component_is_in_container:
         # add change to current container, so can later be retrieved
-        perforce_component['container']['metadata']['change'] = change
+        logger.info('adding change {} as metadata to {}'.format(change, component['container']))
+        component['container']['metadata']['change'] = change
         session.commit()
 
+    # If there's a valid change and the component is either without container (single file)
+    # or is the container itself, submit the changes to perforce
     if (
-            isinstance(perforce_component, session.types['SequenceComponent'])
-            or not perforce_component['container']
+        change and (component_is_container or not component_is_in_container)
     ):
-        # PUBLISH RESULT FILE IN PERFORCE
+        logger.info('Submitting change {}'.format(change))
         perforce_location.accessor.perforce_file_handler.change.submit(change)
 
 
