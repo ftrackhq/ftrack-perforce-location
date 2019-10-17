@@ -115,9 +115,9 @@ class WorkspaceValidator(object):
         )
         result = P4.Map.join(client_map, root_map)
 
-        self.logger.debug('Client map:\n{0}'.format(client_map))
-        self.logger.debug('Client root map:\n{0}'.format(root_map))
-        self.logger.debug('Result:\n{0}'.format(result))
+        # self.logger.debug('Client map:\n{0}'.format(client_map))
+        # self.logger.debug('Client root map:\n{0}'.format(root_map))
+        # self.logger.debug('Result:\n{0}'.format(result))
 
         #  Avoid the weird mix of (back)slashes on Windows.
         result = P4.Map([
@@ -125,7 +125,7 @@ class WorkspaceValidator(object):
             for row in result.as_array()
         ])
 
-        self.logger.debug('Normalized Result:\n{0}'.format(result))
+        # self.logger.debug('Normalized Result:\n{0}'.format(result))
 
         return result
 
