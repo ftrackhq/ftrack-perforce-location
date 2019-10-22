@@ -2,6 +2,7 @@
 # :copyright: Copyright (c) 2018 ftrack
 
 import logging
+import re
 import os
 from ftrack_perforce_location.import_p4api import import_p4
 
@@ -42,9 +43,11 @@ class PerforceResourceIdentifierTransformer(
         fullpath = os.path.join(root, resource_identifier)
         mangled_path = seq_to_glob(fullpath)
         stats = self.connection.run_fstat(mangled_path)
-
-        if '%d' in resource_identifier:
-            resource_identifier = resource_identifier.replace('%d', '*')
+        rx = re.compile('%+\d+d|%d')
+        found = rx.search(resource_identifier)
+        if found:
+            replace = found.group()
+            resource_identifier = resource_identifier.replace(replace, '*')
 
         # format result path as: //depot/,,,,#<revision>
         encoded_path = '//{0}#{1}'.format(
