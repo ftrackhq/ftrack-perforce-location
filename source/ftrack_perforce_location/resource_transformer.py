@@ -82,14 +82,16 @@ class PerforceResourceIdentifierTransformer(
             pass
 
         stats = self.connection.run_fstat(depot_pat)
-        for stat in stats:
-            self.logger.info('checking for {} in {}'.format(depot_path_name, stat['clientFile']))
-            if depot_path_name in stat['clientFile']:
-                decoded_path = stat['clientFile']
-                self.logger.debug('decode {0} as {1}'.format(
-                    resource_identifier, decoded_path)
-                )
-                break
+
+        if '*' not in depot_path_name:
+            for stat in stats:
+                self.logger.info('checking for {} in {}'.format(depot_path_name, stat['clientFile']))
+                if depot_path_name in stat['clientFile']:
+                    decoded_path = stat['clientFile']
+                    self.logger.debug('decode {0} as {1}'.format(
+                        resource_identifier, decoded_path)
+                    )
+                    break
 
         decoded_sequence_path = os.path.join(os.path.dirname(stats[0]['clientFile']), depot_path_name)
         decoded_path = decoded_path or decoded_sequence_path
