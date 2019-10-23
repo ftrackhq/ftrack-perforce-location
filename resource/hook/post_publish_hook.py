@@ -42,7 +42,7 @@ def post_publish_callback(session, event):
     file_path = None
 
     # check components we are about to publish
-    component_is_in_container = component['container']
+    component_is_in_container = bool(component['container'])
     component_is_container = isinstance(
         component, session.types['SequenceComponent']
     )
@@ -62,8 +62,14 @@ def post_publish_callback(session, event):
         change = component['metadata'].get('change')
         project_id = component['version']['link'][0]['id']
 
-    logger.info('post publish for :{}, iscontainer :{} , isincontainer: {}, has change: {}'.format(
-        component, component_is_container, component_is_in_container, change))
+    logger.info(
+        'post publish for :{},'
+        ' iscontainer :{} ,'
+        ' isincontainer: {}, '
+        'has change: {}'.format(
+        component, component_is_container, component_is_in_container, change
+        )
+    )
 
     project = session.query(
         'select id, name from Project where id is "{0}"'.format(project_id)
@@ -140,8 +146,15 @@ def post_publish_callback(session, event):
     if (
         change and (component_is_container or not component_is_in_container)
     ):
-        logger.info('Submitting change {}'.format(change))
         perforce_location.accessor.perforce_file_handler.change.submit(change)
+
+        if component_is_container:
+            # once submitted the change remove the pending change from metadata
+            logger.debug(
+                'removing change:{} from {} metadata'.format(
+                    change, component['container'])
+            )
+            component['container']['metadata']['change'] = None
 
 
 def _register(event, session=None):
