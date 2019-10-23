@@ -45,6 +45,8 @@ class PerforceResourceIdentifierTransformer(
         stats = self.connection.run_fstat(mangled_path)
         rx = re.compile('%+\d+d|%d')
         found = rx.search(resource_identifier)
+        original_resource = resource_identifier
+
         if found:
             replace = found.group()
             resource_identifier = resource_identifier.replace(replace, '*')
@@ -56,7 +58,7 @@ class PerforceResourceIdentifierTransformer(
         )
 
         self.logger.debug('encode {0} as {1}'.format(
-            resource_identifier, encoded_path)
+            original_resource, encoded_path)
         )
         return encoded_path
 
@@ -88,11 +90,12 @@ class PerforceResourceIdentifierTransformer(
                     resource_identifier, decoded_path)
                 )
                 break
-        decoded_path = decoded_path or os.path.join(os.path.dirname(stats[0]['clientFile']), depot_path_name)
+
+        decoded_sequence_path = os.path.join(os.path.dirname(stats[0]['clientFile']), depot_path_name)
+        decoded_path = decoded_path or decoded_sequence_path
         if '*' in decoded_path:
             decoded_path = decoded_path.replace('*', '%d')
 
         self.logger.info('returning decoded path for {} as {}'.format(resource_identifier, decoded_path))
-
 
         return decoded_path

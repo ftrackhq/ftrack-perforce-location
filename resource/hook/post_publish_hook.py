@@ -60,7 +60,11 @@ def post_publish_callback(session, event):
                 logger.error(error)
                 pass
         else:
+            change = component['metadata'].get('change')
             project_id = component['version']['link'][0]['id']
+
+        logger.info('post publish for :{}, iscontainer :{} , isincontainer: {}, has change: {}'.format(
+            component, component_is_container, component_is_in_container, change))
 
         project = session.query(
             'select id, name from Project where id is "{0}"'.format(project_id)
@@ -115,10 +119,6 @@ def post_publish_callback(session, event):
             file_path = perforce_location.get_filesystem_path(component)
 
         if file_path:
-            # add file_path
-            logger.info(
-                'Adding {} :: {} to perforce '.format(component, file_path))
-
             change = perforce_location.accessor.perforce_file_handler.change.add(
                 change, file_path, 'published with ftrack',
             )

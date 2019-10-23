@@ -6,6 +6,7 @@ import logging
 
 import ftrack_api.accessor.disk
 
+
 class PerforceAccessor(ftrack_api.accessor.disk.DiskAccessor):
     '''Extends the DiskAccessor to ensure target file is writable and/or the
     correct version.
@@ -35,8 +36,6 @@ class PerforceAccessor(ftrack_api.accessor.disk.DiskAccessor):
 
         _, ext = os.path.splitext(resource_identifier)
         perforce_filemode = self._typemap.get(ext.lower(), 'binary')  # If is unknown let's piggy back on binary format.
-
-        self.logger.debug('opening : {}'.format(resource_identifier))
         filesystem_path = self.get_filesystem_path(resource_identifier)
         self.perforce_file_handler.file_to_depot(filesystem_path, perforce_filemode)
         return super(PerforceAccessor, self).open(
