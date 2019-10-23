@@ -29,124 +29,119 @@ logger = logging.getLogger(
 
 def post_publish_callback(session, event):
     '''Event callback to publish the result file in Perforce depot.'''
-    try:
-        # collect location
-        location_id = event['data'].get('location_id')
-        perforce_location = session.get('Location', location_id)
+    # collect location
+    location_id = event['data'].get('location_id')
+    perforce_location = session.get('Location', location_id)
 
-        # collect component
-        component_id = event['data'].get('component_id')
-        component = session.get('Component', component_id)
+    # collect component
+    component_id = event['data'].get('component_id')
+    component = session.get('Component', component_id)
 
-        # store initial states
-        change = None
-        file_path = None
+    # store initial states
+    change = None
+    file_path = None
 
-        # check components we are about to publish
-        component_is_in_container = component['container']
-        component_is_container = isinstance(
-            component, session.types['SequenceComponent']
-        )
+    # check components we are about to publish
+    component_is_in_container = component['container']
+    component_is_container = isinstance(
+        component, session.types['SequenceComponent']
+    )
 
-        # get the project id,and potentially a change
-        if component_is_in_container:
-            project_id = component['container']['version']['link'][0]['id']
+    # get the project id,and potentially a change
+    if component_is_in_container:
+        project_id = component['container']['version']['link'][0]['id']
 
-            # if the component is in a container
-            # check the container for the current change set
+        # if the component is in a container
+        # check the container for the current change set
+        try:
+            change = component['container']['metadata'].get('change')
+        except ValueError as error:
+            logger.error(error)
+            pass
+    else:
+        change = component['metadata'].get('change')
+        project_id = component['version']['link'][0]['id']
+
+    logger.info('post publish for :{}, iscontainer :{} , isincontainer: {}, has change: {}'.format(
+        component, component_is_container, component_is_in_container, change))
+
+    project = session.query(
+        'select id, name from Project where id is "{0}"'.format(project_id)
+    ).one()
+
+    storage_scenario = session.query(
+        'select value from Setting '
+        'where name is "storage_scenario" and group is "STORAGE"'
+    ).one()
+
+    # check if we require one depot per project
+    configuration = json.loads(storage_scenario['value'])
+    location_data = configuration.get('data', {})
+    require_one_depot_per_project = location_data.get(
+        'one_depot_per_project', False
+    )
+
+    if require_one_depot_per_project:
+        # Avoid stale cached values
+        del project['custom_attributes']
+        session.populate(project, 'custom_attributes')
+        if project['custom_attributes'].get('own_perforce_depot', False):
+            connection = (
+                perforce_location.resource_identifier_transformer.connection
+            )
             try:
-                change = component['container']['metadata'].get('change')
-            except ValueError as error:
-                logger.error(error)
-                pass
-        else:
-            change = component['metadata'].get('change')
-            project_id = component['version']['link'][0]['id']
+                sanitise_function = (
+                    perforce_location.structure.sanitise_for_filesystem
+                )
+            except AttributeError:
+                sanitise_function = None
+            validator = WorkspaceValidator(
+                connection, [project], sanitise_function
+            )
+            try:
+                validator.validate_one_depot_per_project()
+            except PerforceValidationError as error:
+                logger.warning(
+                    'Workspace validation failed for project {}:\n{}'.format(
+                        project['name'], error)
+                )
+                error_message = (
+                    'Cannot checkin {}.\n'
+                    'Project {} requires its own depot.'.format(
+                        file_path, project['name']
+                    )
+                )
+                raise PerforceValidationError(error_message)
 
-        logger.info('post publish for :{}, iscontainer :{} , isincontainer: {}, has change: {}'.format(
-            component, component_is_container, component_is_in_container, change))
+    # we don't want to publish the sequence representation itself
+    if not component_is_container:
+        file_path = perforce_location.get_filesystem_path(component)
 
-        project = session.query(
-            'select id, name from Project where id is "{0}"'.format(project_id)
-        ).one()
-
-        storage_scenario = session.query(
-            'select value from Setting '
-            'where name is "storage_scenario" and group is "STORAGE"'
-        ).one()
-
-        # check if we require one depot per project
-        configuration = json.loads(storage_scenario['value'])
-        location_data = configuration.get('data', {})
-        require_one_depot_per_project = location_data.get(
-            'one_depot_per_project', False
+    if file_path:
+        change = perforce_location.accessor.perforce_file_handler.change.add(
+            change, file_path, 'published with ftrack',
         )
 
-        if require_one_depot_per_project:
-            # Avoid stale cached values
-            del project['custom_attributes']
-            session.populate(project, 'custom_attributes')
-            if project['custom_attributes'].get('own_perforce_depot', False):
-                connection = (
-                    perforce_location.resource_identifier_transformer.connection
-                )
-                try:
-                    sanitise_function = (
-                        perforce_location.structure.sanitise_for_filesystem
-                    )
-                except AttributeError:
-                    sanitise_function = None
-                validator = WorkspaceValidator(
-                    connection, [project], sanitise_function
-                )
-                try:
-                    validator.validate_one_depot_per_project()
-                except PerforceValidationError as error:
-                    logger.warning(
-                        'Workspace validation failed for project {}:\n{}'.format(
-                            project['name'], error)
-                    )
-                    error_message = (
-                        'Cannot checkin {}.\n'
-                        'Project {} requires its own depot.'.format(
-                            file_path, project['name']
-                        )
-                    )
-                    raise PerforceValidationError(error_message)
-
-        # we don't want to publish the sequence representation itself
-        if not component_is_container:
-            file_path = perforce_location.get_filesystem_path(component)
-
-        if file_path:
-            change = perforce_location.accessor.perforce_file_handler.change.add(
-                change, file_path, 'published with ftrack',
+        logger.info(
+            'Added  {} to change {}'.format(
+                file_path, change
             )
+        )
 
-            logger.info(
-                'Added  {} to change {}'.format(
-                    file_path, change
-                )
-            )
+    if component_is_in_container and change:
+        # add change to current container, so can later be retrieved
+        logger.info('adding change {} as metadata to {}'.format(
+            change, component['container'])
+        )
+        component['container']['metadata']['change'] = change
 
-        if component_is_in_container and change:
-            # add change to current container, so can later be retrieved
-            logger.info('adding change {} as metadata to {}'.format(
-                change, component['container'])
-            )
-            component['container']['metadata']['change'] = change
-
-        # If there's a valid change and the component is either without container (single file)
-        # or is the container itself, submit the changes to perforce
-        if (
-            change and (component_is_container or not component_is_in_container)
-        ):
-            logger.info('Submitting change {}'.format(change))
-            perforce_location.accessor.perforce_file_handler.change.submit(change)
-
-
-    except Exception as error:
-        logger.error(error)
+    # If there's a valid change and the component is either without container (single file)
+    # or is the container itself, submit the changes to perforce
+    if (
+        change and (component_is_container or not component_is_in_container)
+    ):
+        logger.info('Submitting change {}'.format(change))
+        perforce_location.accessor.perforce_file_handler.change.submit(change)
 
 
 def _register(event, session=None):
