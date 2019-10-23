@@ -135,7 +135,6 @@ def post_publish_callback(session, event):
                 change, component['container'])
             )
             component['container']['metadata']['change'] = change
-            session.commit()
 
         # If there's a valid change and the component is either without container (single file)
         # or is the container itself, submit the changes to perforce
