@@ -8,7 +8,7 @@ import sys
 import ftrack_api
 
 # from ftrack_connect.ui.widget.data_drop_zone.riffle import browser
-from QtExt import QtCore, QtGui, QtWidgets
+from qtpy import QtCore, QtGui, QtWidgets
 import ftrack_connect.ui.theme
 
 logger = logging.getLogger(

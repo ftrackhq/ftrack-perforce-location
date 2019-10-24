@@ -104,7 +104,8 @@ setup(
     ],
     install_requires=[
         'appdirs == 1.4.0',
-        'ftrack-action-handler'
+        'ftrack-action-handler',
+        'qtpy >=1.0.0, < 2'
     ],
     tests_require=[
     ],
