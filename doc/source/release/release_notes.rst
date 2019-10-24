@@ -9,6 +9,9 @@ Release Notes
 
 .. release:: upcoming
 
+    .. change:: new
+
+        Use Qtpy instead of the bundled QtExt with Connect.
 
     .. change:: fixed
 
