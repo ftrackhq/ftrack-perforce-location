@@ -8,7 +8,6 @@ import sys
 import ftrack_api
 
 # from ftrack_connect.ui.widget.data_drop_zone.riffle import browser
-from qtpy import QtCore, QtGui, QtWidgets
 import ftrack_connect.ui.theme
 
 logger = logging.getLogger(
@@ -19,7 +18,9 @@ logger = logging.getLogger(
 # which, due to cx_freeze, does not ordinarily respect PYTHONPATH
 extra_paths = os.environ.get('PYTHONPATH', '').split(os.pathsep)
 for path in extra_paths:
-    sys.path.append(path)
+    sys.path.insert(0, path)
+
+from qtpy import QtCore, QtGui, QtWidgets
 
 from ftrack_perforce_location.perforce_handlers.connection import (
     PerforceConnectionHandler
@@ -242,7 +243,7 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
 if __name__ == '__main__':
     session = ftrack_api.Session(plugin_paths=list(), auto_connect_event_hub=False)
     perforce_settings = PerforceSettingsHandler(session)
-    app = QtGui.QApplication(sys.argv)
+    app = QtWidgets.QApplication(sys.argv)
     window = ConfigureUserSettingsWidget(perforce_settings)
     window.exec_()
     # TODO exit after closing verification warning.
