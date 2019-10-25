@@ -2,15 +2,16 @@
 # :copyright: Copyright (c) 2018 ftrack
 
 import logging
-import re
 import os
+import re
+
+import ftrack_api.resource_identifier_transformer.base as base_transformer
+
 from ftrack_perforce_location.import_p4api import import_p4
 
 import_p4()
 
 from P4 import P4Exception
-import ftrack_api.resource_identifier_transformer.base as base_transformer
-
 from ftrack_perforce_location.perforce_handlers.file import seq_to_glob
 
 
@@ -72,20 +73,22 @@ class PerforceResourceIdentifierTransformer(
 
         '''
         decoded_path = None
-        depot_pat, version = resource_identifier.split('#')
-        depot_path_name = os.path.basename(depot_pat)
+        depot_path, version = resource_identifier.split('#')
+        depot_path_name = os.path.basename(depot_path)
 
         try:
-            self.logger.info('Sync {}'.format(resource_identifier))
+            self.logger.info('Sync {0}'.format(resource_identifier))
             self.connection.run_sync(resource_identifier)
-        except P4Exception as error:
+        except P4Exception:
             pass
 
-        stats = self.connection.run_fstat(depot_pat)
+        stats = self.connection.run_fstat(depot_path)
 
         if '*' not in depot_path_name:
             for stat in stats:
-                self.logger.info('checking for {} in {}'.format(depot_path_name, stat['clientFile']))
+                self.logger.info('checking for {0} in {1}'.format(
+                    depot_path_name, stat['clientFile']
+                ))
                 if depot_path_name in stat['clientFile']:
                     decoded_path = stat['clientFile']
                     self.logger.debug('decode {0} as {1}'.format(
@@ -93,11 +96,15 @@ class PerforceResourceIdentifierTransformer(
                     )
                     break
 
-        decoded_sequence_path = os.path.join(os.path.dirname(stats[0]['clientFile']), depot_path_name)
+        decoded_sequence_path = os.path.join(
+            os.path.dirname(stats[0]['clientFile']), depot_path_name
+        )
         decoded_path = decoded_path or decoded_sequence_path
         if '*' in decoded_path:
             decoded_path = decoded_path.replace('*', '%d')
 
-        self.logger.info('returning decoded path for {} as {}'.format(resource_identifier, decoded_path))
+        self.logger.info('returning decoded path for {0} as {1}'.format(
+            resource_identifier, decoded_path
+        ))
 
         return decoded_path
