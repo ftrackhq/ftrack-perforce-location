@@ -38,9 +38,15 @@ def post_publish_callback(session, event):
     component_is_container = isinstance(
         component, session.types['SequenceComponent']
     )
-    container = component['container'] or component
-    change = container['metadata'].get('change')
-    project_id = container['version']['link'][0]['id']
+
+    # either get the container of the component itself
+    root_component = component['container'] or component
+
+    # get the change number
+    change = root_component['metadata'].get('change')
+
+    # extract project id from root_component
+    project_id = root_component['version']['link'][0]['id']
 
     logger.debug(
         'post publish for: {0},'
@@ -83,9 +89,9 @@ def post_publish_callback(session, event):
     if component_is_in_container:
         # Add change to current container temporarily
         logger.debug('adding change {0} as metadata to {1}'.format(
-            change, container)
+            change, root_component)
         )
-        container['metadata']['change'] = change
+        root_component['metadata']['change'] = change
 
     # If there's a valid change and the component has no container (single file)
     # or is the container itself, submit the changes to Perforce
