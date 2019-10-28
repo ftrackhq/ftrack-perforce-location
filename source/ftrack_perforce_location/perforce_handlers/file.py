@@ -5,6 +5,10 @@ import logging
 import os
 import re
 
+from ftrack_perforce_location.import_p4api import import_p4
+
+import_p4()
+
 from P4 import P4Exception
 from ftrack_perforce_location.perforce_handlers.errors import (
     PerforceFileHandlerException
@@ -17,7 +21,7 @@ seq_match = re.compile('(%+\d+d)|(#+)|(%d)')
 def seq_to_glob(filepath):
     '''
     Search for file sequence signatures in **filepath**
-    and replace it with wildcard *.
+-    and replace it with wildcard *.
     '''
     found = seq_match.search(filepath)
     if found:
@@ -74,10 +78,12 @@ class PerforceFileHandler(object):
 
     def file_to_depot(self, filepath, perforce_filemode='binary'):
         '''Publish **filepath** to server.'''
-        self.logger.debug('moving file {} to depot with mode {}'.format(filepath, perforce_filemode))
+
         if not filepath.startswith(self.root):
             raise IOError('File is not in {}'.format(self.root))
         stats = []
+
+        self.logger.debug('moving file {} to depot with mode {}'.format(filepath, perforce_filemode))
 
         try:
             stats = self.connection.run_fstat(filepath)

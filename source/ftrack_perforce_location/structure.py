@@ -34,7 +34,7 @@ class PerforceStructure(ftrack_api.structure.standard.StandardStructure):
 
         '''
 
-        self.logger.debug('Get parts from entity : {}'.format(entity))
+        # self.logger.debug('Get parts from entity : {}'.format(entity))
 
         session = entity.session
 
@@ -78,6 +78,6 @@ class PerforceStructure(ftrack_api.structure.standard.StandardStructure):
 
         parts.append(asset['name'])
 
-        self.logger.debug('Get parts result : {}'.format(parts))
+        # self.logger.debug('Get parts result : {}'.format(parts))
 
         return [self.sanitise_for_filesystem(part) for part in parts]

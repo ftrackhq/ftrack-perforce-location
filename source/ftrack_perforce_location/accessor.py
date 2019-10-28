@@ -6,8 +6,6 @@ import logging
 
 import ftrack_api.accessor.disk
 
-from ftrack_perforce_location.perforce_handlers.file import seq_to_glob
-
 
 class PerforceAccessor(ftrack_api.accessor.disk.DiskAccessor):
     '''Extends the DiskAccessor to ensure target file is writable and/or the
@@ -38,10 +36,7 @@ class PerforceAccessor(ftrack_api.accessor.disk.DiskAccessor):
 
         _, ext = os.path.splitext(resource_identifier)
         perforce_filemode = self._typemap.get(ext.lower(), 'binary')  # If is unknown let's piggy back on binary format.
-
-        self.logger.debug('opening : {}'.format(resource_identifier))
         filesystem_path = self.get_filesystem_path(resource_identifier)
-        filesystem_path = seq_to_glob(filesystem_path)
         self.perforce_file_handler.file_to_depot(filesystem_path, perforce_filemode)
         return super(PerforceAccessor, self).open(
             resource_identifier, mode=mode)
@@ -56,5 +51,5 @@ class PerforceAccessor(ftrack_api.accessor.disk.DiskAccessor):
                required to overwrite the file.
         '''
 
-        self.logger.debug('exists : {}'.format(resource_identifier))
+        # self.logger.debug('exists : {}'.format(resource_identifier))
         return False
