@@ -9,6 +9,9 @@ Release Notes
 
 .. release:: upcoming
 
+    .. change:: new
+
+        Support publish of file sequences.
 
     .. change:: fixed
 
