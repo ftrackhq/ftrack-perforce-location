@@ -11,6 +11,10 @@ Release Notes
 
     .. change:: new
 
+        Use Qt.py instead of the bundled QtExt with Connect.
+
+    .. change:: new
+
         Support publish of file sequences.
 
     .. change:: fixed
