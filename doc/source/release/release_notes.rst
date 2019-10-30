@@ -9,6 +9,10 @@ Release Notes
 
 .. release:: upcoming
 
+    .. change:: changed
+
+        Defer the Qt import when loading scenario.
+
     .. change:: new
 
         Support publish of file sequences.
