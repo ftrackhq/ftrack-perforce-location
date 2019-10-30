@@ -9,6 +9,10 @@ Release Notes
 
 .. release:: upcoming
 
+    .. change:: changed
+
+        Defer the Qt import when loading scenario.
+
     .. change:: new
 
         Use Qt.py instead of the bundled QtExt with Connect.
