@@ -11,6 +11,14 @@ Release Notes
 
     .. change:: changed
 
+        Split hooks and events, so the location can be imported from api only.
+
+        .. note::
+           In order to use it only with the session, please set env::FTRACK_EVENT_PLUGIN_PATH
+           to the event folder before starting the session.
+
+    .. change:: changed
+
         Defer the Qt import when loading scenario.
 
     .. change:: new
