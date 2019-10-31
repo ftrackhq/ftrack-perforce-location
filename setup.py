@@ -16,6 +16,8 @@ SOURCE_PATH = os.path.join(ROOT_PATH, 'source')
 README_PATH = os.path.join(ROOT_PATH, 'README.rst')
 RESOURCE_PATH = os.path.join(ROOT_PATH, 'resource')
 HOOK_PATH = os.path.join(RESOURCE_PATH, 'hook')
+EVENT_PATH = os.path.join(RESOURCE_PATH, 'event')
+
 MODULES_PATH = os.path.join(RESOURCE_PATH, 'modules')
 
 # Read version from source.
@@ -49,6 +51,12 @@ class BuildPlugin(Command):
         '''Run the build step.'''
         # Clean staging path
         shutil.rmtree(STAGING_PATH, ignore_errors=True)
+
+        # Copy hook files
+        shutil.copytree(
+            EVENT_PATH,
+            os.path.join(STAGING_PATH, 'event')
+        )
 
         # Copy hook files
         shutil.copytree(
