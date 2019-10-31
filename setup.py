@@ -5,6 +5,11 @@ import os
 import re
 import shutil
 import sys
+import pip
+
+if not pip.__version__.split('.') >= ['19', '3', '0']:
+    raise ValueError('Pip should be version 19.3.0 or higher')
+
 from pip._internal import main as pip_main  # pip >= 10
 
 from setuptools import setup, find_packages, Command
@@ -62,13 +67,12 @@ class BuildPlugin(Command):
             os.path.join(STAGING_PATH, 'modules')
         )
 
-        pip_main(
+        pip_main.main(
             [
                 'install',
                 '.',
                 '--target',
-                os.path.join(STAGING_PATH, 'dependencies'),
-                '--process-dependency-links'
+                os.path.join(STAGING_PATH, 'dependencies')
             ]
         )
 
