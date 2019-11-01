@@ -9,6 +9,11 @@ Release Notes
 
 .. release:: upcoming
 
+    ..change:: changed
+        :tags: Setup
+
+        Pip compatibility for version 19.3.0 or higher
+
     .. change:: changed
 
         Defer the Qt import when loading scenario.
