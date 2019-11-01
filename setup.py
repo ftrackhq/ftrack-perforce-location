@@ -5,9 +5,11 @@ import os
 import re
 import shutil
 import sys
+
+from pkg_resources import parse_version
 import pip
 
-if not pip.__version__.split('.') >= ['19', '3', '0']:
+if parse_version(pip.__version__) < parse_version('19.3.0'):
     raise ValueError('Pip should be version 19.3.0 or higher')
 
 from pip._internal import main as pip_main  # pip >= 10
