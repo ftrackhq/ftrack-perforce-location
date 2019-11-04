@@ -7,7 +7,8 @@
 Release Notes
 *************
 
-.. release:: upcoming
+.. release:: 0.7.0
+    :date: 2019-11-04
 
     ..change:: changed
         :tags: Setup
@@ -37,7 +38,6 @@ Release Notes
     .. change:: new
 
         Enforce perforce username to be the same as the ftrack user logged in.
-
 
 
 .. release:: 0.1.0
