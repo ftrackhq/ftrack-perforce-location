@@ -24,7 +24,7 @@ def modify_application_launch(event):
         environment = {}
 
     ftrack_connect.application.appendPath(
-        os.path.join(os.path.dirname(__file__), '..', 'event'),
+        os.path.join(os.path.dirname(__file__), '..', 'location'),
         'FTRACK_EVENT_PLUGIN_PATH',
         environment
     )
