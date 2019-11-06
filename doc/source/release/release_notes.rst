@@ -15,7 +15,7 @@ Release Notes
 
         .. note::
            In order to use it only with the session, please set env::FTRACK_EVENT_PLUGIN_PATH
-           to the event folder before starting the session.
+           to the **location** folder before starting the session.
 
     .. change:: changed
 
