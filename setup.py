@@ -16,7 +16,7 @@ SOURCE_PATH = os.path.join(ROOT_PATH, 'source')
 README_PATH = os.path.join(ROOT_PATH, 'README.rst')
 RESOURCE_PATH = os.path.join(ROOT_PATH, 'resource')
 HOOK_PATH = os.path.join(RESOURCE_PATH, 'hook')
-EVENT_PATH = os.path.join(RESOURCE_PATH, 'event')
+LOCATION_PATH = os.path.join(RESOURCE_PATH, 'location')
 
 MODULES_PATH = os.path.join(RESOURCE_PATH, 'modules')
 
@@ -54,8 +54,8 @@ class BuildPlugin(Command):
 
         # Copy hook files
         shutil.copytree(
-            EVENT_PATH,
-            os.path.join(STAGING_PATH, 'event')
+            LOCATION_PATH,
+            os.path.join(STAGING_PATH, 'location')
         )
 
         # Copy hook files
