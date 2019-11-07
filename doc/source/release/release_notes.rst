@@ -7,7 +7,13 @@
 Release Notes
 *************
 
-.. release:: upcoming
+.. release:: 0.7.0
+    :date: 2019-11-04
+
+    ..change:: changed
+        :tags: Setup
+
+        Pip compatibility for version 19.3.0 or higher
 
     .. change:: changed
 
@@ -40,7 +46,6 @@ Release Notes
     .. change:: new
 
         Enforce perforce username to be the same as the ftrack user logged in.
-
 
 
 .. release:: 0.1.0
