@@ -13,6 +13,10 @@ Release Notes
 
         Discover new icon from ftrack server.
 
+    .. change:: changed
+        
+        Split hooks so location can be used without connect.
+
 .. release:: 0.7.0
     :date: 2019-11-04
 
