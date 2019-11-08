@@ -10,6 +10,14 @@ Release Notes
 .. release:: 0.7.0
     :date: 2019-11-04
 
+    .. change:: changed
+
+        Split hooks and events, so the location can be imported from api only.
+
+        .. note::
+           In order to use it only with the session, please set env::FTRACK_EVENT_PLUGIN_PATH
+           to the **location** folder before starting the session.
+
     ..change:: changed
         :tags: Setup
 
