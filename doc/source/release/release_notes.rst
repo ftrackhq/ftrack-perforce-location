@@ -7,6 +7,12 @@
 Release Notes
 *************
 
+.. release :: Upcoming
+
+    .. change:: add
+
+        Discover new icon from ftrack server.
+
 .. release:: 0.7.0
     :date: 2019-11-04
 
