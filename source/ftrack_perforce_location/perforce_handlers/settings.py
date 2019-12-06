@@ -170,11 +170,17 @@ class PerforceSettingsHandler(object):
         Spins up a short-lived ftrack_api.Session to query the ftrack server
         for settings.
         '''
-        with ftrack_api.Session(auto_connect_event_hub=False,
-                                plugin_paths=list()) as session:
+        with ftrack_api.Session(
+                self.session.server_url,
+                self.session.api_key,
+                self.session.api_user,
+                auto_connect_event_hub=False,
+                plugin_paths=list()
+        ) as session:
             setting = session.query(
                 'select value from Setting where name is storage_scenario'
             ).one()
+
         location_data = json.loads(setting['value'])['data']
         self.logger.debug('scenario data :{}'.format(location_data))
         return location_data
