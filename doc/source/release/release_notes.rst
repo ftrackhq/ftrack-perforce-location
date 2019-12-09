@@ -7,7 +7,8 @@
 Release Notes
 *************
 
-.. release :: Upcoming
+.. release:: 1.0.0
+    :date: 2019-12-09
 
     .. change:: add
 
