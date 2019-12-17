@@ -5,14 +5,10 @@ ftrack perforce location
 ftrack-perforce-location allows ftrack to publish to and import from a Perforce
 depot through a user's local workspace.
 
-It demonstrates using an accessor, location, resrouce transformer and structure
-to ingest, track versions of files and assets. For more information how ftrack
-manages files, see:
-https://help.ftrack.com/developing-with-ftrack/key-concepts/locations
-https://help.ftrack.com/administering-ftrack/general/configuring-file-storage
-
+*************
 Prerequisites
-================
+*************
+
 Perforce
 --------
 * Ensure that a Perforce server is available and reachable.
@@ -29,26 +25,6 @@ Building the plugin
 .. code:: bash
 
     $ python setup.py build_plugin
-
-TODO
-====
-* Import file published
-
-Known issues
-============
-* In case of :: [Warning]: '<FILEPATH> - file(s) not in client view.'#
-
-.. code::bash
-
-    $p4 client <yourclient>
-
-and ensure :
-
-.. code::config
-
-    View:
-    //depot/... //<yourclient>/...
-
 
 
 Configuration
