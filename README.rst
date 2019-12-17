@@ -19,6 +19,12 @@ ftrack
 * Configure the Perforce Storage Scenario with your Perforce server protocol,
 address and port.
 
+
+*************
+Documentation
+*************
+Full documentation, including installation and setup guides, can be found at http://ftrack-perforce-location.rtd.ftrack.com/en/latest/
+
 Building the plugin
 ===================
 
