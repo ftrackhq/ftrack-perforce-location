@@ -7,6 +7,13 @@
 Release Notes
 *************
 
+
+.. release:: Upcoming
+
+    .. change:: add
+
+        Add Vc10 and Vc9 libraries for windows.
+
 .. release:: 1.0.0
     :date: 2019-12-09
 
