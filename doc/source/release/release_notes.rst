@@ -8,7 +8,8 @@ Release Notes
 *************
 
 
-.. release:: Upcoming
+.. release:: 1.0.1
+    :date: 2020-07-09
 
     .. change:: add
 
