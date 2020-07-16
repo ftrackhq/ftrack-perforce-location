@@ -18,8 +18,6 @@ logger = logging.getLogger('ftrack_perforce_location.connect_plugin_hook')
 def modify_application_launch(event):
     '''Modify the application environment to include our location plugin.'''
 
-    print event
-
     try:
         environment = event['data']['options']['env']
     except KeyError:
@@ -39,7 +37,7 @@ def modify_application_launch(event):
         environment
     )
 
-    logger.debug('Adding {} to app start environment. '.format(location))
+    logger.debug('Updating environments.')
 
 
 def register(api_object, **kw):
