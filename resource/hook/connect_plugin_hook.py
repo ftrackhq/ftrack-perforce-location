@@ -18,13 +18,17 @@ logger = logging.getLogger('ftrack_perforce_location.connect_plugin_hook')
 def modify_application_launch(event):
     '''Modify the application environment to include our location plugin.'''
 
+    print event
+
     try:
         environment = event['data']['options']['env']
     except KeyError:
         environment = {}
 
+    location = os.path.join(os.path.dirname(__file__), '..', 'location')
+
     ftrack_connect.application.appendPath(
-        os.path.join(os.path.dirname(__file__), '..', 'location'),
+        location,
         'FTRACK_EVENT_PLUGIN_PATH',
         environment
     )
@@ -34,6 +38,8 @@ def modify_application_launch(event):
         'PYTHONPATH',
         environment
     )
+
+    logger.debug('Adding {} to app start environment. '.format(location))
 
 
 def register(api_object, **kw):
@@ -45,6 +51,8 @@ def register(api_object, **kw):
     if not isinstance(api_object, ftrack_api.Session):
         # Exit to avoid registering this plugin again.
         return
+
+    logger.debug('Discovering connect plugin hook')
 
     # Location will be available from within the dcc applications.
     api_object.event_hub.subscribe(

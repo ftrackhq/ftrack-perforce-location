@@ -1,5 +1,9 @@
 import ftrack_api
+import logging
 
+logger = logging.getLogger(
+    'ftrack_perforce_location.register_typemap_hook'
+)
 # Binary formats
 BINARY = 'binary'
 BINARYFL = 'binary+Fl'
@@ -13,6 +17,7 @@ TEXTL = 'text+l'
 
 
 def register_images_typemap(event):
+
     return {
         '.bmp': BINARY,
         '.jpg': BINARYL,
@@ -64,7 +69,8 @@ def register_unreal_typemap(event):
         '.umap': BINARYL,
         '.upk': BINARYL,
         '.udk': BINARYL
-}
+    }
+
 
 def register_unity_typemap(event):
     # https://community.perforce.com/s/article/15244
@@ -105,6 +111,7 @@ def register(api_object, **kw):
     if not isinstance(api_object, ftrack_api.Session):
         # Exit to avoid registering this plugin again.
         return
+    logger.info('Discovering typemap hook')
 
     # IMAGES
     api_object.event_hub.subscribe(

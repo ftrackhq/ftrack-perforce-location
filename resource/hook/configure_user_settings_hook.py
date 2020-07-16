@@ -245,7 +245,7 @@ def register(session):
         # Exit to avoid registering this plugin again.
         return
 
-    logger.info('discovering configure storage scenario')
+    logger.info('Discovering configure user settings')
 
     application_store = ApplicationStore()
     launcher = ApplicationLauncher(application_store)

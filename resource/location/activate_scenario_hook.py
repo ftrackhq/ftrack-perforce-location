@@ -26,6 +26,6 @@ def register(session):
         # Exit to avoid registering this plugin again.
         return
 
-    logger.info('discovering activate storage scenario')
+    logger.info('Discovering activate storage scenario')
     scenario = ActivatePerforceStorageScenario()
     scenario.register(session)

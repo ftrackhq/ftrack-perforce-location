@@ -12,7 +12,7 @@ os_mapping = {
 
 
 def import_p4():
-    
+
     # if the module has already been loaded skip the checks.
     if 'P4' in sys.modules:
         # logger.debug('P4 module loaded: {}'.format(sys.modules['P4']))
