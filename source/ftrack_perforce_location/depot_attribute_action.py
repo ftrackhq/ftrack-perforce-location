@@ -38,7 +38,6 @@ class PerforceAttributeAction(BaseAction):
     def discover(self, session, entities, event):
         '''Return True to be discovered when *entities* is a single Project.
         '''
-        print self.logger.name
         if not entities or len(entities) != 1:
             return False
 
