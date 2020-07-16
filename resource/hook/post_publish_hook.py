@@ -88,7 +88,7 @@ def post_publish_callback(session, event):
 
     if component_is_in_container:
         # Add change to current container temporarily
-        logger.debug('adding change {0} as metadata to {1}'.format(
+        logger.debug('Adding change {0} as metadata to {1}'.format(
             change, root_component)
         )
         root_component['metadata']['change'] = change
@@ -194,7 +194,7 @@ def register(api_object, **kw):
         # Exit to avoid registering this plugin again.
         return
 
-    logger.info('Discovering post publish hook')
+    logger.info('Discovering post publish hook from {}'.format(__file__))
 
     api_object.event_hub.subscribe(
         'topic=ftrack.api.session.ready',
