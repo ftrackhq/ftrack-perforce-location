@@ -122,7 +122,7 @@ class PerforceSettingsHandler(object):
             self.write(new_config)
 
         if os.path.isfile(config_file):
-            self.logger.info(u'Reading config from {0}'.format(config_file))
+            self.logger.debug(u'Reading config from {0}'.format(config_file))
 
             with open(config_file, 'r') as file:
                 config = json.load(file)
@@ -136,7 +136,7 @@ class PerforceSettingsHandler(object):
                 config = new_config
 
         config = self.update_port_from_scenario(config)
-        self.logger.info('Returning config data :{}'.format(config))
+        self.logger.debug('Returning config data :{}'.format(config))
         return config
 
     def update_port_from_scenario(self, config, scenario_data=None):
@@ -151,7 +151,7 @@ class PerforceSettingsHandler(object):
         '''
         scenario_data = scenario_data or self._get_scenario_settings()
 
-        self.logger.info('Updating port from scenario: {}'.format(scenario_data))
+        self.logger.debug('Updating port from scenario: {}'.format(scenario_data))
         self._apply_scenario_settings(config, scenario_data)
 
         try:
