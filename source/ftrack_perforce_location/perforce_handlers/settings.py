@@ -89,7 +89,7 @@ class PerforceSettingsHandler(object):
                 error.message)
             )
 
-        self.logger.debug('updated config from perforce with: {}'.format(config))
+        self.logger.debug('Updated config from perforce with: {}'.format(config))
 
         return config
 
@@ -182,7 +182,7 @@ class PerforceSettingsHandler(object):
             ).one()
 
         location_data = json.loads(setting['value'])['data']
-        self.logger.debug('scenario data :{}'.format(location_data))
+        self.logger.debug('Current scenario data :{}'.format(location_data))
         return location_data
 
     def scenario_is_configured(self):
