@@ -58,7 +58,7 @@ class PerforceResourceIdentifierTransformer(
             int(stats[0].get('headRev', 0)) + 1
         )
 
-        self.logger.debug('encode {0} as {1}'.format(
+        self.logger.debug('Encode {0} as {1}'.format(
             original_resource, encoded_path)
         )
         return encoded_path
@@ -77,7 +77,7 @@ class PerforceResourceIdentifierTransformer(
         depot_path_name = os.path.basename(depot_path)
 
         try:
-            self.logger.info('Sync {0}'.format(resource_identifier))
+            self.logger.debug('Sync {0}'.format(resource_identifier))
             self.connection.run_sync(resource_identifier)
         except P4Exception:
             pass
@@ -86,12 +86,12 @@ class PerforceResourceIdentifierTransformer(
 
         if '*' not in depot_path_name:
             for stat in stats:
-                self.logger.info('checking for {0} in {1}'.format(
+                self.logger.debug('Checking for {0} in {1}'.format(
                     depot_path_name, stat['clientFile']
                 ))
                 if depot_path_name in stat['clientFile']:
                     decoded_path = stat['clientFile']
-                    self.logger.debug('decode {0} as {1}'.format(
+                    self.logger.debug('Decode {0} as {1}'.format(
                         resource_identifier, decoded_path)
                     )
                     break
@@ -103,7 +103,7 @@ class PerforceResourceIdentifierTransformer(
         if '*' in decoded_path:
             decoded_path = decoded_path.replace('*', '%d')
 
-        self.logger.info('returning decoded path for {0} as {1}'.format(
+        self.logger.debug('Returning decoded path for {0} as {1}'.format(
             resource_identifier, decoded_path
         ))
 
