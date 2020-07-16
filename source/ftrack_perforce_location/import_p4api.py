@@ -24,7 +24,7 @@ def import_p4():
     for module in modules:
 
         full_path = os.path.join(p4_modules, module)
-        logger.debug('looking for module in path: {}'.format(full_path))
+        logger.debug('Looking for module in path: {}'.format(full_path))
         if full_path not in sys.path:
             sys.path.append(full_path)
         try:
@@ -35,5 +35,5 @@ def import_p4():
             if sys.path[-1] == full_path:
                 del sys.path[-1]
         else:
-            logger.debug('successfully loaded {}'.format(full_path))
+            logger.debug('Successfully loaded module from {}'.format(full_path))
             break
