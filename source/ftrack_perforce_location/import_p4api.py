@@ -12,6 +12,12 @@ os_mapping = {
 
 
 def import_p4():
+    
+    # if the module has already been loaded skip the checks.
+    if 'P4' in sys.modules:
+        # logger.debug('P4 module loaded: {}'.format(sys.modules['P4']))
+        return
+
     cwd = os.path.dirname(__file__)
     p4_modules = os.path.abspath(os.path.join(cwd, '..', '..', 'modules', os_mapping[sys.platform]))
     modules = os.listdir(p4_modules)
