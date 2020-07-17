@@ -14,6 +14,7 @@ ftrack perforce location
    :caption: Contents:
 
    installing.rst
+   setup.rst
    release/index.rst
 
 
