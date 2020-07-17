@@ -3,10 +3,10 @@ Users permissions
 
 .. note::
 
-    This is has to be performed by a perforce user with Admin rights.
+    This is has to be performed by a perforce user with `Admin rights <https://www.perforce.com/manuals/v15.1/p4sag/chapter.protections.html>`_.
 
-* In p4admin : Create users with name as the **same login name as ftrack**
-* In p4admin : Ensure users are part of the **p4users group as Members and Owners**
+* In **p4admin** : Create users with name as the **same login name as ftrack**
+* In **p4admin** : Ensure users are part of the **p4users group as Members and Owners**
 
 .. image:: /image/user-permissions.png
 
@@ -101,4 +101,34 @@ Project Configuration
 
 On the designed project , run actions and select **Configure Project Perforce**.
 
-    .. image:: /image/configure-project-action.png
+.. image:: /image/configure-project-action.png
+
+Set the per project depot attribute and click Submit
+
+.. image:: /image/per-project-depot.png
+
+To confirm all is in place **run p4v** and check the view to the current project has been correctly added
+
+.. image:: /image/view-configuragion.png
+
+
+Publishing
+==========
+
+You should now be able to publish to perforce using connect as usual using connect or any other ftrack integration.
+
+.. image:: /image/connect-publish.png
+
+This should result in connect reporting the successful publish
+
+.. image:: /image/connect-publish-result.png
+
+On the server , the component should be added to the **ftrack.perforce-scenario** location.
+
+.. image:: /image/connect-publish-result-server.png
+
+Running p4v should show the files in the depot.
+
+.. image:: /image/p4v-successful-publish.png
+
+
