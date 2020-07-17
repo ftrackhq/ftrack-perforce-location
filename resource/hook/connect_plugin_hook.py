@@ -50,7 +50,7 @@ def register(api_object, **kw):
         # Exit to avoid registering this plugin again.
         return
 
-    logger.debug('Discovering connect plugin hook')
+    logger.debug('Discovering connect plugin hook from {}'.format(__file__))
 
     # Location will be available from within the dcc applications.
     api_object.event_hub.subscribe(

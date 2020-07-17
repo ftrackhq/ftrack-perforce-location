@@ -7,18 +7,28 @@
 Release Notes
 *************
 
+.. release:: Upcoming
+
+    .. change:: fixed
+
+        Change list is not committed.
+
+    .. change:: changed
+
+        Improve and cleanup logs.
+
 
 .. release:: 1.0.1
     :date: 2020-07-09
 
-    .. change:: add
+    .. change:: new
 
         Add Vc10 and Vc9 libraries for windows.
 
 .. release:: 1.0.0
     :date: 2019-12-09
 
-    .. change:: add
+    .. change:: new
 
         Discover new icon from ftrack server.
 
