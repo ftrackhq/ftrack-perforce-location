@@ -1,3 +1,7 @@
+In this document the required setup for the ftrack perforce integration.
+A basic knowledge of perforce and ftrack is assumed.
+
+
 Users permissions
 =================
 
