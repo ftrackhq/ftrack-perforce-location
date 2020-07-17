@@ -113,7 +113,7 @@ Set the per project depot attribute and click Submit
 
 To confirm all is in place **run p4v** and check the view to the current project has been correctly added
 
-.. image:: /image/view-configuragion.png
+.. image:: /image/view-configuration.png
 
 
 Publishing

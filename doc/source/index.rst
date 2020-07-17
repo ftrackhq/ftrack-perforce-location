@@ -15,6 +15,7 @@ ftrack perforce location
 
    installing.rst
    setup.rst
+   known_issues.rst
    release/index.rst
 
 
