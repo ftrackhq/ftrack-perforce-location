@@ -27,6 +27,6 @@ def register(session):
         # Exit to avoid registering this plugin again in the old API.
         return
 
-    logger.info('Registering Perforce attribute action')
+    logger.info('Discovering perforce attribute action')
     action = PerforceAttributeAction(session)
     action.register()

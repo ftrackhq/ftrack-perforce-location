@@ -23,8 +23,10 @@ def modify_application_launch(event):
     except KeyError:
         environment = {}
 
+    location = os.path.join(os.path.dirname(__file__), '..', 'location')
+
     ftrack_connect.application.appendPath(
-        os.path.join(os.path.dirname(__file__), '..', 'location'),
+        location,
         'FTRACK_EVENT_PLUGIN_PATH',
         environment
     )
@@ -34,6 +36,8 @@ def modify_application_launch(event):
         'PYTHONPATH',
         environment
     )
+
+    logger.debug('Updating environments.')
 
 
 def register(api_object, **kw):
@@ -45,6 +49,8 @@ def register(api_object, **kw):
     if not isinstance(api_object, ftrack_api.Session):
         # Exit to avoid registering this plugin again.
         return
+
+    logger.debug('Discovering connect plugin hook from {}'.format(__file__))
 
     # Location will be available from within the dcc applications.
     api_object.event_hub.subscribe(

@@ -123,7 +123,7 @@ class PerforceConnectionHandler(object):
         if filtered_workspaces:
             workspace = filtered_workspaces[0].get('client')
         else:
-            self.logger.info(
+            self.logger.warning(
                 'Could not find valid workspace for {0} on {1}'.format(
                     self._user, self.host
                 )
@@ -134,7 +134,7 @@ class PerforceConnectionHandler(object):
                         self._using_workspace
                     )
                 )
-            self.logger.info('Creating new workspace . . .')
+            self.logger.debug('Creating new workspace . . .')
             new_workspace = self.create_workspace(
                 self._workspace_root, self._using_workspace
             )
