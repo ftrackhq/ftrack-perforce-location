@@ -1,13 +1,10 @@
-In this document the required setup for the ftrack perforce integration.
-A basic knowledge of perforce and ftrack is assumed.
-
 
 Users permissions
 =================
 
 .. note::
 
-    This is has to be performed by a perforce user with `Admin rights <https://www.perforce.com/manuals/v15.1/p4sag/chapter.protections.html>`_.
+    This is has to be performed by a perforce user with **`Admin rights <https://www.perforce.com/manuals/v15.1/p4sag/chapter.protections.html>`_**.
 
 * In **p4admin** : Create users with name as the **same login name as ftrack**
 * In **p4admin** : Ensure users are part of the **p4users group as Members and Owners**

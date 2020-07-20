@@ -11,7 +11,7 @@ The view of the project depot has not been properly added to the p4 configuratio
 
 Error
 .....
-This means the view perforce is referring to , which is the project is not been mapped correctly.
+This means the view perforce is referring to , usually the project itself, is not correctly mapped.
 
 
 .. image:: /image/publish-view-error.png
