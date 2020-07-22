@@ -23,7 +23,7 @@ address and port.
 *************
 Documentation
 *************
-Full documentation, including installation and setup guides, can be found at http://ftrack-perforce-location.rtd.ftrack.com/en/latest/
+Full documentation, including installation and setup guides, can be found at https://ftrack-perforce-location.readthedocs.io/en/latest/
 
 Building the plugin
 ===================
