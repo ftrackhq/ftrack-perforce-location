@@ -9,7 +9,7 @@ Users permissions
 * In **p4admin** : Create users with name as the **same login name as ftrack**
 * In **p4admin** : Ensure users are part of the **p4users group as Members and Owners**
 
-.. image:: /image/user-permissions.png
+.. image:: image/user-permissions.png
 
 
 Workspace and local folder
@@ -35,7 +35,7 @@ Create workspace
 In **p4v**: login with your current ftrack username and perforce password.
 Create a new workspace
 
-.. image:: /image/new-workspace.png
+.. image:: image/new-workspace.png
 
 
 Set workspace
@@ -44,13 +44,13 @@ Set workspace
 Set the workspace path to the folder created in step 1 of this process:
 
 
-.. image:: /image/workspace-setup.png
+.. image:: image/workspace-setup.png
 
 
 
 Once complete, p4v should look like this:
 
-.. image:: /image/workspace-setup-done.png
+.. image:: image/workspace-setup-done.png
 
 
 Integration
@@ -65,29 +65,29 @@ Setup user workspace and credentials
 
 If the plugin is properly installed you should see the Configure Perforce User action.
 
-.. image:: /image/connect-startup.png
+.. image:: image/connect-startup.png
 
 Launch the Configure Perforce User Action from ftrack Connect. Select the workspace you wish to use and click ‘save settings’.
 
-.. image:: /image/user-setup-workspace-connect.png
+.. image:: image/user-setup-workspace-connect.png
 
 
 .. note::
 
     A login window will display and ask for a username and password, if you have not logged into Perforce for a while.
 
-    .. image:: /image/reenter-pass.png
+    .. image:: image/reenter-pass.png
 
 
 Your ‘Workspace Root’ should match that of the folder created and set up during the Perforce user configuration.
 (See: Set up user workspace.)
 
-.. image:: /image/user-setup-workspace-connect-done.png
+.. image:: image/user-setup-workspace-connect-done.png
 
 
 This will write a configuration file into the ftrack-connect data folder, which will contain your chosen settings:
 
-.. image:: /image/config-result.png
+.. image:: image/config-result.png
 
 
 You can now restart ftrack connect.
@@ -103,20 +103,20 @@ Project Configuration
     otherwise this Action will not appear and run.
 
 
-    .. image:: /image/permissions.png
+    .. image:: image/permissions.png
 
 
 Run ftrack Actions and select Configure Project Perforce on the created project.
 
-.. image:: /image/configure-project-action.png
+.. image:: image/configure-project-action.png
 
 Set the per project depot attribute and click Submit
 
-.. image:: /image/per-project-depot.png
+.. image:: image/per-project-depot.png
 
 To confirm all is in place **run p4v** and check the view to the current project has been correctly added
 
-.. image:: /image/view-configuration.png
+.. image:: image/view-configuration.png
 
 You can now restart connect.
 
@@ -126,18 +126,18 @@ Publishing
 
 You should now be able to publish to perforce using connect as usual using connect or any other ftrack integration.
 
-.. image:: /image/connect-publish.png
+.. image:: image/connect-publish.png
 
 This will result in ftrack Connect reporting a successful publish:
 
-.. image:: /image/connect-publish-result.png
+.. image:: image/connect-publish-result.png
 
 The component will be added to the server’s **ftrack.perforce-scenario** location.
 
-.. image:: /image/connect-publish-result-server.png
+.. image:: image/connect-publish-result-server.png
 
 Running p4v should show the files in the depot.
 
-.. image:: /image/p4v-successful-publish.png
+.. image:: image/p4v-successful-publish.png
 
 
