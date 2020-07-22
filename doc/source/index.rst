@@ -6,6 +6,9 @@ ftrack perforce location
 ########################
 
 
+This location plugin, provides a seamless integration between `Perforce <https://www.perforce.com>`_ and `ftrack <https://www.ftrack.com>`_ versioning system.
+
+
 .. note::
     A basic knowledge of `Perforce <https://www.perforce.com>`_ and `ftrack <https://www.ftrack.com>`_ is required.
 

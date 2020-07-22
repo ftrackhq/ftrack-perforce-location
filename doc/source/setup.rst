@@ -18,7 +18,7 @@ Workspace and local folder
 Local folder
 ------------
 
-Create a workspace folder on local disk where to perforce will checkout file to.
+Create a workspace folder on your local disk as a location to save and store files
 
 
 For example::
@@ -41,13 +41,14 @@ Create a new workspace
 Set workspace
 .............
 
-Set the workspace path to the previously created folder
+Set the workspace path to the folder created in step 1 of this process:
+
 
 .. image:: /image/workspace-setup.png
 
 
 
-Once done this how should look like in p4v
+Once complete, p4v should look like this:
 
 .. image:: /image/workspace-setup-done.png
 
@@ -66,41 +67,46 @@ If the plugin is properly installed you should see the Configure Perforce User a
 
 .. image:: /image/connect-startup.png
 
-You can now launch the **Configure Perforce User action** and select the workspace to use and click save settings.
-
+Launch the Configure Perforce User Action from ftrack Connect. Select the workspace you wish to use and click ‘save settings’.
 
 .. image:: /image/user-setup-workspace-connect.png
 
 
 .. note::
 
-    If you haven’t been logging into perforce for sometime, a login in window will show up asking for username and password.
+    A login window will display and ask for a username and password, if you have not logged into Perforce for a while.
 
     .. image:: /image/reenter-pass.png
 
 
-The workspace root should match the folder created and setup during the perforce user configuration.
+Your ‘Workspace Root’ should match that of the folder created and set up during the Perforce user configuration.
+(See: Set up user workspace.)
 
 .. image:: /image/user-setup-workspace-connect-done.png
 
 
-This will result in a configuration file written in the ftrack-connect data folder, containing the chosen settings :
+This will write a configuration file into the ftrack-connect data folder, which will contain your chosen settings:
 
 .. image:: /image/config-result.png
+
+
+You can now restart ftrack connect.
+
 
 Project Configuration
 =====================
 
 .. note::
 
-    For this action to appear and run, the user running it should be having super `Access Level <https://www.perforce.com/manuals/v15.1/p4sag/chapter.protections.html>`_ assigned from perforce itself
-    and the `right permissions on the ftrack server <https://help.ftrack.com/en/articles/1040544-managing-permissions-and-roles>`_ to add custom attributes.
+    The user must be assigned super `Access Level <https://www.perforce.com/manuals/v15.1/p4sag/chapter.protections.html>`_  in Perforce and be granted
+    `permissions <https://help.ftrack.com/en/articles/1040544-managing-permissions-and-roles>`_ to add custom attributes on the ftrack server,
+    otherwise this Action will not appear and run.
+
 
     .. image:: /image/permissions.png
 
 
-
-On the designed project , run actions and select **Configure Project Perforce**.
+Run ftrack Actions and select Configure Project Perforce on the created project.
 
 .. image:: /image/configure-project-action.png
 
@@ -112,6 +118,8 @@ To confirm all is in place **run p4v** and check the view to the current project
 
 .. image:: /image/view-configuration.png
 
+You can now restart connect.
+
 
 Publishing
 ==========
@@ -120,11 +128,11 @@ You should now be able to publish to perforce using connect as usual using conne
 
 .. image:: /image/connect-publish.png
 
-This should result in connect reporting the successful publish
+This will result in ftrack Connect reporting a successful publish:
 
 .. image:: /image/connect-publish-result.png
 
-On the server , the component should be added to the **ftrack.perforce-scenario** location.
+The component will be added to the server’s **ftrack.perforce-scenario** location.
 
 .. image:: /image/connect-publish-result-server.png
 
