@@ -14,7 +14,7 @@ Error
 The above means that the view Perforce is referring to (the project) is incorrectly mapped.
 
 
-.. image:: /image/publish-view-error.png
+.. image:: /image/publish-view-error.PNG
 
 
 
@@ -25,4 +25,4 @@ Solution
 * Re run the configure project action.
 * Ensure the view is part of the current perforce's user configuration.
 
-.. image:: /image/config-view.png
+.. image:: /image/config-view.PNG
