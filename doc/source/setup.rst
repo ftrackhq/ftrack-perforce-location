@@ -35,7 +35,7 @@ Create workspace
 In **p4v**: login with your current ftrack username and perforce password.
 Create a new workspace
 
-.. image:: image/new-workspace.png
+.. image:: ../image/new-workspace.png
 
 
 Set workspace
@@ -44,7 +44,7 @@ Set workspace
 Set the workspace path to the folder created in step 1 of this process:
 
 
-.. image:: image/workspace-setup.png
+.. image:: /image/workspace-setup.png
 
 
 
