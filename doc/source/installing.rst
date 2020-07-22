@@ -13,8 +13,7 @@ cloning the public repository::
 
     git clone git@bitbucket.org:ftrack/ftrack-perforce-location.git
 
-Then you can build and install the package into your current Python
-site-packages folder::
+You can then `build and install <https://help.ftrack.com/en/articles/3504354-ftrack-connect-plugins-discovery-installation-and-update>`_ the plugin::
 
     python setup.py build_plugin
 
