@@ -7,5 +7,5 @@ python:
     pip_install: true
     install:
       - method: pip
-      - path: lowdown
+        path: lowdown
 
