@@ -7,6 +7,12 @@
 Release Notes
 *************
 
+.. release::  Upcoming
+
+    .. change:: changed
+
+        Version comments are published as Perforce changelist description.
+
 .. release::  1.0.2
     :date: 2020-07-22
 
