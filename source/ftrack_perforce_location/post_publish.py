@@ -40,6 +40,9 @@ def post_publish_callback(session, event):
     # get the change number
     change = root_component['metadata'].get('change')
 
+    # get the version comment
+    comment = root_component['version'].get('comment', 'Published with ftrack')
+
     # extract project id from root_component
     project_id = root_component['version']['link'][0]['id']
 
@@ -73,7 +76,7 @@ def post_publish_callback(session, event):
 
     if file_path:
         change = perforce_location.accessor.perforce_file_handler.change.add(
-            change, file_path, 'published with ftrack',
+            change, file_path, comment,
         )
 
     # We should only get here with a SequenceComponent with no

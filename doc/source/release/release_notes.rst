@@ -7,12 +7,16 @@
 Release Notes
 *************
 
+.. release::  Upcoming
 
-.. release:: Upcoming
+    .. change:: changed
+
+        Version comments are published as Perforce changelist description.
 
     .. change:: new
 
         Update docs to include timeout solution for credentials.
+
 
 .. release::  1.0.2
     :date: 2020-07-22
