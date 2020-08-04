@@ -7,7 +7,7 @@
 Release Notes
 *************
 
-.. release::  1.0.3
+.. release:: 1.0.3
     :date: 2020-08-04
 
     .. change:: changed
@@ -19,7 +19,7 @@ Release Notes
         Update docs to include timeout solution for credentials.
 
 
-.. release::  1.0.2
+.. release:: 1.0.2
     :date: 2020-07-22
 
     .. change:: fixed
