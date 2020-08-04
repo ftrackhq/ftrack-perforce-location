@@ -8,4 +8,4 @@ SCENARIO_DESCRIPTION = (
     'Storage scenario where files are stored and versioned by '
     'Perforce, with flexible mapping between projects and depots.'
 )
-ICON_URL = os.environ.get('FTRACK_SERVER', '') + '/application_icons/helix_core.PNG'
+ICON_URL = os.environ.get('FTRACK_SERVER', '') + '/application_icons/helix_core.png'
