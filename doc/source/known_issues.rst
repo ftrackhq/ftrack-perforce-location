@@ -32,7 +32,7 @@ Login timeout
 Cause
 .....
 
-After some time, the perforce session time out and ask to be re connected.
+After some time, the perforce session times out and asks to be reconnected.
 
 
 Error
@@ -43,12 +43,12 @@ Error
 Solution
 ........
 
-The default timeout is define on a per-group basis.
-There are two options to fix this
+The default timeout is defined on a per-group basis.
+There are two options to fix this:
 
 
-1) set the timeout for the group to *unlimited* using **p4admin** or **p4 group** `command <https://www.perforce.com/perforce/r12.1/manuals/cmdref/group.html>`_
-2) set the perforce credentials in system environment variables or using **p4 set** `command https://www.perforce.com/manuals/v17.1/cmdref/Content/CmdRef/p4_set.htm>`_::
+1) set the timeout for the group to *unlimited* using **p4admin** or **p4 group** `command <https://www.perforce.com/perforce/r12.1/manuals/cmdref/group.html>`_.
+2) set the perforce credentials in system environment variables or using **p4 set** `command <https://www.perforce.com/manuals/v17.1/cmdref/Content/CmdRef/p4_set.html>`__::
 
     * P4PASSWD
     * P4USER
