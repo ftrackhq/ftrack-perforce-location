@@ -12,8 +12,7 @@ import pip
 if parse_version(pip.__version__) < parse_version('19.3.0'):
     raise ValueError('Pip should be version 19.3.0 or higher')
 
-from pip._internal import main as pip_main  # pip >= 10
-
+from pip.__main__ import _main as pip_main
 from setuptools import setup, find_packages, Command
 
 
@@ -77,7 +76,7 @@ class BuildPlugin(Command):
             os.path.join(STAGING_PATH, 'modules')
         )
 
-        pip_main.main(
+        pip_main(
             [
                 'install',
                 '.',
