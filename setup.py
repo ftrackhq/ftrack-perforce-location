@@ -21,7 +21,6 @@ RESOURCE_PATH = os.path.join(ROOT_PATH, 'resource')
 HOOK_PATH = os.path.join(RESOURCE_PATH, 'hook')
 LOCATION_PATH = os.path.join(RESOURCE_PATH, 'location')
 
-MODULES_PATH = os.path.join(RESOURCE_PATH, 'modules')
 
 # Read version from source.
 with open(os.path.join(
@@ -65,12 +64,6 @@ class BuildPlugin(Command):
         shutil.copytree(
             HOOK_PATH,
             os.path.join(STAGING_PATH, 'hook')
-        )
-
-        # Copy modules
-        shutil.copytree(
-            MODULES_PATH,
-            os.path.join(STAGING_PATH, 'modules')
         )
 
         subprocess.check_call(
