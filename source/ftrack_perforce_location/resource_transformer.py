@@ -7,10 +7,6 @@ import re
 
 import ftrack_api.resource_identifier_transformer.base as base_transformer
 
-from ftrack_perforce_location.import_p4api import import_p4
-
-import_p4()
-
 from P4 import P4Exception
 from ftrack_perforce_location.perforce_handlers.file import seq_to_glob
 

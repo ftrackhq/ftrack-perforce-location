@@ -5,14 +5,11 @@ import os
 import re
 import shutil
 import sys
+import subprocess
 
 from pkg_resources import parse_version
 import pip
 
-if parse_version(pip.__version__) < parse_version('19.3.0'):
-    raise ValueError('Pip should be version 19.3.0 or higher')
-
-from pip.__main__ import _main as pip_main
 from setuptools import setup, find_packages, Command
 
 
@@ -76,11 +73,9 @@ class BuildPlugin(Command):
             os.path.join(STAGING_PATH, 'modules')
         )
 
-        pip_main(
+        subprocess.check_call(
             [
-                'install',
-                '.',
-                '--target',
+                sys.executable, '-m', 'pip', 'install','.','--target',
                 os.path.join(STAGING_PATH, 'dependencies')
             ]
         )
@@ -119,6 +114,7 @@ setup(
         'appdirs == 1.4.0',
         'ftrack-action-handler',
         'qt.py >=1.0.0, < 2'
+        'p4python'
     ],
     tests_require=[
     ],
@@ -127,4 +123,5 @@ setup(
         'build_plugin': BuildPlugin,
 
     },
+    python_requires=">=3, <4.0"
 )
