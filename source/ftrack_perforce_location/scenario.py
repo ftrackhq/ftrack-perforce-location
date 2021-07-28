@@ -304,7 +304,7 @@ class ActivatePerforceStorageScenario(object):
         try:
             connection = self._connect_to_perforce(event)
         except errors.PerforceConnectionHandlerException as error:
-            return unicode(error)
+            return str(error)
 
         storage_scenario = event['data']['storage_scenario']
         try:

@@ -6,7 +6,7 @@ import re
 import shutil
 import sys
 import subprocess
-
+import platform
 from pkg_resources import parse_version
 import pip
 
@@ -32,7 +32,7 @@ with open(os.path.join(
 
 
 STAGING_PATH = os.path.join(
-    BUILD_PATH, 'ftrack-perforce-location-{0}'.format(VERSION)
+    BUILD_PATH, 'ftrack-perforce-location-{0}-{1}'.format(VERSION, platform.system().lower())
 )
 
 
