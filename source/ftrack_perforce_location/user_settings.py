@@ -214,7 +214,7 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
         self.raise_warning_box(warning_text)
         # Doesn't seem to show up under OSX
         caption = 'Choose workspace root directory'
-        root_dir = QtGui.QFileDialog().getExistingDirectory(
+        root_dir = QtWidgets.QFileDialog().getExistingDirectory(
             self, caption=caption, directory='~'
         )
         return root_dir
