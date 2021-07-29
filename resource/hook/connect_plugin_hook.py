@@ -5,7 +5,7 @@ import logging
 import os
 
 import ftrack_api
-import ftrack_connect.application
+# import ftrack_connect.application
 
 
 dependencies_directory = os.path.abspath(
@@ -25,17 +25,8 @@ def modify_application_launch(event):
 
     location = os.path.join(os.path.dirname(__file__), '..', 'location')
 
-    ftrack_connect.application.appendPath(
-        location,
-        'FTRACK_EVENT_PLUGIN_PATH',
-        environment
-    )
-
-    ftrack_connect.application.appendPath(
-        dependencies_directory,
-        'PYTHONPATH',
-        environment
-    )
+    environment['FTRACK_EVENT_PLUGIN_PATH'] = os.pathsep.join([environment.get('FTRACK_EVENT_PLUGIN_PATH', ''), location])
+    environment['PYTHONPATH'] =  os.pathsep.join([environment.get('PYTHONPATH', ''), dependencies_directory])
 
     logger.debug('Updating environments.')
 

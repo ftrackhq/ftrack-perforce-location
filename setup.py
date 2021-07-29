@@ -76,7 +76,7 @@ class BuildPlugin(Command):
         result_path = shutil.make_archive(
             os.path.join(
                 BUILD_PATH,
-                'ftrack-perforce-location-{0}'.format(VERSION)
+                'ftrack-perforce-location-{0}-{1}'.format(VERSION, platform.system().lower())
             ),
             'zip',
             STAGING_PATH
@@ -106,7 +106,7 @@ setup(
     install_requires=[
         'appdirs == 1.4.0',
         'ftrack-action-handler',
-        'qt.py >=1.0.0, < 2'
+        'qt.py >=1.0.0, < 2',
         'p4python'
     ],
     tests_require=[
@@ -114,7 +114,6 @@ setup(
     zip_safe=False,
     cmdclass={
         'build_plugin': BuildPlugin,
-
     },
     python_requires=">=3, <4.0"
 )
