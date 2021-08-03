@@ -39,4 +39,4 @@ def register(session, **kw):
         return
 
     plugin = ftrack_connect.ui.application.ConnectWidgetPlugin(PerforceUserSettings)
-    plugin.register(session, priority=10)
+    plugin.register(session, priority=100)

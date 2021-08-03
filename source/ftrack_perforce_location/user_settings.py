@@ -31,7 +31,7 @@ from ftrack_perforce_location.perforce_handlers.settings import (
 )
 
 
-class ConfigureUserSettingsWidget(QtWidgets.QDialog):
+class ConfigureUserSettingsWidget(QtWidgets.QWidget):
     def __init__(self, settings):
         super(ConfigureUserSettingsWidget, self).__init__()
         self.settings = settings
@@ -241,10 +241,12 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
 
 
 if __name__ == '__main__':
+    logger.info('start')
     session = ftrack_api.Session(plugin_paths=list(), auto_connect_event_hub=False)
     perforce_settings = PerforceSettingsHandler(session)
+    logger.info('settings : {}'.format(perforce_settings))
     app = QtWidgets.QApplication(sys.argv)
     window = ConfigureUserSettingsWidget(perforce_settings)
-    window.exec_()
-    # TODO exit after closing verification warning.
+    logger.info('window : {}'.format(window))
+    window.show()
     sys.exit(app.exec_())
