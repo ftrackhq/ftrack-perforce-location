@@ -224,7 +224,7 @@ class ConfigurePerforceStorageScenario(object):
 
         session.event_hub.subscribe(
             (
-                u'topic=ftrack.storage-scenario.discover '
+                'topic=ftrack.storage-scenario.discover '
                 'and source.user.username="{0}"'
             ).format(
                 session.api_user
@@ -234,7 +234,7 @@ class ConfigurePerforceStorageScenario(object):
         )
         session.event_hub.subscribe(
             (
-                u'topic=ftrack.storage-scenario.configure '
+                'topic=ftrack.storage-scenario.configure '
                 'and data.scenario_id="{0}" '
                 'and source.user.username="{1}"'
             ).format(
@@ -272,14 +272,14 @@ class ActivatePerforceStorageScenario(object):
 
         perforce_settings = PerforceSettingsHandler(self.session)
         perforce_settings_data = perforce_settings.read()
-        user_settings_values = perforce_settings_data.values()
+        user_settings_values = list(perforce_settings_data.values())
 
         while not all(user_settings_values):
             from ftrack_perforce_location.user_settings import ConfigureUserSettingsWidget
             settings_widget = ConfigureUserSettingsWidget(perforce_settings)
             settings_widget.exec_()
             perforce_settings_data = perforce_settings.read()
-            user_settings_values = perforce_settings_data.values()
+            user_settings_values = list(perforce_settings_data.values())
 
         # Builds p4.port from the protocol, address, and port settings
         perforce_settings.update_port_from_scenario(
@@ -357,7 +357,7 @@ class ActivatePerforceStorageScenario(object):
             ftrack_api.event.base.Event(topic="ftrack.perforce.typemap.register"),
             synchronous=True,
         )
-        typemap = {k: v for d in typemaps if d for k, v in d.items()}
+        typemap = {k: v for d in typemaps if d for k, v in list(d.items())}
 
         self.logger.debug('Creating Location {}.'.format(location))
 
@@ -388,7 +388,7 @@ class ActivatePerforceStorageScenario(object):
         location.priority = 0
 
         self.logger.info(L(
-            u'Storage scenario activated. Configured {0!r}',
+            'Storage scenario activated. Configured {0!r}',
             location['name']
         ))
 

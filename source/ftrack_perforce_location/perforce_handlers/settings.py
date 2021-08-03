@@ -120,7 +120,7 @@ class PerforceSettingsHandler(object):
             self.write(new_config)
 
         if os.path.isfile(config_file):
-            self.logger.debug(u'Reading config from {0}'.format(config_file))
+            self.logger.debug('Reading config from {0}'.format(config_file))
 
             with open(config_file, 'r') as file:
                 config = json.load(file)
