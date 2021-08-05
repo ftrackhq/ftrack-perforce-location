@@ -9,7 +9,7 @@ import ftrack_api.resource_identifier_transformer.base as base_transformer
 
 from P4 import P4Exception
 from ftrack_perforce_location.perforce_handlers.file import seq_to_glob
-
+from pathlib import Path
 
 class PerforceResourceIdentifierTransformer(
         base_transformer.ResourceIdentifierTransformer):
@@ -39,7 +39,7 @@ class PerforceResourceIdentifierTransformer(
         root = self._perforce_file_handler.root
         fullpath = os.path.join(root, resource_identifier)
         mangled_path = seq_to_glob(fullpath)
-        stats = self.connection.run_fstat(mangled_path)
+        stats = self.connection.run_fstat(str(Path(mangled_path)))
         rx = re.compile('%+\d+d|%d')
         found = rx.search(resource_identifier)
         original_resource = resource_identifier
@@ -103,4 +103,4 @@ class PerforceResourceIdentifierTransformer(
             resource_identifier, decoded_path
         ))
 
-        return decoded_path
+        return Path(decoded_path)

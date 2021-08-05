@@ -31,7 +31,7 @@ from ftrack_perforce_location.perforce_handlers.settings import (
 )
 
 
-class ConfigureUserSettingsWidget(QtWidgets.QWidget):
+class ConfigureUserSettingsWidget(QtWidgets.QDialog):
     def __init__(self, settings):
         super(ConfigureUserSettingsWidget, self).__init__()
         self.settings = settings

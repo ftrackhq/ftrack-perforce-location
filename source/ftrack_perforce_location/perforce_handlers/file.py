@@ -4,6 +4,7 @@
 import logging
 import os
 import re
+from pathlib import Path
 
 from P4 import P4Exception
 from ftrack_perforce_location.perforce_handlers.errors import (
@@ -74,8 +75,9 @@ class PerforceFileHandler(object):
 
     def file_to_depot(self, filepath, perforce_filemode='binary'):
         '''Publish **filepath** to server.'''
+        filepath = Path(filepath)
 
-        if not filepath.startswith(self.root):
+        if self.root not in str(filepath):
             raise IOError('File is not in {}'.format(self.root))
         stats = []
 
@@ -99,9 +101,9 @@ class PerforceFileHandler(object):
 
         else:
             # 'p4 edit' requires that the file exists in the client
-            if not os.path.exists(filepath):
-                basedir = os.path.dirname(filepath)
-                if not os.path.exists(basedir):
+            if not filepath.exists():
+                basedir = Path(os.path.dirname(filepath))
+                if not basedir.exists():
                     os.makedirs(basedir)
                 open(filepath, 'a').close()
             self.connection.run_edit(filepath)
