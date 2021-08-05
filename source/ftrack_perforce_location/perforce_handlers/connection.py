@@ -14,6 +14,14 @@ class PerforceConnectionHandler(object):
     '''Handles credentials and login to Perforce server.'''
 
     @property
+    def password(self):
+        return self._password
+
+    @password.setter
+    def password(self,password):
+        self._password = password
+
+    @property
     def user(self):
         return self._user
 
@@ -63,7 +71,7 @@ class PerforceConnectionHandler(object):
         self._port = port
         self._connection = None
         self._user = user
-        self._password = password
+        self.password = password
 
         self._hostname = host if host is not None else socket.gethostname()
         self._workspace = None
@@ -161,18 +169,22 @@ class PerforceConnectionHandler(object):
             'Logging in as: {0}'.format(self._user)
         )
         try:
-            self._connection.run_login()
+            self._connection.run_login(password=self.password)
         except P4Exception as error:
+            self.logger.error(str(error))
+
             if len(error.errors) != 1:
                 raise errors.PerforceConnectionHandlerException(error)
+
             if error.errors[0] == errors.expired_session_message:
                 raise errors.PerforceSessionExpiredException(error)
+
             if error.errors[0] in [
                 errors.invalid_or_unset_password_message,
                 errors.invalid_password_message,
             ]:
                 raise errors.PerforceInvalidPasswordException(error)
-            raise errors.PerforceConnectionHandlerException(error)
+            # raise errors.PerforceConnectionHandlerException(error)
 
     def disconnect(self):
         '''Handles server disconnection.'''
