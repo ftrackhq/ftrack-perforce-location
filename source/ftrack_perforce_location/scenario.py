@@ -30,6 +30,7 @@ from ftrack_perforce_location.perforce_handlers.settings import (
     PerforceSettingsHandler
 )
 from ftrack_perforce_location.validate_workspace import WorkspaceValidator
+from ftrack_perforce_location.user_settings import ConfigureUserSettingsWidget
 
 
 class ConfigurePerforceStorageScenario(object):
@@ -274,27 +275,24 @@ class ActivatePerforceStorageScenario(object):
         perforce_settings_data = perforce_settings.read()
         user_settings_values = list(perforce_settings_data.values())
 
+        retry_n = 0
         while not all(user_settings_values):
-            from ftrack_perforce_location.user_settings import ConfigureUserSettingsWidget
+            self.logger.info('{} :: Perforce settings values: {}'.format(retry_n, user_settings_values))
+
             settings_widget = ConfigureUserSettingsWidget(perforce_settings)
             settings_widget.exec_()
             perforce_settings_data = perforce_settings.read()
             user_settings_values = list(perforce_settings_data.values())
+            retry_n += 1
 
         # Builds p4.port from the protocol, address, and port settings
         perforce_settings.update_port_from_scenario(
             perforce_settings_data, location_data
         )
 
-        try:
-            perforce_connection_handler = PerforceConnectionHandler(
-                **perforce_settings_data
-            )
-        except Exception as error:
-            self.logger.error(L(str(error)))
-            error = str(error).split('[Error]:')[-1]
-            error = 'Perforce Error: {}'.format(error)
-            raise errors.PerforceConnectionHandlerException(error)
+        perforce_connection_handler = PerforceConnectionHandler(
+            **perforce_settings_data
+        )
 
         return perforce_connection_handler
 

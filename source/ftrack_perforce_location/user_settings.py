@@ -170,6 +170,7 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
             del perforce_settings_data['password']
 
         self.settings.write(perforce_settings_data)
+
         return connection
 
     def get_user_workspaces(self, user, ensure=True):
@@ -196,7 +197,7 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
                         mode=QtWidgets.QLineEdit.Password
                     )
                     if password:
-                        self.p4_handler.connection.password = str(password)
+                        self.p4_handler.password = str(password)
                         self.p4_handler._login()
             else:
                 unsuccessful = False
