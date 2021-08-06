@@ -1,5 +1,6 @@
+# :coding: utf-8
+# :copyright: Copyright (c) 2021 ftrack
 
-# :copyright: Copyright (c) 2014 ftrack
 import ftrack_api
 import logging
 from Qt import QtWidgets, QtCore

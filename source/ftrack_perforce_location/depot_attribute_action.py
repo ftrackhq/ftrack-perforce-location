@@ -1,5 +1,6 @@
 # :coding: utf-8
-# :copyright: Copyright (c) 2019 ftrack
+# :copyright: Copyright (c) 2021 ftrack
+
 import logging
 import json
 from ftrack_action_handler.action import BaseAction
