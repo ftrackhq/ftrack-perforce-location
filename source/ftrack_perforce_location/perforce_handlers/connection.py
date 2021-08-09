@@ -184,7 +184,7 @@ class PerforceConnectionHandler(object):
                 errors.invalid_password_message,
             ]:
                 raise errors.PerforceInvalidPasswordException(error)
-            # raise errors.PerforceConnectionHandlerException(error)
+            raise errors.PerforceConnectionHandlerException(error)
 
     def disconnect(self):
         '''Handles server disconnection.'''
@@ -194,7 +194,7 @@ class PerforceConnectionHandler(object):
 
     def create_workspace(self, client_root, client_name=None):
         if client_name is None:
-            client_name = 'ftrack-{0}'.format(uuid.uuid4())
+            client_name = 'ftrack-{0}'.format(uuid.uuid4().hex)
         workspace = self.connection.fetch_client(client_name)
         workspace['Root'] = str(client_root)
         self.connection.save_client(workspace)
