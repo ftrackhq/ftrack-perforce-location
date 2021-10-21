@@ -26,8 +26,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'ftrack perforce location'
-copyright = u'2014, ftrack'
+project = 'ftrack perforce location'
+copyright = '2014, ftrack'
 
 # Version
 with open(
