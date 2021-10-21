@@ -5,6 +5,7 @@ expired_session_message = 'Your session has expired, please login again.'
 invalid_or_unset_password_message = 'Perforce password (P4PASSWD) invalid or unset.'
 invalid_password_message = 'Password invalid.'
 
+
 class PerforceLocationError(Exception):
     '''Base Location exception.'''
 

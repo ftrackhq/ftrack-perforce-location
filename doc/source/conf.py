@@ -15,7 +15,7 @@ extensions = [
     'sphinx.ext.intersphinx',
     'sphinx.ext.todo',
     'sphinx.ext.viewcode',
-    'lowdown'
+    'lowdown',
 ]
 
 
@@ -32,8 +32,12 @@ copyright = '2014, ftrack'
 # Version
 with open(
     os.path.join(
-        os.path.dirname(__file__), '..', '..' ,'source',
-        'ftrack_perforce_location', '_version.py'
+        os.path.dirname(__file__),
+        '..',
+        '..',
+        'source',
+        'ftrack_perforce_location',
+        '_version.py',
     )
 ) as _version_file:
     _version = re.match(
@@ -52,6 +56,7 @@ exclude_patterns = ['_template']
 if not os.environ.get('READTHEDOCS', None) == 'True':
     # Only import and set the theme if building locally.
     import sphinx_rtd_theme
+
     html_theme = 'sphinx_rtd_theme'
     html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
@@ -80,9 +85,7 @@ def autodoc_skip(app, what, name, obj, skip, options):
 
 intersphinx_mapping = {
     'python': ('http://docs.python.org/', None),
-    'ftrack': (
-        'http://rtd.ftrack.com/docs/ftrack/en/stable/', None
-    )
+    'ftrack': ('http://rtd.ftrack.com/docs/ftrack/en/stable/', None),
 }
 
 
@@ -92,6 +95,7 @@ todo_include_todos = os.environ.get('FTRACK_DOC_INCLUDE_TODOS', False) == 'True'
 
 
 # -- Setup --------------------------------------------------------------------
+
 
 def setup(app):
     app.connect('autodoc-skip-member', autodoc_skip)

@@ -20,9 +20,7 @@ class PerforceAccessor(ftrack_api.accessor.disk.DiskAccessor):
         '''
         self._typemap = typemap
         self.perforce_file_handler = perforce_file_handler
-        self.logger = logging.getLogger(
-            __name__ + '.' + self.__class__.__name__
-        )
+        self.logger = logging.getLogger(__name__ + '.' + self.__class__.__name__)
         self.prefix = perforce_file_handler.root
 
     def open(self, resource_identifier, mode='rb'):
@@ -35,11 +33,12 @@ class PerforceAccessor(ftrack_api.accessor.disk.DiskAccessor):
         '''
 
         _, ext = os.path.splitext(resource_identifier)
-        perforce_filemode = self._typemap.get(ext.lower(), 'binary')  # If is unknown let's piggy back on binary format.
+        perforce_filemode = self._typemap.get(
+            ext.lower(), 'binary'
+        )  # If is unknown let's piggy back on binary format.
         filesystem_path = self.get_filesystem_path(resource_identifier)
         self.perforce_file_handler.file_to_depot(filesystem_path, perforce_filemode)
-        return super(PerforceAccessor, self).open(
-            resource_identifier, mode=mode)
+        return super(PerforceAccessor, self).open(resource_identifier, mode=mode)
 
     def exists(self, resource_identifier):
         '''

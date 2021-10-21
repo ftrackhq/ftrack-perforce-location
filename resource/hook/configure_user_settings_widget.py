@@ -10,7 +10,8 @@ import ftrack_connect.ui.widget.overlay
 import ftrack_connect.ui.widget.actions
 from ftrack_perforce_location import user_settings
 from ftrack_perforce_location.perforce_handlers.settings import (
-    PerforceSettingsHandler, P4Exception
+    PerforceSettingsHandler,
+    P4Exception,
 )
 
 logger = logging.getLogger('ftrack_perforce_location.connect-widget')
@@ -23,7 +24,9 @@ class PerforceUserSettings(ftrack_connect.ui.application.ConnectWidget):
         layout = QtWidgets.QVBoxLayout()
         self.setLayout(layout)
         perforce_settings = PerforceSettingsHandler(session)
-        self.settings_widget = user_settings.ConfigureUserSettingsWidget(perforce_settings)
+        self.settings_widget = user_settings.ConfigureUserSettingsWidget(
+            perforce_settings
+        )
         layout.addWidget(self.settings_widget)
 
 

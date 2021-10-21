@@ -11,14 +11,14 @@ from P4 import P4Exception
 from ftrack_perforce_location.perforce_handlers.file import seq_to_glob
 from pathlib import Path
 
+
 class PerforceResourceIdentifierTransformer(
-        base_transformer.ResourceIdentifierTransformer):
+    base_transformer.ResourceIdentifierTransformer
+):
     def __init__(self, session, perforce_file_handler):
         super(PerforceResourceIdentifierTransformer, self).__init__(session)
 
-        self.logger = logging.getLogger(
-            __name__ + '.' + self.__class__.__name__
-        )
+        self.logger = logging.getLogger(__name__ + '.' + self.__class__.__name__)
 
         self._perforce_file_handler = perforce_file_handler
 
@@ -50,13 +50,10 @@ class PerforceResourceIdentifierTransformer(
 
         # format result path as: //depot/,,,,#<revision>
         encoded_path = '//{0}#{1}'.format(
-            resource_identifier,
-            int(stats[0].get('headRev', 0)) + 1
+            resource_identifier, int(stats[0].get('headRev', 0)) + 1
         )
 
-        self.logger.debug('Encode {0} as {1}'.format(
-            original_resource, encoded_path)
-        )
+        self.logger.debug('Encode {0} as {1}'.format(original_resource, encoded_path))
         return encoded_path
 
     def decode(self, resource_identifier, context=None):
@@ -82,13 +79,15 @@ class PerforceResourceIdentifierTransformer(
 
         if '*' not in depot_path_name:
             for stat in stats:
-                self.logger.debug('Checking for {0} in {1}'.format(
-                    depot_path_name, stat['clientFile']
-                ))
+                self.logger.debug(
+                    'Checking for {0} in {1}'.format(
+                        depot_path_name, stat['clientFile']
+                    )
+                )
                 if depot_path_name in stat['clientFile']:
                     decoded_path = stat['clientFile']
-                    self.logger.debug('Decode {0} as {1}'.format(
-                        resource_identifier, decoded_path)
+                    self.logger.debug(
+                        'Decode {0} as {1}'.format(resource_identifier, decoded_path)
                     )
                     break
 
@@ -99,8 +98,10 @@ class PerforceResourceIdentifierTransformer(
         if '*' in decoded_path:
             decoded_path = decoded_path.replace('*', '%d')
 
-        self.logger.debug('Returning decoded path for {0} as {1}'.format(
-            resource_identifier, decoded_path
-        ))
+        self.logger.debug(
+            'Returning decoded path for {0} as {1}'.format(
+                resource_identifier, decoded_path
+            )
+        )
 
         return Path(decoded_path)

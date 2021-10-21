@@ -8,7 +8,7 @@ from pathlib import Path
 
 from P4 import P4Exception
 from ftrack_perforce_location.perforce_handlers.errors import (
-    PerforceFileHandlerException
+    PerforceFileHandlerException,
 )
 
 
@@ -68,9 +68,7 @@ class PerforceFileHandler(object):
 
         self._change_handler = perforce_change_handler
 
-        self.logger = logging.getLogger(
-            __name__ + '.' + self.__class__.__name__
-        )
+        self.logger = logging.getLogger(__name__ + '.' + self.__class__.__name__)
         self._ensure_folder(self.root)
 
     def file_to_depot(self, filepath, perforce_filemode='binary'):
@@ -81,7 +79,9 @@ class PerforceFileHandler(object):
             raise IOError('File is not in {}'.format(self.root))
         stats = []
 
-        self.logger.debug('moving file {} to depot with mode {}'.format(filepath, perforce_filemode))
+        self.logger.debug(
+            'moving file {} to depot with mode {}'.format(filepath, perforce_filemode)
+        )
 
         try:
             stats = self.connection.run_fstat(filepath)

@@ -30,8 +30,7 @@ def get_log_directory():
     return log_directory
 
 
-def configure_logging(
-        logger_name, level=None, format=None, extra_modules=None):
+def configure_logging(logger_name, level=None, format=None, extra_modules=None):
     '''Configure `loggerName` loggers with console and file handler.
 
     Optionally specify log *level* (default WARNING)
@@ -43,13 +42,14 @@ def configure_logging(
     '''
 
     # Provide default values for level and format.
-    format = format or '%(levelname)s - %(threadName)s - %(asctime)s - %(lineno)s - %(name)s - %(message)s'
+    format = (
+        format
+        or '%(levelname)s - %(threadName)s - %(asctime)s - %(lineno)s - %(name)s - %(message)s'
+    )
     level = level or logging.WARNING
 
     log_directory = get_log_directory()
-    logfile = os.path.join(
-        log_directory, '{0}.log'.format(logger_name)
-    )
+    logfile = os.path.join(log_directory, '{0}.log'.format(logger_name))
 
     # Sanitise the variable, checking the type.
     if not isinstance(extra_modules, (list, tuple, type(None))):
@@ -86,26 +86,14 @@ def configure_logging(
                 'maxBytes': 10485760,
                 'backupCount': 5,
             },
-
         },
-        'formatters': {
-            'file': {
-                'format': format
-            }
-        },
-        'loggers': {
-            '': {
-                'level': 'DEBUG',
-                'handlers': ['console', 'file']
-            }
-        }
+        'formatters': {'file': {'format': format}},
+        'loggers': {'': {'level': 'DEBUG', 'handlers': ['console', 'file']}},
     }
 
     for module in modules:
         current_level = logging.getLevelName(level)
-        logging_settings['loggers'].setdefault(
-            module, {'level': current_level}
-        )
+        logging_settings['loggers'].setdefault(module, {'level': current_level})
 
     # Set default logging settings.
     logging.config.dictConfig(logging_settings)

@@ -5,7 +5,7 @@ import logging
 from P4 import P4Exception
 
 from ftrack_perforce_location.perforce_handlers.errors import (
-    PerforceChangeHanderException
+    PerforceChangeHanderException,
 )
 from ftrack_perforce_location.perforce_handlers.file import seq_to_glob
 
@@ -16,9 +16,7 @@ class PerforceChangeHandler(object):
     def __init__(self, connection_handler):
         self._connection_handler = connection_handler
 
-        self.logger = logging.getLogger(
-            __name__ + '.' + self.__class__.__name__
-        )
+        self.logger = logging.getLogger(__name__ + '.' + self.__class__.__name__)
 
     @property
     def connection(self):
@@ -53,9 +51,7 @@ class PerforceChangeHandler(object):
         change = existing_change or self.create(description)
 
         try:
-            self.logger.debug(
-                'adding file {0} to change: {1}'.format(filepath, change)
-            )
+            self.logger.debug('adding file {0} to change: {1}'.format(filepath, change))
             self.connection.run_reopen('-c', str(change), filepath)
         except P4Exception as error:
             self.logger.error(str(error))
@@ -66,9 +62,7 @@ class PerforceChangeHandler(object):
     def submit(self, change):
         '''Submit **filepath** with **description** to server.'''
 
-        self.logger.debug(
-            'submitting change : {0}'.format(change)
-        )
+        self.logger.debug('submitting change : {0}'.format(change))
         try:
             change_specs = self.connection.fetch_change('-o', str(change))
             self.connection.run_submit(change_specs)

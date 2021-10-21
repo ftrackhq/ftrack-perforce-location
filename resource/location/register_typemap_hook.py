@@ -4,9 +4,7 @@
 import ftrack_api
 import logging
 
-logger = logging.getLogger(
-    'ftrack_perforce_location.register_typemap_hook'
-)
+logger = logging.getLogger('ftrack_perforce_location.register_typemap_hook')
 # Binary formats
 BINARY = 'binary'
 BINARYFL = 'binary+Fl'
@@ -21,11 +19,8 @@ TEXTL = 'text+l'
 
 def register_images_typemap(event):
 
-    return {
-        '.bmp': BINARY,
-        '.jpg': BINARYL,
-        '.tga': BINARYL
-    }
+    return {'.bmp': BINARY, '.jpg': BINARYL, '.tga': BINARYL}
+
 
 def register_autodesk_typemap(event):
 
@@ -41,12 +36,7 @@ def register_autodesk_typemap(event):
 
 def register_adobe_typemap(event):
 
-    return {
-        '.prproj': BINARYFL,
-        '.psd': BINARYFL,
-        '.ai': BINARYFL,
-        '.aep': BINARYFL
-    }
+    return {'.prproj': BINARYFL, '.psd': BINARYFL, '.ai': BINARYFL, '.aep': BINARYFL}
 
 
 def register_unreal_typemap(event):
@@ -71,7 +61,7 @@ def register_unreal_typemap(event):
         '.uasset': BINARYL,
         '.umap': BINARYL,
         '.upk': BINARYL,
-        '.udk': BINARYL
+        '.udk': BINARYL,
     }
 
 
@@ -104,7 +94,6 @@ def register_unity_typemap(event):
     }
 
 
-
 def register(api_object, **kw):
     '''Register plugin to api_object.'''
 
@@ -118,30 +107,25 @@ def register(api_object, **kw):
 
     # IMAGES
     api_object.event_hub.subscribe(
-        'topic=ftrack.perforce.typemap.register',
-        register_images_typemap
+        'topic=ftrack.perforce.typemap.register', register_images_typemap
     )
 
     # AUTODESK
     api_object.event_hub.subscribe(
-        'topic=ftrack.perforce.typemap.register',
-        register_autodesk_typemap
+        'topic=ftrack.perforce.typemap.register', register_autodesk_typemap
     )
 
     # ADOBE
     api_object.event_hub.subscribe(
-        'topic=ftrack.perforce.typemap.register',
-        register_adobe_typemap
+        'topic=ftrack.perforce.typemap.register', register_adobe_typemap
     )
 
     # UNREAL
     api_object.event_hub.subscribe(
-        'topic=ftrack.perforce.typemap.register',
-        register_unreal_typemap
+        'topic=ftrack.perforce.typemap.register', register_unreal_typemap
     )
 
     # UNITY
     api_object.event_hub.subscribe(
-        'topic=ftrack.perforce.typemap.register',
-        register_unity_typemap
+        'topic=ftrack.perforce.typemap.register', register_unity_typemap
     )

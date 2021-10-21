@@ -13,9 +13,7 @@ dependencies_directory = os.path.abspath(
 )
 sys.path.append(dependencies_directory)
 
-logger = logging.getLogger(
-    'ftrack_perforce_location.post_publish_hook'
-)
+logger = logging.getLogger('ftrack_perforce_location.post_publish_hook')
 from ftrack_perforce_location import post_publish
 
 
@@ -32,5 +30,5 @@ def register(api_object, **kw):
 
     api_object.event_hub.subscribe(
         'topic=ftrack.api.session.ready',
-        functools.partial(post_publish._register, session=api_object)
+        functools.partial(post_publish._register, session=api_object),
     )

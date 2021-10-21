@@ -22,9 +22,7 @@ class PerforceAttributeAction(BaseAction):
 
     def __init__(self, session):
         super(PerforceAttributeAction, self).__init__(session)
-        self.logger = logging.getLogger(
-            __name__ + '.' + self.__class__.__name__
-        )
+        self.logger = logging.getLogger(__name__ + '.' + self.__class__.__name__)
 
     def _discover(self, event):
         '''Inject Perforce icon into the attribute dictionary.'''
@@ -36,15 +34,14 @@ class PerforceAttributeAction(BaseAction):
         return my_dict
 
     def discover(self, session, entities, event):
-        '''Return True to be discovered when *entities* is a single Project.
-        '''
+        '''Return True to be discovered when *entities* is a single Project.'''
         if not entities or len(entities) != 1:
             return False
 
         entity_type, entity_id = entities[0]
         if not self._user_is_admin(
-            username=event['source']['user']['username'],
-                project_id=entity_id):
+            username=event['source']['user']['username'], project_id=entity_id
+        ):
             return False
 
         return entity_type == 'Project'
@@ -62,16 +59,16 @@ class PerforceAttributeAction(BaseAction):
         # Custom attributes are cached, so clear and fetch current values.
         del project['custom_attributes']
         self.session.populate(project, 'custom_attributes')
-        current_value = project['custom_attributes'].get(
-            'own_perforce_depot', False
-        )
+        current_value = project['custom_attributes'].get('own_perforce_depot', False)
 
-        widgets = [{
-            'type': 'boolean',
-            'label': 'Project should have its own Perforce depot:',
-            'name': 'own_depot',
-            'value': current_value
-        }]
+        widgets = [
+            {
+                'type': 'boolean',
+                'label': 'Project should have its own Perforce depot:',
+                'name': 'own_depot',
+                'value': current_value,
+            }
+        ]
 
         return widgets
 
@@ -84,15 +81,14 @@ class PerforceAttributeAction(BaseAction):
         entity_type, entity_id = entities[0]
         values = event['data'].get('values', {})
         project = self.session.get(entity_type, entity_id)
-        project['custom_attributes']['own_perforce_depot'] = (
-            values['own_depot']
-        )
+        project['custom_attributes']['own_perforce_depot'] = values['own_depot']
         self.session.commit()
 
         if values['own_depot']:
             depot_name = str(self._sanitise(project['name']))
-            if depot_name not in (depot['name'] for depot
-                                  in self.connection.run_depots()):
+            if depot_name not in (
+                depot['name'] for depot in self.connection.run_depots()
+            ):
                 self._create_depot(depot_name)
             self._update_workspace_map(depot_name)
 
@@ -107,19 +103,19 @@ class PerforceAttributeAction(BaseAction):
         return perforce_location.resource_identifier_transformer.connection
 
     def _create_attribute(self, project_id):
-        self.logger.debug('Creating custom attributes on project id : {}'.format(project_id))
+        self.logger.debug(
+            'Creating custom attributes on project id : {}'.format(project_id)
+        )
 
         admin_role = self.session.query(
             'SecurityRole where name is "{0}"'.format('Administrator')
         ).one()
         all_roles = self.session.query('SecurityRole').all()
         attribute_group = self.session.ensure(
-            'CustomAttributeGroup',
-            {'name': 'Perforce'}
+            'CustomAttributeGroup', {'name': 'Perforce'}
         )
         boolean_type = self.session.query(
-            'select id from CustomAttributeType where name is "{0}"'.format(
-                'boolean')
+            'select id from CustomAttributeType where name is "{0}"'.format('boolean')
         ).one()
 
         # Leaves roles off the identifying_keys list since the query
@@ -137,7 +133,7 @@ class PerforceAttributeAction(BaseAction):
                 'type_id': boolean_type['id'],
                 'write_security_roles': [admin_role],
             },
-            identifying_keys=['entity_type', 'key', 'project_id', 'type_id']
+            identifying_keys=['entity_type', 'key', 'project_id', 'type_id'],
         )
 
         return perforce_attribute
@@ -145,12 +141,14 @@ class PerforceAttributeAction(BaseAction):
     def _create_depot(self, depot_name):
         self.logger.debug('Creating new depot : {}'.format(depot_name))
         try:
-            self.connection.save_depot({
-                'Depot': depot_name,
-                'Map': '{0}/...'.format(depot_name),
-                'Description': 'Created by ftrack.',
-                'Type': 'local'
-            })
+            self.connection.save_depot(
+                {
+                    'Depot': depot_name,
+                    'Map': '{0}/...'.format(depot_name),
+                    'Description': 'Created by ftrack.',
+                    'Type': 'local',
+                }
+            )
         except P4Exception as error:
             self.logger.exception(error)
 
@@ -166,15 +164,11 @@ class PerforceAttributeAction(BaseAction):
     def _update_workspace_map(self, new_depot):
         self.logger.debug('Updating workspace map with : {}'.format(new_depot))
         workspace = self.connection.fetch_client('-o')
-        new_mapping = '//{0}/... "//{1}/{0}/..."'.format(
-            new_depot, workspace['Client']
-        )
+        new_mapping = '//{0}/... "//{1}/{0}/..."'.format(new_depot, workspace['Client'])
         mappings = P4.Map(workspace['View']).as_array()
         if new_mapping in mappings:
             self.logger.info(
-                'Depot already in client view. Not adding: {0}'.format(
-                    new_mapping
-                )
+                'Depot already in client view. Not adding: {0}'.format(new_mapping)
             )
             return
 
@@ -184,5 +178,9 @@ class PerforceAttributeAction(BaseAction):
 
     def _user_is_admin(self, username, project_id):
         # check perforce super role
-        perforce_super_role = any(protect for protect in self.connection.run_protects() if protect['perm'] == 'super')
+        perforce_super_role = any(
+            protect
+            for protect in self.connection.run_protects()
+            if protect['perm'] == 'super'
+        )
         return perforce_super_role

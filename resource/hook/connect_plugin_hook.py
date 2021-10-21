@@ -27,7 +27,7 @@ def modify_application_launch(event):
         [environment.get('FTRACK_EVENT_PLUGIN_PATH', ''), location]
     )
 
-    environment['PYTHONPATH'] =  os.pathsep.join(
+    environment['PYTHONPATH'] = os.pathsep.join(
         [environment.get('PYTHONPATH', ''), dependencies_directory]
     )
 
@@ -48,14 +48,10 @@ def register(api_object, **kw):
 
     # Location will be available from within the dcc applications.
     api_object.event_hub.subscribe(
-        'topic=ftrack.connect.application.launch',
-        modify_application_launch
+        'topic=ftrack.connect.application.launch', modify_application_launch
     )
 
     # Location will be available from actions
     api_object.event_hub.subscribe(
-        'topic=ftrack.action.launch',
-        modify_application_launch
+        'topic=ftrack.action.launch', modify_application_launch
     )
-
-

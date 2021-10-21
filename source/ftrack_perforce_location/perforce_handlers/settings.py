@@ -16,9 +16,7 @@ class PerforceSettingsHandler(object):
     def __init__(self, session):
         super(PerforceSettingsHandler, self).__init__()
         self._session = session
-        self.logger = logging.getLogger(
-            __name__ + '.' + self.__class__.__name__
-        )
+        self.logger = logging.getLogger(__name__ + '.' + self.__class__.__name__)
 
     @property
     def session(self):
@@ -28,20 +26,13 @@ class PerforceSettingsHandler(object):
     def _templated_default(self):
         '''Return a default, empty config to be setup.'''
 
-        return dict(
-            user=None,
-            using_workspace=None,
-            workspace_root=None
-        )
+        return dict(user=None, using_workspace=None, workspace_root=None)
 
     def _get_config_path(self):
         '''Return the current Perforce config file path.'''
 
         config_file_path = os.path.join(
-            appdirs.user_data_dir(
-                'ftrack-connect', 'ftrack'
-            ),
-            'perforce_config.json'
+            appdirs.user_data_dir('ftrack-connect', 'ftrack'), 'perforce_config.json'
         )
 
         return config_file_path
@@ -83,8 +74,8 @@ class PerforceSettingsHandler(object):
                 if config['workspace_root'] == 'None':
                     config['workspace_root'] = None
         except P4Exception as error:
-            self.logger.debug('Error while querying client root: {0}'.format(
-                error.message)
+            self.logger.debug(
+                'Error while querying client root: {0}'.format(error.message)
             )
 
         self.logger.debug('Updated config from perforce with: {}'.format(config))
@@ -112,7 +103,9 @@ class PerforceSettingsHandler(object):
         config = None
 
         if not os.path.exists(config_file):
-            self.logger.debug('Creating default config settings in :{}'.format(config_file))
+            self.logger.debug(
+                'Creating default config settings in :{}'.format(config_file)
+            )
 
             new_config = self._templated_default
             self.update_port_from_scenario(new_config)
@@ -126,9 +119,7 @@ class PerforceSettingsHandler(object):
                 config = json.load(file)
             if any((key not in config) for key in self._templated_default):
                 new_config = self._templated_default
-                new_config = self._update_config_from_perforce(
-                    new_config
-                )
+                new_config = self._update_config_from_perforce(new_config)
                 new_config.update(config)
                 self.write(new_config)
                 config = new_config
@@ -157,7 +148,8 @@ class PerforceSettingsHandler(object):
         except KeyError:
             self.logger.warning(
                 'Cannot update p4.port.'
-                ' Is the storage scenario configured correctly?')
+                ' Is the storage scenario configured correctly?'
+            )
             return
 
         return config
@@ -169,11 +161,11 @@ class PerforceSettingsHandler(object):
         for settings.
         '''
         with ftrack_api.Session(
-                self.session.server_url,
-                self.session.api_key,
-                self.session.api_user,
-                auto_connect_event_hub=False,
-                plugin_paths=list()
+            self.session.server_url,
+            self.session.api_key,
+            self.session.api_user,
+            auto_connect_event_hub=False,
+            plugin_paths=list(),
         ) as session:
             setting = session.query(
                 'select value from Setting where name is storage_scenario'
@@ -195,8 +187,9 @@ class PerforceSettingsHandler(object):
         if not missing_keys:
             return True
 
-        self.logger.warning('Missing keys in server settings:\n{0}'.format(
-            ', '.join(missing_keys)))
+        self.logger.warning(
+            'Missing keys in server settings:\n{0}'.format(', '.join(missing_keys))
+        )
         return False
 
     def _apply_scenario_settings(self, config, location_data):
@@ -214,11 +207,11 @@ class PerforceSettingsHandler(object):
             else:
                 protocol = 'tcp'
             p4_port = '{}:{}:{}'.format(
-                protocol,
-                location_data['server'],
-                location_data['port_number']
+                protocol, location_data['server'], location_data['port_number']
             )
             config['port'] = p4_port
         except Exception as e:
-            self.logger.warning('Could not read Perforce server settings from'
-                                ' ftrack. Caught exception:\n{}'.format(e))
+            self.logger.warning(
+                'Could not read Perforce server settings from'
+                ' ftrack. Caught exception:\n{}'.format(e)
+            )

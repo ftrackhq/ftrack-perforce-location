@@ -6,9 +6,7 @@ import os
 
 
 import P4
-from ftrack_perforce_location.perforce_handlers.errors import (
-    PerforceValidationError
-)
+from ftrack_perforce_location.perforce_handlers.errors import PerforceValidationError
 
 
 class WorkspaceValidator(object):
@@ -26,9 +24,7 @@ class WorkspaceValidator(object):
         *sanitise* is an optional function to sanitise the project names'
         before writing them to the filesystem.
         '''
-        self.logger = logging.getLogger(
-            __name__ + '.' + self.__class__.__name__
-        )
+        self.logger = logging.getLogger(__name__ + '.' + self.__class__.__name__)
 
         self._p4 = p4
         if projects is None:
@@ -39,9 +35,7 @@ class WorkspaceValidator(object):
         self._client_info = self._p4.fetch_client()
         self._prefix = os.path.normpath(self._client_info['Root'])
         self._ws_map = self._get_ws_mapping()
-        self._case_insensitive = (
-            self._p4.run_info()[0]['clientCase'] == 'insensitive'
-        )
+        self._case_insensitive = self._p4.run_info()[0]['clientCase'] == 'insensitive'
 
     def validate_one_depot_per_project(self, projects=None):
         '''Tests the Perforce configuration for a list of projects.
@@ -65,13 +59,12 @@ class WorkspaceValidator(object):
         if not workspace_mappings:
             raise PerforceValidationError(
                 'Workspace {0} has no views configured.'.format(
-                    self._client_info['Client'])
+                    self._client_info['Client']
+                )
             )
 
         if len(list(self._positive_mappings())) == 1:
-            self.logger.warning(
-                'Workspace only configured for a single depot.'
-            )
+            self.logger.warning('Workspace only configured for a single depot.')
             if len(projects) > 1:
                 raise PerforceValidationError(
                     'Multiple projects specified, but workspace mapping'
@@ -105,12 +98,10 @@ class WorkspaceValidator(object):
 
     def _get_ws_mapping(self):
         '''Returns a P4.Map which resolves depot paths to filesystem paths.'''
-        self.logger.debug('Creating workspace map for {0}.'.format(
-            self._p4.client)
-        )
+        self.logger.debug('Creating workspace map for {0}.'.format(self._p4.client))
         client_map = P4.Map(self._client_info['View'])
-        root_map = P4.Map('//{0}/... "{1}/..."'.format(
-            self._client_info['Client'], self._prefix)
+        root_map = P4.Map(
+            '//{0}/... "{1}/..."'.format(self._client_info['Client'], self._prefix)
         )
         result = P4.Map.join(client_map, root_map)
 
@@ -119,10 +110,7 @@ class WorkspaceValidator(object):
         # self.logger.debug('Result:\n{0}'.format(result))
 
         #  Avoid the weird mix of (back)slashes on Windows.
-        result = P4.Map([
-            os.path.normpath(row)
-            for row in result.as_array()
-        ])
+        result = P4.Map([os.path.normpath(row) for row in result.as_array()])
 
         # self.logger.debug('Normalized Result:\n{0}'.format(result))
 
@@ -139,9 +127,7 @@ class WorkspaceValidator(object):
         '''
         if mapping is None:
             mapping = self._ws_map
-        return (line for
-                line in mapping.as_array()
-                if not line.startswith('-'))
+        return (line for line in mapping.as_array() if not line.startswith('-'))
 
     def _get_project_dir(self, project, prefix=None):
         '''For a given *project_name* and optional *prefix*, return the right
@@ -165,15 +151,14 @@ class WorkspaceValidator(object):
             raise PerforceValidationError(
                 'Failed to validate project: {0}\n'
                 'Project directory {1} not in mapping.'.format(
-                    project['name'], self._get_project_dir(project))
+                    project['name'], self._get_project_dir(project)
+                )
             )
         project_depots = []
         other_project_depots = []
         # So that it matches only the specific directory later, ensure it has
         # the correct trailing slash here
-        proj_dir = os.path.join(
-            os.path.dirname(self._get_project_dir(project)), ''
-        )
+        proj_dir = os.path.join(os.path.dirname(self._get_project_dir(project)), '')
 
         for lhs, rhs in zip(mapping.lhs(), mapping.rhs()):
             if lhs.startswith('-'):

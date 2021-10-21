@@ -12,13 +12,9 @@ dependencies_directory = os.path.abspath(
 )
 sys.path.append(dependencies_directory)
 
-from ftrack_perforce_location.depot_attribute_action import (
-    PerforceAttributeAction
-)
+from ftrack_perforce_location.depot_attribute_action import PerforceAttributeAction
 
-logger = logging.getLogger(
-    'ftrack_perforce_location.perforce_attribute_action_hook'
-)
+logger = logging.getLogger('ftrack_perforce_location.perforce_attribute_action_hook')
 
 
 def register(session):
