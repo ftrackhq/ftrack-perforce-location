@@ -17,7 +17,7 @@ extra_paths = os.environ.get('PYTHONPATH', '').split(os.pathsep)
 for path in extra_paths:
     sys.path.insert(0, path)
 
-from Qt import QtCore, QtGui, QtWidgets
+from ftrack_connect.qt import QtCore, QtGui, QtWidgets
 
 from ftrack_perforce_location.perforce_handlers.connection import (
     PerforceConnectionHandler,

@@ -3,11 +3,9 @@
 
 import ftrack_api
 import logging
-from Qt import QtWidgets, QtCore
+from ftrack_connect.qt import QtWidgets, QtCore
+import ftrack_connect
 
-import ftrack_connect.ui.application
-import ftrack_connect.ui.widget.overlay
-import ftrack_connect.ui.widget.actions
 from ftrack_perforce_location import user_settings
 from ftrack_perforce_location.perforce_handlers.settings import (
     PerforceSettingsHandler,

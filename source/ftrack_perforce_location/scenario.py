@@ -24,7 +24,6 @@ from ftrack_perforce_location.perforce_handlers.errors import PerforceValidation
 from ftrack_perforce_location.perforce_handlers.file import PerforceFileHandler
 from ftrack_perforce_location.perforce_handlers.settings import PerforceSettingsHandler
 from ftrack_perforce_location.validate_workspace import WorkspaceValidator
-from ftrack_perforce_location.user_settings import ConfigureUserSettingsWidget
 
 
 class ConfigurePerforceStorageScenario(object):
@@ -269,6 +268,7 @@ class ActivatePerforceStorageScenario(object):
                     retry_n, user_settings_values
                 )
             )
+            from ftrack_perforce_location.user_settings import ConfigureUserSettingsWidget
 
             settings_widget = ConfigureUserSettingsWidget(perforce_settings)
             settings_widget.exec_()
