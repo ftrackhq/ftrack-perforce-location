@@ -1,12 +1,10 @@
 # :coding: utf-8
-# :copyright: Copyright (c) 2018 ftrack
+# :copyright: Copyright (c) 2021 ftrack
 
 import logging
 import os
 
 import ftrack_api
-import ftrack_connect.application
-
 
 dependencies_directory = os.path.abspath(
     os.path.join(os.path.dirname(__file__), '..', 'dependencies')
@@ -25,16 +23,12 @@ def modify_application_launch(event):
 
     location = os.path.join(os.path.dirname(__file__), '..', 'location')
 
-    ftrack_connect.application.appendPath(
-        location,
-        'FTRACK_EVENT_PLUGIN_PATH',
-        environment
+    environment['FTRACK_EVENT_PLUGIN_PATH'] = os.pathsep.join(
+        [environment.get('FTRACK_EVENT_PLUGIN_PATH', ''), location]
     )
 
-    ftrack_connect.application.appendPath(
-        dependencies_directory,
-        'PYTHONPATH',
-        environment
+    environment['PYTHONPATH'] = os.pathsep.join(
+        [environment.get('PYTHONPATH', ''), dependencies_directory]
     )
 
     logger.debug('Updating environments.')
@@ -54,14 +48,10 @@ def register(api_object, **kw):
 
     # Location will be available from within the dcc applications.
     api_object.event_hub.subscribe(
-        'topic=ftrack.connect.application.launch',
-        modify_application_launch
+        'topic=ftrack.connect.application.launch', modify_application_launch
     )
 
     # Location will be available from actions
     api_object.event_hub.subscribe(
-        'topic=ftrack.action.launch',
-        modify_application_launch
+        'topic=ftrack.action.launch', modify_application_launch
     )
-
-

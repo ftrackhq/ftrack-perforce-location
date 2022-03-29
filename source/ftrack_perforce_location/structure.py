@@ -1,5 +1,5 @@
 # :coding: utf-8
-# :copyright: Copyright (c) 2018 ftrack
+# :copyright: Copyright (c) 2021 ftrack
 
 import logging
 
@@ -12,14 +12,12 @@ class PerforceStructure(ftrack_api.structure.standard.StandardStructure):
     above a particular entity. It differs from the StandardStructure because
     it uses Perforce for versioning, rather than separate version folders.
     '''
+
     def __init__(self, perforce_file_handler):
         super(PerforceStructure, self).__init__(
-            project_versions_prefix=None,
-            illegal_character_substitute='_'
+            project_versions_prefix=None, illegal_character_substitute='_'
         )
-        self.logger = logging.getLogger(
-            __name__ + '.' + self.__class__.__name__
-        )
+        self.logger = logging.getLogger(__name__ + '.' + self.__class__.__name__)
 
         self._perforce_file_handler = perforce_file_handler
 
@@ -45,15 +43,10 @@ class PerforceStructure(ftrack_api.structure.standard.StandardStructure):
 
         error_message = (
             'Component {0!r} must be attached to a committed '
-            'version and a committed asset with a parent context.'.format(
-                entity
-            )
+            'version and a committed asset with a parent context.'.format(entity)
         )
 
-        if (
-            version is ftrack_api.symbol.NOT_SET or
-            version in session.created
-        ):
+        if version is ftrack_api.symbol.NOT_SET or version in session.created:
             raise ftrack_api.exception.StructureError(error_message)
 
         link = version['link']
@@ -61,10 +54,7 @@ class PerforceStructure(ftrack_api.structure.standard.StandardStructure):
         if not link:
             raise ftrack_api.exception.StructureError(error_message)
 
-        structure_names = [
-            item['name']
-            for item in link[1:-1]
-        ]
+        structure_names = [item['name'] for item in link[1:-1]]
 
         project_id = link[0]['id']
         project = session.get('Project', project_id)

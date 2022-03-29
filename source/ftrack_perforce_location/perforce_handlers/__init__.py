@@ -1,2 +1,2 @@
 # :coding: utf-8
-# :copyright: Copyright (c) 2018 ftrack
+# :copyright: Copyright (c) 2021 ftrack

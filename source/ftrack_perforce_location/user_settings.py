@@ -1,6 +1,5 @@
-#! /usr/bin/env python
 # :coding: utf-8
-# :copyright: Copyright (c) 2018 ftrack
+# :copyright: Copyright (c) 2021 ftrack
 
 import logging
 import os
@@ -10,9 +9,7 @@ import ftrack_api
 # from ftrack_connect.ui.widget.data_drop_zone.riffle import browser
 import ftrack_connect.ui.theme
 
-logger = logging.getLogger(
-    'ftrack_perforce_location.configure_user_setting'
-)
+logger = logging.getLogger('ftrack_perforce_location.configure_user_setting')
 
 # There is a chance this is being run as a script passed to Connect
 # which, due to cx_freeze, does not ordinarily respect PYTHONPATH
@@ -23,11 +20,12 @@ for path in extra_paths:
 from Qt import QtCore, QtGui, QtWidgets
 
 from ftrack_perforce_location.perforce_handlers.connection import (
-    PerforceConnectionHandler
+    PerforceConnectionHandler,
 )
 from ftrack_perforce_location.perforce_handlers import errors
 from ftrack_perforce_location.perforce_handlers.settings import (
-    PerforceSettingsHandler, P4Exception
+    PerforceSettingsHandler,
+    P4Exception,
 )
 
 
@@ -75,9 +73,7 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
         self.ws_value.addItems(self.ws_clients)
 
         if self.ws_clients and using_workspace:
-            index = self.ws_value.findText(
-                using_workspace, QtCore.Qt.MatchFixedString
-            )
+            index = self.ws_value.findText(using_workspace, QtCore.Qt.MatchFixedString)
             self.ws_value.setCurrentIndex(index)
 
         grid.addWidget(ws_label, 1, 0)
@@ -116,9 +112,7 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
         '''Qt slot for save button.'''
         config_data = {}
         config_data['user'] = self.user_value.text()
-        config_data['using_workspace'] = self.ws_clients[
-            self.ws_value.currentIndex()
-        ]
+        config_data['using_workspace'] = self.ws_clients[self.ws_value.currentIndex()]
         config_data['workspace_root'] = self.root_value.text()
         self.settings.write(config_data)
         self.close()
@@ -144,16 +138,17 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
 
         try:
             connection = PerforceConnectionHandler(**perforce_settings_data)
-        except (errors.PerforceInvalidPasswordException,
-                errors.PerforceSessionExpiredException) as e:
+        except (
+            errors.PerforceInvalidPasswordException,
+            errors.PerforceSessionExpiredException,
+        ) as e:
             logger.debug('exception: {}'.format(str(e)))
             perforce_error_message = e.args[0].errors[0]
             text = 'Please re-enter password for {0}\n\n{1}\n'.format(
                 perforce_settings_data['user'], perforce_error_message
             )
             perforce_settings_data['password'] = self.demand_input(
-                text,
-                mode=QtWidgets.QLineEdit.Password
+                text, mode=QtWidgets.QLineEdit.Password
             )
             connection = self.create_connection(perforce_settings_data)
         except errors.PerforceWorkspaceException as e:
@@ -170,6 +165,7 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
             del perforce_settings_data['password']
 
         self.settings.write(perforce_settings_data)
+
         return connection
 
     def get_user_workspaces(self, user, ensure=True):
@@ -182,21 +178,20 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
         unsuccessful = True
         while unsuccessful:
             try:
-                user_worskpaces = (
-                    self.p4_handler.connection.run_workspaces('-u', user)
-                )
+                user_worskpaces = self.p4_handler.connection.run_workspaces('-u', user)
             except P4Exception as e:
-                if (len(e.errors) == 1 and
-                        e.errors[0] == errors.invalid_or_unset_password_message):
+                if (
+                    len(e.errors) == 1
+                    and e.errors[0] == errors.invalid_or_unset_password_message
+                ):
                     text = 'Logging in as {0}\n\n{1}'.format(
                         self.p4_handler.user, e.errors[0]
                     )
                     password = self.demand_input(
-                        text,
-                        mode=QtWidgets.QLineEdit.Password
+                        text, mode=QtWidgets.QLineEdit.Password
                     )
                     if password:
-                        self.p4_handler.connection.password = str(password)
+                        self.p4_handler.password = str(password)
                         self.p4_handler._login()
             else:
                 unsuccessful = False
@@ -214,7 +209,7 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
         self.raise_warning_box(warning_text)
         # Doesn't seem to show up under OSX
         caption = 'Choose workspace root directory'
-        root_dir = QtGui.QFileDialog().getExistingDirectory(
+        root_dir = QtWidgets.QFileDialog().getExistingDirectory(
             self, caption=caption, directory='~'
         )
         return root_dir
@@ -233,7 +228,7 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
             warning_text = '{0} Also accessible at:\n{1}{2}'.format(
                 warning_text,
                 os.environ['FTRACK_SERVER'],
-                '/#view=configure_storage_scenario&itemId=newconfigure'
+                '/#view=configure_storage_scenario&itemId=newconfigure',
             )
         except Exception:
             pass
@@ -241,10 +236,12 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
 
 
 if __name__ == '__main__':
+    logger.info('start')
     session = ftrack_api.Session(plugin_paths=list(), auto_connect_event_hub=False)
     perforce_settings = PerforceSettingsHandler(session)
+    logger.info('settings : {}'.format(perforce_settings))
     app = QtWidgets.QApplication(sys.argv)
     window = ConfigureUserSettingsWidget(perforce_settings)
-    window.exec_()
-    # TODO exit after closing verification warning.
+    logger.info('window : {}'.format(window))
+    window.show()
     sys.exit(app.exec_())
