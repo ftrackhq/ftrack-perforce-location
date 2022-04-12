@@ -1,5 +1,5 @@
 # :coding: utf-8
-# :copyright: Copyright (c) 2019 ftrack
+# :copyright: Copyright (c) 2021 ftrack
 
 import logging
 import os
@@ -15,9 +15,7 @@ sys.path.append(dependencies_directory)
 from ftrack_perforce_location.scenario import ConfigurePerforceStorageScenario
 
 
-logger = logging.getLogger(
-    'ftrack_perforce_location.configure_scenario_hook'
-)
+logger = logging.getLogger('ftrack_perforce_location.configure_scenario_hook')
 
 
 def register(session):

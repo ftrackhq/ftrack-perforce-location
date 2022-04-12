@@ -1,13 +1,9 @@
 # :coding: utf-8
-# :copyright: Copyright (c) 2018 ftrack
+# :copyright: Copyright (c) 2021 ftrack
 
 import logging
 import socket
 import uuid
-
-from ftrack_perforce_location.import_p4api import import_p4
-
-import_p4()
 
 
 from P4 import P4, P4Exception
@@ -16,6 +12,14 @@ from ftrack_perforce_location.perforce_handlers import errors
 
 class PerforceConnectionHandler(object):
     '''Handles credentials and login to Perforce server.'''
+
+    @property
+    def password(self):
+        return self._password
+
+    @password.setter
+    def password(self, password):
+        self._password = password
 
     @property
     def user(self):
@@ -45,8 +49,15 @@ class PerforceConnectionHandler(object):
         '''Return the current workspace.'''
         return self._workspace
 
-    def __init__(self, host=None, port=None, user=None, password=None,
-                 using_workspace=None, workspace_root=None):
+    def __init__(
+        self,
+        host=None,
+        port=None,
+        user=None,
+        password=None,
+        using_workspace=None,
+        workspace_root=None,
+    ):
         '''Initialise Perforce connection handler
         **server** and **port** should point to a live Perforce server
         address to connect to.
@@ -60,14 +71,12 @@ class PerforceConnectionHandler(object):
 
         '''
 
-        self.logger = logging.getLogger(
-            __name__ + '.' + self.__class__.__name__
-        )
+        self.logger = logging.getLogger(__name__ + '.' + self.__class__.__name__)
 
         self._port = port
         self._connection = None
         self._user = user
-        self._password = password
+        self.password = password
 
         self._hostname = host if host is not None else socket.gethostname()
         self._workspace = None
@@ -93,11 +102,7 @@ class PerforceConnectionHandler(object):
         p4.user = str(self.user)
         p4.password = str(self._password)
 
-        self.logger.debug(
-            'Connecting to {0}'.format(
-                p4.__repr__()
-            )
-        )
+        self.logger.debug('Connecting to {0}'.format(p4.__repr__()))
 
         try:
             p4.connect()
@@ -113,13 +118,13 @@ class PerforceConnectionHandler(object):
         '''Lookup and return for the workspace to be used.'''
         workspaces = self.connection.run_clients("-u", self._user)
         filtered_workspaces = [
-            ws for
-            ws in workspaces
-            if (ws.get("Host") or self.host) == self.host]
+            ws for ws in workspaces if (ws.get("Host") or self.host) == self.host
+        ]
         filtered_workspaces = [
-            ws for
-            ws in filtered_workspaces
-            if ws.get('client') == self._using_workspace]
+            ws
+            for ws in filtered_workspaces
+            if ws.get('client') == self._using_workspace
+        ]
         if filtered_workspaces:
             workspace = filtered_workspaces[0].get('client')
         else:
@@ -156,21 +161,21 @@ class PerforceConnectionHandler(object):
             ]:
                 pass
         else:
-            self.logger.debug(
-                'Already logged in as: {0}'.format(self._connection.user)
-            )
+            self.logger.debug('Already logged in as: {0}'.format(self._connection.user))
             return
 
-        self.logger.debug(
-            'Logging in as: {0}'.format(self._user)
-        )
+        self.logger.debug('Logging in as: {0}'.format(self._user))
         try:
-            self._connection.run_login()
+            self._connection.run_login(password=self.password)
         except P4Exception as error:
+            self.logger.error(str(error))
+
             if len(error.errors) != 1:
                 raise errors.PerforceConnectionHandlerException(error)
+
             if error.errors[0] == errors.expired_session_message:
                 raise errors.PerforceSessionExpiredException(error)
+
             if error.errors[0] in [
                 errors.invalid_or_unset_password_message,
                 errors.invalid_password_message,
@@ -186,7 +191,7 @@ class PerforceConnectionHandler(object):
 
     def create_workspace(self, client_root, client_name=None):
         if client_name is None:
-            client_name = 'ftrack-{0}'.format(uuid.uuid4())
+            client_name = 'ftrack-{0}'.format(uuid.uuid4().hex)
         workspace = self.connection.fetch_client(client_name)
         workspace['Root'] = str(client_root)
         self.connection.save_client(workspace)

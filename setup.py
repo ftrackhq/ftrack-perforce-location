@@ -5,14 +5,11 @@ import os
 import re
 import shutil
 import sys
-
+import subprocess
+import platform
 from pkg_resources import parse_version
 import pip
 
-if parse_version(pip.__version__) < parse_version('19.3.0'):
-    raise ValueError('Pip should be version 19.3.0 or higher')
-
-from pip.__main__ import _main as pip_main
 from setuptools import setup, find_packages, Command
 
 
@@ -24,19 +21,19 @@ RESOURCE_PATH = os.path.join(ROOT_PATH, 'resource')
 HOOK_PATH = os.path.join(RESOURCE_PATH, 'hook')
 LOCATION_PATH = os.path.join(RESOURCE_PATH, 'location')
 
-MODULES_PATH = os.path.join(RESOURCE_PATH, 'modules')
 
 # Read version from source.
-with open(os.path.join(
-    SOURCE_PATH, 'ftrack_perforce_location', '_version.py'
-)) as _version_file:
+with open(
+    os.path.join(SOURCE_PATH, 'ftrack_perforce_location', '_version.py')
+) as _version_file:
     VERSION = re.match(
         r'.*__version__ = \'(.*?)\'', _version_file.read(), re.DOTALL
     ).group(1)
 
 
 STAGING_PATH = os.path.join(
-    BUILD_PATH, 'ftrack-perforce-location-{0}'.format(VERSION)
+    BUILD_PATH,
+    'ftrack-perforce-location-{0}-{1}'.format(VERSION, platform.system().lower()),
 )
 
 
@@ -59,39 +56,32 @@ class BuildPlugin(Command):
         shutil.rmtree(STAGING_PATH, ignore_errors=True)
 
         # Copy hook files
-        shutil.copytree(
-            LOCATION_PATH,
-            os.path.join(STAGING_PATH, 'location')
-        )
+        shutil.copytree(LOCATION_PATH, os.path.join(STAGING_PATH, 'location'))
 
         # Copy hook files
-        shutil.copytree(
-            HOOK_PATH,
-            os.path.join(STAGING_PATH, 'hook')
-        )
+        shutil.copytree(HOOK_PATH, os.path.join(STAGING_PATH, 'hook'))
 
-        # Copy modules
-        shutil.copytree(
-            MODULES_PATH,
-            os.path.join(STAGING_PATH, 'modules')
-        )
-
-        pip_main(
+        subprocess.check_call(
             [
+                sys.executable,
+                '-m',
+                'pip',
                 'install',
                 '.',
                 '--target',
-                os.path.join(STAGING_PATH, 'dependencies')
+                os.path.join(STAGING_PATH, 'dependencies'),
             ]
         )
 
         result_path = shutil.make_archive(
             os.path.join(
                 BUILD_PATH,
-                'ftrack-perforce-location-{0}'.format(VERSION)
+                'ftrack-perforce-location-{0}-{1}'.format(
+                    VERSION, platform.system().lower()
+                ),
             ),
             'zip',
-            STAGING_PATH
+            STAGING_PATH,
         )
 
 
@@ -107,24 +97,22 @@ setup(
     author_email='support@ftrack.com',
     license='Apache License (2.0)',
     packages=find_packages(SOURCE_PATH),
-    package_dir={
-        '': 'source'
-    },
+    package_dir={'': 'source'},
     setup_requires=[
         'sphinx >= 1.2.2, < 2',
         'sphinx_rtd_theme >= 0.1.6, < 1',
-        'lowdown >= 0.1.0, < 2'
+        'lowdown >= 0.1.0, < 2',
     ],
     install_requires=[
         'appdirs == 1.4.0',
         'ftrack-action-handler',
-        'qt.py >=1.0.0, < 2'
+        'qt.py >=1.0.0, < 2',
+        'p4python',
     ],
-    tests_require=[
-    ],
+    tests_require=[],
     zip_safe=False,
     cmdclass={
         'build_plugin': BuildPlugin,
-
     },
+    python_requires=">=3, <4.0",
 )

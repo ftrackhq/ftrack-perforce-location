@@ -1,5 +1,5 @@
 # :coding: utf-8
-# :copyright: Copyright (c) 2019 ftrack
+# :copyright: Copyright (c) 2021 ftrack
 
 import logging
 import os
@@ -12,13 +12,9 @@ dependencies_directory = os.path.abspath(
 )
 sys.path.append(dependencies_directory)
 
-from ftrack_perforce_location.depot_attribute_action import (
-    PerforceAttributeAction
-)
+from ftrack_perforce_location.depot_attribute_action import PerforceAttributeAction
 
-logger = logging.getLogger(
-    'ftrack_perforce_location.perforce_attribute_action_hook'
-)
+logger = logging.getLogger('ftrack_perforce_location.perforce_attribute_action_hook')
 
 
 def register(session):

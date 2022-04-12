@@ -1,17 +1,14 @@
 # :coding: utf-8
-# :copyright: Copyright (c) 2018 ftrack
+# :copyright: Copyright (c) 2021 ftrack
 
 import logging
 import os
 import re
-
-from ftrack_perforce_location.import_p4api import import_p4
-
-import_p4()
+from pathlib import Path
 
 from P4 import P4Exception
 from ftrack_perforce_location.perforce_handlers.errors import (
-    PerforceFileHandlerException
+    PerforceFileHandlerException,
 )
 
 
@@ -21,7 +18,7 @@ seq_match = re.compile('(%+\d+d)|(#+)|(%d)')
 def seq_to_glob(filepath):
     '''
     Search for file sequence signatures in **filepath**
--    and replace it with wildcard *.
+    and replace it with wildcard *.
     '''
     found = seq_match.search(filepath)
     if found:
@@ -71,19 +68,20 @@ class PerforceFileHandler(object):
 
         self._change_handler = perforce_change_handler
 
-        self.logger = logging.getLogger(
-            __name__ + '.' + self.__class__.__name__
-        )
+        self.logger = logging.getLogger(__name__ + '.' + self.__class__.__name__)
         self._ensure_folder(self.root)
 
     def file_to_depot(self, filepath, perforce_filemode='binary'):
         '''Publish **filepath** to server.'''
+        filepath = Path(filepath)
 
-        if not filepath.startswith(self.root):
+        if self.root not in str(filepath):
             raise IOError('File is not in {}'.format(self.root))
         stats = []
 
-        self.logger.debug('moving file {} to depot with mode {}'.format(filepath, perforce_filemode))
+        self.logger.debug(
+            'moving file {} to depot with mode {}'.format(filepath, perforce_filemode)
+        )
 
         try:
             stats = self.connection.run_fstat(filepath)
@@ -103,9 +101,9 @@ class PerforceFileHandler(object):
 
         else:
             # 'p4 edit' requires that the file exists in the client
-            if not os.path.exists(filepath):
-                basedir = os.path.dirname(filepath)
-                if not os.path.exists(basedir):
+            if not filepath.exists():
+                basedir = Path(os.path.dirname(filepath))
+                if not basedir.exists():
                     os.makedirs(basedir)
                 open(filepath, 'a').close()
             self.connection.run_edit(filepath)

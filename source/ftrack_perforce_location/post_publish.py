@@ -1,5 +1,5 @@
 # :coding: utf-8
-# :copyright: Copyright (c) 2018 ftrack
+# :copyright: Copyright (c) 2021 ftrack
 
 import functools
 import json
@@ -11,15 +11,11 @@ from ftrack_api.symbol import COMPONENT_ADDED_TO_LOCATION_TOPIC
 import ftrack_api
 
 from ftrack_perforce_location.constants import SCENARIO_ID
-from ftrack_perforce_location.perforce_handlers.errors import (
-    PerforceValidationError
-)
+from ftrack_perforce_location.perforce_handlers.errors import PerforceValidationError
 from ftrack_perforce_location.validate_workspace import WorkspaceValidator
 
 
-logger = logging.getLogger(
-    'ftrack_perforce_location.post_publish_hook'
-)
+logger = logging.getLogger('ftrack_perforce_location.post_publish_hook')
 
 
 def post_publish_callback(session, event):
@@ -30,9 +26,7 @@ def post_publish_callback(session, event):
     component_id = event['data'].get('component_id')
     component = session.get('Component', component_id)
     component_is_in_container = bool(component['container'])
-    component_is_container = isinstance(
-        component, session.types['SequenceComponent']
-    )
+    component_is_container = isinstance(component, session.types['SequenceComponent'])
 
     # either get the container of the component itself
     root_component = component['container'] or component
@@ -68,15 +62,15 @@ def post_publish_callback(session, event):
         except PerforceValidationError:
             error_message = (
                 'Cannot checkin {0}.\n'
-                'Project {1} requires its own depot.'.format(
-                    file_path, project['name']
-                )
+                'Project {1} requires its own depot.'.format(file_path, project['name'])
             )
             raise PerforceValidationError(error_message)
 
     if file_path:
         change = perforce_location.accessor.perforce_file_handler.change.add(
-            change, file_path, comment,
+            change,
+            file_path,
+            comment,
         )
 
     # We should only get here with a SequenceComponent with no
@@ -86,8 +80,8 @@ def post_publish_callback(session, event):
 
     if component_is_in_container:
         # Add change to current container temporarily
-        logger.debug('Adding change {0} as metadata to {1}'.format(
-            change, root_component)
+        logger.debug(
+            'Adding change {0} as metadata to {1}'.format(change, root_component)
         )
         root_component['metadata']['change'] = change
 
@@ -98,8 +92,7 @@ def post_publish_callback(session, event):
         if component_is_container:
             # Once we submit the change remove the pending change from metadata
             logger.debug(
-                'removing change: {0} from {1} metadata'.format(
-                    change, component)
+                'removing change: {0} from {1} metadata'.format(change, component)
             )
             component['metadata'].pop('change', None)
 
@@ -114,18 +107,16 @@ def _require_one_depot_per_project(session):
     # Check whether require one depot per project
     configuration = json.loads(storage_scenario['value'])
     location_data = configuration.get('data', {})
-    require_one_depot_per_project = location_data.get(
-        'one_depot_per_project', False
-    )
+    require_one_depot_per_project = location_data.get('one_depot_per_project', False)
     return require_one_depot_per_project
 
 
 def _validate_depot_for_project(session, project, perforce_location):
     '''Setup and run workspace validation.
 
-       With a combination of server-wide and project-specific settings,
-       we can require that a particular Project has its own Perforce
-       depot, so that it may be split out and archived later.
+    With a combination of server-wide and project-specific settings,
+    we can require that a particular Project has its own Perforce
+    depot, so that it may be split out and archived later.
     '''
 
     # Avoid stale cached values
@@ -133,24 +124,19 @@ def _validate_depot_for_project(session, project, perforce_location):
     session.populate(project, 'custom_attributes')
 
     if project['custom_attributes'].get('own_perforce_depot', False):
-        connection = (
-            perforce_location.resource_identifier_transformer.connection
-        )
+        connection = perforce_location.resource_identifier_transformer.connection
         try:
-            sanitise_function = (
-                perforce_location.structure.sanitise_for_filesystem
-            )
+            sanitise_function = perforce_location.structure.sanitise_for_filesystem
         except AttributeError:
             sanitise_function = None
-        validator = WorkspaceValidator(
-            connection, [project], sanitise_function
-        )
+        validator = WorkspaceValidator(connection, [project], sanitise_function)
         try:
             validator.validate_one_depot_per_project()
         except PerforceValidationError as error:
             logger.warning(
                 'Workspace validation failed for project {}:\n{}'.format(
-                    project['name'], error)
+                    project['name'], error
+                )
             )
             raise
 
@@ -158,26 +144,20 @@ def _validate_depot_for_project(session, project, perforce_location):
 def _register(event, session=None):
     '''Register plugin to api_object.'''
 
-    event_handler = functools.partial(
-        post_publish_callback, session
-    )
+    event_handler = functools.partial(post_publish_callback, session)
 
-    location = session.query(
-        'Location where name is "{}"'.format(SCENARIO_ID)
-    ).first()
+    location = session.query('Location where name is "{}"'.format(SCENARIO_ID)).first()
 
     if not location:
         logger.debug('Location {} not found'.format(SCENARIO_ID))
         return
 
     location_id = location['id']
-    logger.debug('Registering post publish hook for location {}'.format(
-        SCENARIO_ID)
-    )
+    logger.debug('Registering post publish hook for location {}'.format(SCENARIO_ID))
 
     session.event_hub.subscribe(
         'topic={0} and data.location_id="{1}"'.format(
             COMPONENT_ADDED_TO_LOCATION_TOPIC, location_id
         ),
-        event_handler
+        event_handler,
     )
