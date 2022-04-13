@@ -7,6 +7,33 @@
 Release Notes
 *************
 
+.. release:: 1.1.0
+    :date: 2022-04-13
+
+    .. change:: changed
+
+        Move settings to connect widgets.
+
+    .. change:: changed
+
+        Rely on P4Python from pypi
+
+    .. change:: changed
+
+        Code updated to run on Connect 2.  
+
+    .. change:: changed
+
+        Code updated to Python 3.  
+
+
+.. warning::
+
+    From this version the support for ftrack-connect 1.X is dropped, and
+    only ftrack-conenct 2.0 will be supported up to the integration EOL.
+
+
+
 .. release:: 1.0.3
     :date: 2020-08-04
 
