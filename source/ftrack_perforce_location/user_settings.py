@@ -69,7 +69,7 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
         grid.addWidget(self.user_value, 0, 1)
 
         ws_label = QtWidgets.QLabel('Workspace')
-        self.ws_value = QtWidgets.QComboBox()
+        self.ws_value = QtWidgets.QComboBox(parent=self)
         self.ws_value.addItems(self.ws_clients)
 
         if self.ws_clients and using_workspace:

@@ -4,7 +4,10 @@
 import ftrack_api
 import logging
 from ftrack_connect.qt import QtWidgets, QtCore
+import qtawesome as qta
+
 import ftrack_connect
+
 
 from ftrack_perforce_location import user_settings
 from ftrack_perforce_location.perforce_handlers.settings import (
@@ -16,6 +19,9 @@ logger = logging.getLogger('ftrack_perforce_location.connect-widget')
 
 
 class PerforceUserSettings(ftrack_connect.ui.application.ConnectWidget):
+
+    name = 'Perforce Settings'
+
     def __init__(self, session, parent=None):
         '''Instantiate the actions widget.'''
         super(PerforceUserSettings, self).__init__(session, parent=parent)
@@ -41,4 +47,4 @@ def register(session, **kw):
         return
 
     plugin = ftrack_connect.ui.application.ConnectWidgetPlugin(PerforceUserSettings)
-    plugin.register(session, priority=100)
+    plugin.register(session, priority=40)
