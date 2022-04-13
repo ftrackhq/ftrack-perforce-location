@@ -30,7 +30,7 @@ Release Notes
 .. warning::
 
     From this version the support for ftrack-connect 1.X is dropped, and
-    only ftrack-conenct 2.0 will be supported up to the integration EOL.
+    only ftrack-conenct 2.0 will be supported.
 
 
 
