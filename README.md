@@ -1,6 +1,5 @@
----
-title: ftrack perforce location
----
+# ftrack perforce location
+
 
 ftrack-perforce-location allows ftrack to publish to and import from a
 Perforce depot through a user\'s local workspace.
