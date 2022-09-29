@@ -24,6 +24,7 @@ found at <https://ftrack-perforce-location.readthedocs.io/en/latest/>
 ### Building the plugin
 
 bash
+
 $ python setup.py build_plugin
 
 ### Configuration
