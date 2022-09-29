@@ -13,7 +13,7 @@ Perforce depot through a user\'s local workspace.
 
 ## ftrack
 
-\* Configure the Perforce Storage Scenario with your Perforce server
+* Configure the Perforce Storage Scenario with your Perforce server
 protocol, address and port.
 
 # Documentation
@@ -23,9 +23,8 @@ found at <https://ftrack-perforce-location.readthedocs.io/en/latest/>
 
 ### Building the plugin
 
-``` {.bash}
+bash
 $ python setup.py build_plugin
-```
 
 ### Configuration
 
