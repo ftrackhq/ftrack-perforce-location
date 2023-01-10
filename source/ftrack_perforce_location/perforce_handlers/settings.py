@@ -63,7 +63,7 @@ class PerforceSettingsHandler(object):
         '''
         config = dict(config)
         p4 = P4()
-        config['user'] = self._sanitize_username(self.session.api_user)
+        config['user'] = p4.user
         config['using_workspace'] = p4.client
         p4.port = config['port']
         try:
