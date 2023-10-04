@@ -11,7 +11,7 @@ copy of the source by either downloading the
 `zipball <https://bitbucket.org/ftrack/ftrack-perforce-location/get/master.zip>`_ or
 cloning the public repository::
 
-    git clone git@bitbucket.org:ftrack/ftrack-perforce-location.git
+    git clone git@github.com:ftrackhq/ftrack-perforce-location.git
 
 You can then `build and install <https://help.ftrack.com/en/articles/3504354-ftrack-connect-plugins-discovery-installation-and-update>`_ the plugin::
 
