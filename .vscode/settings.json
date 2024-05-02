@@ -1,0 +1,6 @@
+{
+    "python.analysis.extraPaths": [
+        "./source",
+        "../ftrack_connect/source/ftrack_connect"
+    ]
+}

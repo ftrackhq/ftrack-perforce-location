@@ -53,19 +53,6 @@ def post_publish_callback(session, event):
     if not component_is_container:
         file_path = perforce_location.get_filesystem_path(component)
 
-    if _require_one_depot_per_project(session):
-        project = session.query(
-            'select id, name from Project where id is "{0}"'.format(project_id)
-        ).one()
-        try:
-            _validate_depot_for_project(session, project, perforce_location)
-        except PerforceValidationError:
-            error_message = (
-                'Cannot checkin {0}.\n'
-                'Project {1} requires its own depot.'.format(file_path, project['name'])
-            )
-            raise PerforceValidationError(error_message)
-
     if file_path:
         change = perforce_location.accessor.perforce_file_handler.change.add(
             change,
@@ -95,51 +82,6 @@ def post_publish_callback(session, event):
                 'removing change: {0} from {1} metadata'.format(change, component)
             )
             component['metadata'].pop('change', None)
-
-
-def _require_one_depot_per_project(session):
-    '''Determine whether this Project requires its own depot.'''
-    storage_scenario = session.query(
-        'select value from Setting '
-        'where name is "storage_scenario" and group is "STORAGE"'
-    ).one()
-
-    # Check whether require one depot per project
-    configuration = json.loads(storage_scenario['value'])
-    location_data = configuration.get('data', {})
-    require_one_depot_per_project = location_data.get('one_depot_per_project', False)
-    return require_one_depot_per_project
-
-
-def _validate_depot_for_project(session, project, perforce_location):
-    '''Setup and run workspace validation.
-
-    With a combination of server-wide and project-specific settings,
-    we can require that a particular Project has its own Perforce
-    depot, so that it may be split out and archived later.
-    '''
-
-    # Avoid stale cached values
-    del project['custom_attributes']
-    session.populate(project, 'custom_attributes')
-
-    if project['custom_attributes'].get('own_perforce_depot', False):
-        connection = perforce_location.resource_identifier_transformer.connection
-        try:
-            sanitise_function = perforce_location.structure.sanitise_for_filesystem
-        except AttributeError:
-            sanitise_function = None
-        validator = WorkspaceValidator(connection, [project], sanitise_function)
-        try:
-            validator.validate_one_depot_per_project()
-        except PerforceValidationError as error:
-            logger.warning(
-                'Workspace validation failed for project {}:\n{}'.format(
-                    project['name'], error
-                )
-            )
-            raise
-
 
 def _register(event, session=None):
     '''Register plugin to api_object.'''
