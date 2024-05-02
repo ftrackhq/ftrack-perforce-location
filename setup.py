@@ -104,7 +104,7 @@ setup(
         'lowdown >= 0.1.0, < 2',
     ],
     install_requires=[
-        'appdirs == 1.4.0',
+        'platformdirs',
         'ftrack-action-handler',
         'qt.py >=1.0.0, < 2',
         'p4python',
