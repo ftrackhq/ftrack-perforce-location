@@ -5,3 +5,4 @@ build/**
 venv/**
 doc/build/**
 ftrack-perforce-location.code-workspace
+.vscode/settings.json
