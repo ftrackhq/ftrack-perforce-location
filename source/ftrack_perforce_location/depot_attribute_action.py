@@ -46,11 +46,14 @@ class PerforceAttributeAction(BaseAction):
 
         return entity_type == 'Project'
 
+    #[SGIBSON] This might be unnecessary now,
+    # do we need to populate custom attributes elsewhere?
     def interface(self, session, entities, event):
         values = event['data'].get('values', {})
         if values:
             return
 
+        ''' Bypassing for now, TODO confirm removal 
         entity_type, entity_id = entities[0]
 
         self._create_attribute(entity_id)
@@ -59,16 +62,8 @@ class PerforceAttributeAction(BaseAction):
         # Custom attributes are cached, so clear and fetch current values.
         del project['custom_attributes']
         self.session.populate(project, 'custom_attributes')
-        current_value = project['custom_attributes'].get('own_perforce_depot', False)
-
-        widgets = [
-            {
-                'type': 'boolean',
-                'label': 'Project should have its own Perforce depot:',
-                'name': 'own_depot',
-                'value': current_value,
-            }
-        ]
+        '''
+        widgets = []
 
         return widgets
 
@@ -81,16 +76,8 @@ class PerforceAttributeAction(BaseAction):
         entity_type, entity_id = entities[0]
         values = event['data'].get('values', {})
         project = self.session.get(entity_type, entity_id)
-        project['custom_attributes']['own_perforce_depot'] = values['own_depot']
-        self.session.commit()
 
-        if values['own_depot']:
-            depot_name = str(self._sanitise(project['name']))
-            if depot_name not in (
-                depot['name'] for depot in self.connection.run_depots()
-            ):
-                self._create_depot(depot_name)
-            self._update_workspace_map(depot_name)
+        self.session.commit()
 
         return True
 
@@ -176,6 +163,8 @@ class PerforceAttributeAction(BaseAction):
         workspace['View'] = mappings
         self.connection.save_client(workspace)
 
+    #[SGIBSON] Leaving this for utility, but we should assume
+    # that most users ARE NOT admins for future work
     def _user_is_admin(self, username, project_id):
         # check perforce super role
         perforce_super_role = any(
