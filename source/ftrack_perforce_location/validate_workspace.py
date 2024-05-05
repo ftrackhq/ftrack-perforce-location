@@ -96,6 +96,8 @@ class WorkspaceValidator(object):
         proj_dir = os.path.join(prefix, self._get_filesystem_name(project), '...')
         return proj_dir
 
+    '''[SGIBSON] This is probably unnecessary now
+    as we don't check for this anymore'''
     def _proj_has_own_depot(self, project, mapping=None):
         '''Check that the given *project* will be written to a depot which no
         other project is configured to use.
