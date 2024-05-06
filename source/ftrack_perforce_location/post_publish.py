@@ -11,9 +11,11 @@ from ftrack_api.symbol import COMPONENT_ADDED_TO_LOCATION_TOPIC
 import ftrack_api
 
 from ftrack_perforce_location.constants import SCENARIO_ID
-from ftrack_perforce_location.perforce_handlers.errors import PerforceValidationError
+#from ftrack_perforce_location.perforce_handlers.errors import PerforceValidationError
+from ftrack_perforce_location.perforce_handlers import errors
 from ftrack_perforce_location.validate_workspace import WorkspaceValidator
 
+from P4 import P4Exception
 
 logger = logging.getLogger('ftrack_perforce_location.post_publish_hook')
 
@@ -59,12 +61,19 @@ def post_publish_callback(session, event):
         ).one()
         try:
             _validate_depot_for_project(session, project, perforce_location)
-        except PerforceValidationError:
+        except errors.PerforceValidationError:
             error_message = (
                 'Cannot checkin {0}.\n'
                 'Project {1} requires its own depot.'.format(file_path, project['name'])
             )
-            raise PerforceValidationError(error_message)
+            raise errors.PerforceValidationError(error_message)
+
+    #[SGIBSON] Is this a good catch all spot to do the trust?
+    try:
+        if perforce_location.connection.port.startswith('ssl'):
+            perforce_location.connection.run_trust('-y')
+    except P4Exception as error:
+        raise errors.PerforceConnectionHandlerException(error)
 
     if file_path:
         change = perforce_location.accessor.perforce_file_handler.change.add(
