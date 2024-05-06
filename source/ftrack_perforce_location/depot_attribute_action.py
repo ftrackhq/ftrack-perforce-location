@@ -19,7 +19,10 @@ class PerforceAttributeAction(AdvancedBaseAction):
     label = 'Configure Project Perforce'
     identifier = 'com.ftrack.ftrack_perforce_location.perforce_attribute'
     description = 'Configure various Perforce options for the current project'
+    
+    #[SGIBSON] Should these be inclusive?
     run_as_user = True
+    limit_to_user = True
 
     def __init__(self, session):
         super(PerforceAttributeAction, self).__init__(session)
