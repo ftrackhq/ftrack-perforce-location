@@ -1,0 +1,42 @@
+[project]
+name = 'ftrack-perforce-location'
+dynamic = ["version"]
+dependencies = [
+    "sphinx >= 1.2.2, < 2",
+    "sphinx_rtd_theme >= 0.1.6, < 1",
+    "lowdown >= 0.1.0, < 2",
+    "appdirs == 1.4.0",
+    "platformdirs",
+    "ftrack-action-handler",
+    "qt.py >=1.0.0, < 2",
+    "p4python",
+]
+requires-python = ">=3, <4.0"
+authors = [{ name="ftrack", email="support@ftrack.com" }]
+description = "ftrack location integration with perforce."
+license = { file = "LICENSE.txt" }
+readme = "README.md"
+keywords = ["ftrack, integration, connect, location, structure, accessor, perforce"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Environment :: Plugins",
+    "Intended Audience :: Developers",
+]
+
+[project.urls]
+Homepage = "https://github.com/ftrackhq/ftrack-perforce-location"
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+dynamic.version = {attr = "package.__version__"}
+package-dir = { "" = "source" }
+
+[tool.setuptools.packages.find]
+where = ["source"]
+include = ["*"]
+namespaces = false

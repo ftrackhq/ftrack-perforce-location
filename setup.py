@@ -87,32 +87,8 @@ class BuildPlugin(Command):
 
 # Call main setup.
 setup(
-    name='ftrack-perforce-location',
-    version=VERSION,
-    description='ftrack location integration with perforce.',
-    long_description=open(README_PATH).read(),
-    keywords='ftrack, integration, connect, location, structure, accessor, perforce',
-    url='https://bitbucket.org/ftrack/ftrack-perforce-location',
-    author='ftrack',
-    author_email='support@ftrack.com',
-    license='Apache License (2.0)',
-    packages=find_packages(SOURCE_PATH),
-    package_dir={'': 'source'},
-    setup_requires=[
-        'sphinx >= 1.2.2, < 2',
-        'sphinx_rtd_theme >= 0.1.6, < 1',
-        'lowdown >= 0.1.0, < 2',
-    ],
-    install_requires=[
-        'appdirs == 1.4.0',
-        'ftrack-action-handler',
-        'qt.py >=1.0.0, < 2',
-        'p4python',
-    ],
-    tests_require=[],
     zip_safe=False,
     cmdclass={
         'build_plugin': BuildPlugin,
     },
-    python_requires=">=3, <4.0",
 )
