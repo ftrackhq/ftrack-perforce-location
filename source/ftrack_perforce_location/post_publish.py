@@ -11,9 +11,7 @@ from ftrack_api.symbol import COMPONENT_ADDED_TO_LOCATION_TOPIC
 import ftrack_api
 
 from ftrack_perforce_location.constants import SCENARIO_ID
-#from ftrack_perforce_location.perforce_handlers.errors import PerforceValidationError
 from ftrack_perforce_location.perforce_handlers import errors
-from ftrack_perforce_location.validate_workspace import WorkspaceValidator
 
 from P4 import P4Exception
 

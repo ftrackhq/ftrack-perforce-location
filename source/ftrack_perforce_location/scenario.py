@@ -139,7 +139,6 @@ class ConfigurePerforceStorageScenario(object):
                     'value': (
                         '# Perforce storage is now configured with the following settings:\n\n'
                         '* **Server**: {0} \n* **Port**: {1} \n* Use **SSL**: {2} \n'
-                        '* **One depot per project**: {3}'
                     ).format(
                         configuration['select_options']['server'],
                         configuration['select_options']['port_number'],
