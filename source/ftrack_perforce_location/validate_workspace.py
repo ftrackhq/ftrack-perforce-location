@@ -37,48 +37,6 @@ class WorkspaceValidator(object):
         self._ws_map = self._get_ws_mapping()
         self._case_insensitive = self._p4.run_info()[0]['clientCase'] == 'insensitive'
 
-    def validate_one_depot_per_project(self, projects=None):
-        '''Tests the Perforce configuration for a list of projects.
-
-        Returns True if all projects pass all tests, raises exception
-        otherwise.
-
-        *projects* is an optional list of Project or dictionary-like objects.
-        By default, the list passed in to the constructor will be used.
-
-        '''
-        if projects is None:
-            projects = self._projects
-
-        if not os.path.exists(self._prefix):
-            raise PerforceValidationError(
-                'Workspace root, {0}, does not exist'.format(self._prefix)
-            )
-
-        workspace_mappings = self._client_info.get('View')
-        if not workspace_mappings:
-            raise PerforceValidationError(
-                'Workspace {0} has no views configured.'.format(
-                    self._client_info['Client']
-                )
-            )
-
-        if len(list(self._positive_mappings())) == 1:
-            self.logger.warning('Workspace only configured for a single depot.')
-            if len(projects) > 1:
-                raise PerforceValidationError(
-                    'Multiple projects specified, but workspace mapping'
-                    ' contains only one depot.'
-                )
-
-        for project in projects:
-            if not self._proj_has_own_depot(project):
-                raise PerforceValidationError(
-                    'Project {0} shares a depot.'.format(project['name'])
-                )
-
-        return True
-
     def _get_filesystem_name(self, project):
         '''Return the filesystem folder name of a *project*.
 
@@ -138,6 +96,8 @@ class WorkspaceValidator(object):
         proj_dir = os.path.join(prefix, self._get_filesystem_name(project), '...')
         return proj_dir
 
+    '''[SGIBSON] This is probably unnecessary now
+    as we don't check for this anymore'''
     def _proj_has_own_depot(self, project, mapping=None):
         '''Check that the given *project* will be written to a depot which no
         other project is configured to use.

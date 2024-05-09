@@ -180,7 +180,7 @@ class PerforceSettingsHandler(object):
         data = self._get_scenario_settings()
         existing_keys = set(data.keys())
         required_keys = set(
-            ('server', 'port_number', 'use_ssl', 'one_depot_per_project')
+            ('server', 'port_number', 'use_ssl')
         )
         missing_keys = required_keys.difference(existing_keys)
 

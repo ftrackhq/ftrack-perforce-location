@@ -105,10 +105,6 @@ class ConfigurePerforceStorageScenario(object):
                 'use_ssl', True
             )
 
-            one_depot_per_project = self.existing_perforce_storage_configuration.get(
-                'one_depot_per_project', True
-            )
-
             items = [
                 {
                     'type': 'label',
@@ -134,12 +130,6 @@ class ConfigurePerforceStorageScenario(object):
                     'name': 'use_ssl',
                     'value': perforce_ssl,
                 },
-                {
-                    'type': 'boolean',
-                    'label': 'Enforce each project having own depot.',
-                    'name': 'one_depot_per_project',
-                    'value': one_depot_per_project,
-                },
             ]
 
         elif next_step == 'review_configuration':
@@ -154,7 +144,6 @@ class ConfigurePerforceStorageScenario(object):
                         configuration['select_options']['server'],
                         configuration['select_options']['port_number'],
                         configuration['select_options']['use_ssl'],
-                        configuration['select_options']['one_depot_per_project'],
                     ),
                 }
             ]
@@ -167,10 +156,7 @@ class ConfigurePerforceStorageScenario(object):
                     'data': {
                         'server': configuration['select_options']['server'],
                         'port_number': configuration['select_options']['port_number'],
-                        'use_ssl': configuration['select_options']['use_ssl'],
-                        'one_depot_per_project': configuration['select_options'][
-                            'one_depot_per_project'
-                        ],
+                        'use_ssl': configuration['select_options']['use_ssl']
                     },
                 }
             )
@@ -302,31 +288,12 @@ class ActivatePerforceStorageScenario(object):
             error_message = 'Unable to read storage scenario data.'
             return error_message
 
-        if location_data.get('one_depot_per_project', False):
-            projects = self.session.query(
-                'Project where custom_attributes any'
-                ' (key is own_perforce_depot and value is 1)'
-            ).all()
-            if len(projects) == 0:
-                return
-            try:
-                sanitise_function = (
-                    self.query('Location where name is "{0}"'.format(SCENARIO_ID))
-                    .one()
-                    .structure.sanitise_for_filesystem
-                )
-            except AttributeError:
-                sanitise_function = None
-            validator = WorkspaceValidator(
-                connection.connection, projects, sanitise_function
-            )
-            try:
-                validator.validate_one_depot_per_project()
-            except PerforceValidationError as error:
-                return (
-                    'Caught error while validating one depot per project: \n'
-                    '{}'.format(error)
-                )
+        projects = self.session.query(
+            'Project where custom_attributes any'
+            ' (key is own_perforce_depot and value is 1)'
+        ).all()
+        if len(projects) == 0:
+            return
 
     def activate(self, event):
         self.logger.debug('Activating storage scenario {}.'.format(SCENARIO_ID))
