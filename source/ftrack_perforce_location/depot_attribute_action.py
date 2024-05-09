@@ -3,7 +3,7 @@
 
 import logging
 import json
-from ftrack_action_handler.action import BaseAction
+from ftrack_action_handler.action import AdvancedBaseAction
 from ftrack_api.structure.standard import StandardStructure
 
 import P4
@@ -15,10 +15,14 @@ from ftrack_perforce_location.perforce_handlers import connection
 from ftrack_perforce_location.perforce_handlers import settings
 
 
-class PerforceAttributeAction(BaseAction):
+class PerforceAttributeAction(AdvancedBaseAction):
     label = 'Configure Project Perforce'
     identifier = 'com.ftrack.ftrack_perforce_location.perforce_attribute'
     description = 'Configure various Perforce options for the current project'
+    
+    #[SGIBSON] Should these be inclusive?
+    run_as_user = True
+    limit_to_user = True
 
     def __init__(self, session):
         super(PerforceAttributeAction, self).__init__(session)
