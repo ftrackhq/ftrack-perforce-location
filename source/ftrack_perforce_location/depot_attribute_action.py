@@ -42,12 +42,12 @@ class PerforceAttributeAction(AdvancedBaseAction):
             return False
 
         entity_type, entity_id = entities[0]
-        if not self._user_is_admin(
-            username=event['source']['user']['username'], project_id=entity_id
-        ):
-            return False
+        #if not self._user_is_admin(
+        #    username=event['source']['user']['username'], project_id=entity_id
+        #):
+        return False
 
-        return entity_type == 'Project'
+        #return entity_type == 'Project'
 
     def launch(self, session, entities, event):
         # It is possible but unlikely that someone has launched the event

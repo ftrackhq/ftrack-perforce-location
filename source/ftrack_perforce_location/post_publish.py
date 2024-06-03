@@ -17,9 +17,9 @@ from P4 import P4Exception
 
 logger = logging.getLogger('ftrack_perforce_location.post_publish_hook')
 
-
 def post_publish_callback(session, event):
     '''Event callback to publish the result file in Perforce depot.'''
+
     location_id = event['data'].get('location_id')
     perforce_location = session.get('Location', location_id)
 

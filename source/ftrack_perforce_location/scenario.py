@@ -23,8 +23,6 @@ from ftrack_perforce_location.perforce_handlers.connection import (
 from ftrack_perforce_location.perforce_handlers.errors import PerforceValidationError
 from ftrack_perforce_location.perforce_handlers.file import PerforceFileHandler
 from ftrack_perforce_location.perforce_handlers.settings import PerforceSettingsHandler
-from ftrack_perforce_location.validate_workspace import WorkspaceValidator
-
 
 class ConfigurePerforceStorageScenario(object):
     '''Configure a storage scenario using Perforce.'''
