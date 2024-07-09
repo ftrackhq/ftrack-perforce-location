@@ -6,5 +6,3 @@ venv/**
 doc/build/**
 ftrack-perforce-location.code-workspace
 .vscode/**
-setup.cfg
-setup.py

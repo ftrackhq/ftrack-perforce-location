@@ -284,13 +284,7 @@ class ActivatePerforceStorageScenario(object):
         except KeyError:
             error_message = 'Unable to read storage scenario data.'
             return error_message
-
-        projects = self.session.query(
-            'Project where custom_attributes any'
-            ' (key is own_perforce_depot and value is 1)'
-        ).all()
-        if len(projects) == 0:
-            return
+        return ""
 
     def activate(self, event):
         self.logger.debug('Activating storage scenario {}.'.format(SCENARIO_ID))
