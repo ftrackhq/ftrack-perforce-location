@@ -16,7 +16,8 @@ classifiers = [
     "Environment :: Plugins",
     "Intended Audience :: Developers",
 ]
-packages = [{include = "source"}]
+packages = [{include = "hook"},{include = "location"}]
+exclude =["./pyproject.toml", "./README.md"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
