@@ -63,7 +63,7 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
 
         user_label = QtWidgets.QLabel('User')
         self.user_value = QtWidgets.QLineEdit(user)
-        self.user_value.setReadOnly(True)
+        self.user_value.setReadOnly(False)
 
         grid.addWidget(user_label, 0, 0)
         grid.addWidget(self.user_value, 0, 1)
@@ -81,19 +81,22 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
 
         root_label = QtWidgets.QLabel('Workspace Root')
         self.root_value = QtWidgets.QLineEdit(workspace_root)
-        self.root_value.setReadOnly(True)
+        self.root_value.setReadOnly(False)
         if not workspace_root:
             self.on_workspace_change()
 
         grid.addWidget(root_label, 2, 0)
         grid.addWidget(self.root_value, 2, 1)
 
-        self.button = QtWidgets.QPushButton('Save Settings')
-        self.layout().addWidget(self.button)
+        self.save_button = QtWidgets.QPushButton('Save Settings')
+        self.layout().addWidget(self.save_button)
+        self.ref_button = QtWidgets.QPushButton('Refresh')
+        self.layout().addWidget(self.ref_button)        
 
     def post_build(self):
         '''Connect events.'''
-        self.button.clicked.connect(self.on_save_settings)
+        self.save_button.clicked.connect(self.on_save_settings)
+        self.ref_button.clicked.connect(self.on_refresh_settings)
         self.ws_value.currentIndexChanged.connect(self.on_workspace_change)
 
     def setTheme(self):
@@ -115,7 +118,36 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
         config_data['using_workspace'] = self.ws_clients[self.ws_value.currentIndex()]
         config_data['workspace_root'] = self.root_value.text()
         self.settings.write(config_data)
-        self.close()
+        #self.close()
+
+    def on_refresh_settings(self):
+        self.on_save_settings()
+        settings_data = self.settings.read()
+        user = settings_data['user']
+        available_worskpaces = self.get_user_workspaces(user)
+        self.ws_clients = [w['client'] for w in available_worskpaces]
+        self.ws_roots = [w['Root'] for w in available_worskpaces]
+
+        using_workspace = settings_data['using_workspace']
+        if using_workspace not in self.ws_clients:
+            using_workspace = self.ws_clients[0]
+        workspace_root = settings_data['workspace_root']
+
+        self.user_value.setText(user)
+        self.user_value.setReadOnly(False)
+
+        self.ws_value = QtWidgets.QComboBox(parent=self)
+        self.ws_value.addItems(self.ws_clients)
+
+        if self.ws_clients and using_workspace:
+            index = self.ws_value.findText(using_workspace, QtCore.Qt.MatchFixedString)
+            self.ws_value.setCurrentIndex(index)
+
+        root_label = QtWidgets.QLabel('Workspace Root')
+        self.root_value.setText(workspace_root)
+        self.root_value.setReadOnly(False)
+        if not workspace_root:
+            self.on_workspace_change()
 
     def raise_warning_box(self, text):
         '''Display a warning dialog box with *text*.'''

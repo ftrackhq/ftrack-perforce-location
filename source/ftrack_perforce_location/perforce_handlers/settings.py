@@ -1,7 +1,7 @@
 # :coding: utf-8
 # :copyright: Copyright (c) 2021 ftrack
 
-import appdirs
+import platformdirs
 import json
 import logging
 import os
@@ -32,7 +32,7 @@ class PerforceSettingsHandler(object):
         '''Return the current Perforce config file path.'''
 
         config_file_path = os.path.join(
-            appdirs.user_data_dir('ftrack-connect', 'ftrack'), 'perforce_config.json'
+            platformdirs.user_data_dir('ftrack-connect', 'ftrack'), 'perforce_config.json'
         )
 
         return config_file_path
@@ -180,7 +180,7 @@ class PerforceSettingsHandler(object):
         data = self._get_scenario_settings()
         existing_keys = set(data.keys())
         required_keys = set(
-            ('server', 'port_number', 'use_ssl', 'one_depot_per_project')
+            ('server', 'port_number', 'use_ssl')
         )
         missing_keys = required_keys.difference(existing_keys)
 
