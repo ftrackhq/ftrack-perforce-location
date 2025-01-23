@@ -7,6 +7,12 @@
 Release Notes
 *************
 
+.. release:: Upcoming
+
+    .. change:: fixed
+
+         Perforce username guessed from ftrack user.
+
 .. release:: 1.1.0
     :date: 2022-04-13
 
