@@ -37,8 +37,10 @@ class PerforceResourceIdentifierTransformer(
 
         '''
         root = self._perforce_file_handler.root
+        
         fullpath = os.path.join(root, resource_identifier)
         mangled_path = seq_to_glob(fullpath)
+        
         stats = self.connection.run_fstat(str(Path(mangled_path)))
         rx = re.compile('%+\d+d|%d')
         found = rx.search(resource_identifier)
@@ -53,8 +55,16 @@ class PerforceResourceIdentifierTransformer(
             resource_identifier, int(stats[0].get('headRev', 0)) + 1
         )
 
+        # Don't return the depot encoded path if the file isn't in the depot
+        # P4 doesn't handle that very well, fstat shouldn't fail if the file isn't in the depot
+        returned_path = encoded_path
+        try:
+            self.connection.run_fstat(returned_path)
+        except P4Exception:
+            returned_path = original_resource
+
         self.logger.debug('Encode {0} as {1}'.format(original_resource, encoded_path))
-        return encoded_path
+        return returned_path
 
     def decode(self, resource_identifier, context=None):
         '''
@@ -65,43 +75,54 @@ class PerforceResourceIdentifierTransformer(
             This transforms //depot/file/path#version to /file/path
 
         '''
-        decoded_path = None
-        depot_path, version = resource_identifier.split('#')
-        depot_path_name = os.path.basename(depot_path)
+        decoded_path = ''
+        decoded_sequence_path = ''
 
-        try:
-            self.logger.debug('Sync {0}'.format(resource_identifier))
-            self.connection.run_sync(resource_identifier)
-        except P4Exception:
-            pass
+        if '#' in resource_identifier:
+            depot_path, version = resource_identifier.split('#')
+            depot_path_name = os.path.basename(depot_path)
 
-        stats = self.connection.run_fstat(depot_path)
+            try:
+                self.logger.debug('Sync {0}'.format(resource_identifier))
+                self.connection.run_sync(resource_identifier)
+            except P4Exception:
+                pass
 
-        if '*' not in depot_path_name:
-            for stat in stats:
-                self.logger.debug(
-                    'Checking for {0} in {1}'.format(
-                        depot_path_name, stat['clientFile']
+            stats = None
+            try:
+                stats = self.connection.run_fstat(depot_path)
+            except:
+                pass
+
+            if '*' not in depot_path_name:
+                if stats:
+                    for stat in stats:
+                        self.logger.debug(
+                            'Checking for {0} in {1}'.format(
+                                depot_path_name, stat['clientFile']
+                            )
+                        )
+                        if depot_path_name in stat['clientFile']:
+                            decoded_path = stat['clientFile']
+                            self.logger.debug(
+                                'Decode {0} as {1}'.format(resource_identifier, decoded_path)
+                            )
+                            break
+
+                    decoded_sequence_path = os.path.join(
+                        os.path.dirname(stats[0]['clientFile']), depot_path_name
                     )
+            decoded_path = decoded_path or decoded_sequence_path
+            if '*' in decoded_path:
+                decoded_path = decoded_path.replace('*', '%d')
+
+            self.logger.debug(
+                'Returning decoded path for {0} as {1}'.format(
+                    resource_identifier, decoded_path
                 )
-                if depot_path_name in stat['clientFile']:
-                    decoded_path = stat['clientFile']
-                    self.logger.debug(
-                        'Decode {0} as {1}'.format(resource_identifier, decoded_path)
-                    )
-                    break
-
-        decoded_sequence_path = os.path.join(
-            os.path.dirname(stats[0]['clientFile']), depot_path_name
-        )
-        decoded_path = decoded_path or decoded_sequence_path
-        if '*' in decoded_path:
-            decoded_path = decoded_path.replace('*', '%d')
-
-        self.logger.debug(
-            'Returning decoded path for {0} as {1}'.format(
-                resource_identifier, decoded_path
             )
-        )
 
-        return Path(decoded_path)
+            return Path(decoded_path)
+        else:
+            # assume file isn't in depot because resource_identifier is a local path
+            return Path(resource_identifier)
