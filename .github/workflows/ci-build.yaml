@@ -41,13 +41,13 @@ jobs:
               id: extract_branch
               shell: cmd
               run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
-      
+
             - name: Upload Windows release
               uses: softprops/action-gh-release@v2
               with:
                 name : "latest ${{ steps.extract_branch.outputs.branch }} unstable"
                 body: "This is the latest unstable build version, feel free to test it out."
-                tag_name: "${{ steps.extract_branch.outputs.branch }}-ustable"
+                tag_name: "ustable"
                 path: build/*.zip
                 prerelease: true
 

@@ -103,7 +103,6 @@ setup(
     setup_requires=[],
     install_requires=[
         'appdirs == 1.4.0',
-        'ftrack-action-handler',
         'qt.py >=1.0.0, < 2',
         'p4python',
     ],
