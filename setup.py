@@ -100,7 +100,7 @@ setup(
     package_dir={'': 'source'},
     setup_requires=[],
     install_requires=[
-        'appdirs == 1.4.0',
+        'platformdirs',
         'qt.py >=1.0.0, < 2',
         'p4python',
     ],
