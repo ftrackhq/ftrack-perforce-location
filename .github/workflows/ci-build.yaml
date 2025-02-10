@@ -11,10 +11,10 @@ jobs:
             - uses: actions/setup-python@v5
               with:
                 python-version: '3.10'
+                
             - name: build
-              shell: bash
               run: |
-                python setup.py build_plugin
+                python3 setup.py build_plugin
             - name: Upload OSX release
               uses: softprops/action-gh-release@v2
               with:
@@ -51,9 +51,8 @@ jobs:
               with:
                 python-version: '3.10'
             - name: build
-              shell: bash
               run: |
-                python setup.py build_plugin
+                python3 setup.py build_plugin
             - name: Upload Rocky ${{ matrix.rocky-version }} release
               uses: softprops/action-gh-release@v2
               with:
