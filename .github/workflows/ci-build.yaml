@@ -29,7 +29,7 @@ jobs:
                 python-version: '3.10'
             - name: build
               run: |
-                sudo python3 setup.py build_plugin
+                python3 setup.py build_plugin
             - name: Upload Windowz release
               uses: softprops/action-gh-release@v2
               with:
