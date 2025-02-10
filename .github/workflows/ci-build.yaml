@@ -45,8 +45,12 @@ jobs:
             - name: Upload Windows release
               uses: softprops/action-gh-release@v2
               with:
+                name : "latest ${{ steps.extract_branch.outputs.branch }} unstable"
+                body: "This is the latest unstable build version, feel free to test it out."
                 tag_name: "${{ steps.extract_branch.outputs.branch }}-ustable"
                 path: build/*.zip
+                prerelease: true
+
               env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     
