@@ -70,6 +70,8 @@ class BuildPlugin(Command):
                 '.',
                 '--target',
                 os.path.join(STAGING_PATH, 'dependencies'),
+                '--no-user',
+                '--no-build-isolation'
             ]
         )
 

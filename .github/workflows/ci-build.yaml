@@ -24,17 +24,31 @@ jobs:
         runs-on: windows-latest
         steps:
             - uses: actions/checkout@v4
+            
             - uses: actions/setup-python@v5
               with:
                 python-version: '3.10'
+            
+            - name: ensure wheel
+              run: |
+                python -m pip install wheel
+
             - name: build
               run: |
-                python3 setup.py build_plugin
-            - name: Upload Windowz release
+                python setup.py build_plugin
+
+            - name: Extract branch name
+              id: extract_branch
+              shell: cmd
+              run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
+      
+            - name: Upload Windows release
               uses: softprops/action-gh-release@v2
               with:
+                tag_name: "${{ steps.extract_branch.outputs.branch }}-ustable"
                 path: build/*.zip
-
+              env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     
     # rocky-build:
     #     name: Build Linux
