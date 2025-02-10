@@ -1,0 +1,60 @@
+name: CI-BUILD
+
+on: [push]
+
+jobs:
+    osx-build:
+        name: Build OSX
+        runs-on: macos-12 
+        steps:
+            - uses: actions/checkout@v3
+            - uses: actions/setup-python@v5
+              with:
+                python-version: '3.10'
+            - name: build
+              shell: bash
+              run: |
+                python setup.py build_plugin
+            - name: Upload OSX release
+              uses: softprops/action-gh-release@v2
+              with:
+                path: build/*.zip
+
+    windows-build:
+        name: Build Win
+        runs-on: windows-latest
+        steps:
+            - uses: actions/checkout@v3
+            - uses: actions/setup-python@v5
+              with:
+                python-version: '3.10'
+            - name: build
+              run: |
+                python3 setup.py build_plugin
+            - name: Upload Windowz release
+              uses: softprops/action-gh-release@v2
+              with:
+                path: build/*.zip
+
+    
+    rocky-build:
+        name: Build Linux
+        runs-on: ubuntu-latest
+        strategy:
+          matrix:
+            rocky-version: [ '8', '9' ]
+        container:
+          image: rockylinux/rockylinux:${{ matrix.rocky-version }}
+        steps:
+            - uses: actions/checkout@v3
+            - uses: actions/setup-python@v5
+              with:
+                python-version: '3.10'
+            - name: build
+              shell: bash
+              run: |
+                python setup.py build_plugin
+            - name: Upload Rocky ${{ matrix.rocky-version }} release
+              uses: softprops/action-gh-release@v2
+              with:
+                path: build/*.zip
