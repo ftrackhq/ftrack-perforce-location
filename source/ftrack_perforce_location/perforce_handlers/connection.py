@@ -100,7 +100,7 @@ class PerforceConnectionHandler(object):
         p4.host = str(self.host)
         p4.port = str(self.port)
         p4.user = str(self.user)
-        p4.password = str(self._password)
+        # p4.password = str(self._password)
 
         self.logger.debug('Connecting to {0}'.format(p4.__repr__()))
 
@@ -166,7 +166,7 @@ class PerforceConnectionHandler(object):
 
         self.logger.debug('Logging in as: {0}'.format(self._user))
         try:
-            self._connection.run_login(password=self.password)
+            self._connection.run_login(self.password)
         except P4Exception as error:
             self.logger.error(str(error))
 
