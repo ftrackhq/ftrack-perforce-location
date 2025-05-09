@@ -35,15 +35,11 @@ location_data = {}
 
 def configure_location(session, event):
     '''Listen.'''
+
     logger.info('Configuring Perforce Location')
     perforce_settings = PerforceSettingsHandler(session)
     perforce_settings_data = perforce_settings.read()
-    user_settings_values = list(perforce_settings_data.values())
-
-    logger.info(user_settings_values)
-    perforce_settings.update_port_from_scenario(
-        perforce_settings_data, location_data
-    )
+    logger.info(perforce_settings_data)
 
     stored_pass =  os.getenv('P4PASSWD')
     if stored_pass:
@@ -53,7 +49,6 @@ def configure_location(session, event):
     perforce_connection_handler = PerforceConnectionHandler(
         **perforce_settings_data
     )
-
 
     perforce_change_handler = PerforceChangeHandler(perforce_connection_handler)
 

@@ -4,9 +4,10 @@
 import logging
 import socket
 import uuid
-
+import time
 
 from P4 import P4, P4Exception
+
 from ftrack_perforce_location.perforce_handlers import errors
 
 
@@ -39,9 +40,22 @@ class PerforceConnectionHandler(object):
         '''Return the current server port.'''
         return self._port
 
+
     @property
     def connection(self):
-        '''Return the current server connection.'''
+        """Return the current server connection."""   
+        if self._connection:
+            return self._connection    
+
+        try:
+            connected = self._connection.connected()
+        except P4Exception:
+            connected = False
+        
+        if not connected or (time.time() > self._timeout + self._connected_time):
+            self._connection = None
+            self.connect()
+
         return self._connection
 
     @property
@@ -82,7 +96,8 @@ class PerforceConnectionHandler(object):
         self._workspace = None
         self._workspace_root = workspace_root
         self._using_workspace = using_workspace
-
+        self._connected_time = 0
+        self._timeout = 15
         self.connect()
 
     def connect(self):
@@ -100,7 +115,7 @@ class PerforceConnectionHandler(object):
         p4.host = str(self.host)
         p4.port = str(self.port)
         p4.user = str(self.user)
-        # p4.password = str(self._password)
+        p4.password = str(self._password)
 
         self.logger.debug('Connecting to {0}'.format(p4.__repr__()))
 
@@ -110,7 +125,8 @@ class PerforceConnectionHandler(object):
                 p4.run_trust('-y')
         except P4Exception as error:
             raise errors.PerforceConnectionHandlerException(error)
-
+        
+        self._connected_time = time.time()
         self._connection = p4
         return True
 
