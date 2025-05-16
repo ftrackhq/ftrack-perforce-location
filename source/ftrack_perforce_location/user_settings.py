@@ -29,13 +29,13 @@ from ftrack_perforce_location.perforce_handlers.settings import (
 )
 
 
-class ConfigureUserSettingsWidget(QtWidgets.QDialog):
+class ConfigureUserSettingsWidget(QtWidgets.QWidget):
     def __init__(self, settings):
         super(ConfigureUserSettingsWidget, self).__init__()
         self.settings = settings
         self.ws_clients = []
         self.ws_roots = []
-        self.setTheme()
+        # self.setTheme()
         if not self.verify_scenario():
             self.reject()
             return
@@ -65,8 +65,8 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
         self.user_value = QtWidgets.QLineEdit(user)
         self.user_value.setReadOnly(False)
 
-        grid.addWidget(user_label, 0, 0)
-        grid.addWidget(self.user_value, 0, 1)
+        grid.addWidget(user_label, 0, 0,  QtCore.Qt.AlignTop)
+        grid.addWidget(self.user_value, 0, 1, QtCore.Qt.AlignTop)
 
         ws_label = QtWidgets.QLabel('Workspace')
         self.ws_value = QtWidgets.QComboBox(parent=self)
@@ -76,8 +76,8 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
             index = self.ws_value.findText(using_workspace, QtCore.Qt.MatchFixedString)
             self.ws_value.setCurrentIndex(index)
 
-        grid.addWidget(ws_label, 1, 0)
-        grid.addWidget(self.ws_value, 1, 1)
+        grid.addWidget(ws_label, 1, 0, QtCore.Qt.AlignTop)
+        grid.addWidget(self.ws_value, 1, 1, QtCore.Qt.AlignTop)
 
         root_label = QtWidgets.QLabel('Workspace Root')
         self.root_value = QtWidgets.QLineEdit(workspace_root)
@@ -85,13 +85,14 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
         if not workspace_root:
             self.on_workspace_change()
 
-        grid.addWidget(root_label, 2, 0)
-        grid.addWidget(self.root_value, 2, 1)
+        grid.addWidget(root_label, 2, 0, QtCore.Qt.AlignTop)
+        grid.addWidget(self.root_value, 2, 1, QtCore.Qt.AlignTop)
 
         self.save_button = QtWidgets.QPushButton('Save Settings')
-        self.layout().addWidget(self.save_button)
+        self.layout().addWidget(self.save_button, QtCore.Qt.AlignTop)
         self.ref_button = QtWidgets.QPushButton('Refresh')
-        self.layout().addWidget(self.ref_button)        
+        self.layout().addWidget(self.ref_button, QtCore.Qt.AlignTop)
+        self.layout().addStretch()
 
     def post_build(self):
         '''Connect events.'''
@@ -118,7 +119,7 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
         config_data['using_workspace'] = self.ws_clients[self.ws_value.currentIndex()]
         config_data['workspace_root'] = self.root_value.text()
         self.settings.write(config_data)
-        #self.close()
+        # self.close()
 
     def on_refresh_settings(self):
         self.on_save_settings()
@@ -238,7 +239,7 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
         warning_text = (
             'No workspaces found for user. Choose root directory to continue.'
         )
-        self.raise_warning_box(warning_text)
+        # self.raise_warning_box(warning_text)
         # Doesn't seem to show up under OSX
         caption = 'Choose workspace root directory'
         root_dir = QtWidgets.QFileDialog().getExistingDirectory(
@@ -264,7 +265,10 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
             )
         except Exception:
             pass
-        self.raise_warning_box(warning_text)
+
+        if warning_text:
+            logger.debug(f'raising warning message: {warning_text}')
+            self.raise_warning_box(warning_text)
 
 
 if __name__ == '__main__':
