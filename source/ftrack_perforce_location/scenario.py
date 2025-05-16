@@ -14,6 +14,7 @@ from ftrack_perforce_location.constants import (
     SCENARIO_ID,
     SCENARIO_DESCRIPTION,
     SCENARIO_LABEL,
+    PERFORCE_STORAGE_REQUIRED_FIELDS
 )
 from ftrack_perforce_location.perforce_handlers import errors
 from ftrack_perforce_location.perforce_handlers.change import PerforceChangeHandler
@@ -41,8 +42,11 @@ class ConfigurePerforceStorageScenario(object):
         storage_scenario = self.session.server_information.get(
             'storage_scenario'
         )
+        data = storage_scenario['data']
+        if data.keys() != PERFORCE_STORAGE_REQUIRED_FIELDS:
+            raise PerforceValidationError('Perforce scenario fields do not match.')
 
-        return storage_scenario['data']
+        return data
 
     @property
     def existing_perforce_storage_configuration(self):

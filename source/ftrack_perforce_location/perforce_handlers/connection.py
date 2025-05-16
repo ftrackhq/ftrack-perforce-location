@@ -1,6 +1,6 @@
 # :coding: utf-8
 # :copyright: Copyright (c) 2021 ftrack
-
+import os
 import logging
 import socket
 import uuid
@@ -68,7 +68,7 @@ class PerforceConnectionHandler(object):
         host=None,
         port=None,
         user=None,
-        password=None,
+        password=os.getenv('P4PASSWD'),
         using_workspace=None,
         workspace_root=None,
     ):
@@ -182,7 +182,7 @@ class PerforceConnectionHandler(object):
 
         self.logger.debug('Logging in as: {0}'.format(self._user))
         try:
-            self._connection.run_login(self.password)
+            self._connection.run_login(password=self.password)
         except P4Exception as error:
             self.logger.error(str(error))
 
