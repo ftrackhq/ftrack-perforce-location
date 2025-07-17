@@ -37,7 +37,7 @@ class ConfigureUserSettingsWidget(QtWidgets.QWidget):
         self.ws_roots = []
         # self.setTheme()
         if not self.verify_scenario():
-            self.reject()
+            # self.reject()
             return
         self.build()
         self.post_build()
