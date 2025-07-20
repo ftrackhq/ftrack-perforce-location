@@ -43,8 +43,8 @@ class ConfigurePerforceStorageScenario(object):
             'storage_scenario'
         )
         data = storage_scenario['data']
-        if data.keys() != PERFORCE_STORAGE_REQUIRED_FIELDS:
-            raise PerforceValidationError('Perforce scenario fields do not match.')
+        # if data.keys() != PERFORCE_STORAGE_REQUIRED_FIELDS:
+        #     raise PerforceValidationError('Perforce scenario fields do not match.')
 
         return data
 
