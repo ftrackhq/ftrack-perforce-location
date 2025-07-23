@@ -35,18 +35,20 @@ class ConfigurePerforceStorageScenario(object):
     @property
     def storage_scenario(self):
         '''Return storage scenario setting.'''
+        return self.session.query(
+            'select value from Setting '
+            'where name is "storage_scenario" and group is "STORAGE"'
+        ).one()        
 
-        if 'storage_scenario' not in self.session.server_information:
-            return None
+        # if 'storage_scenario' not in self.session.server_information:
+        #     return None
         
-        storage_scenario = self.session.server_information.get(
-            'storage_scenario'
-        )
-        data = storage_scenario['data']
+        # storage_scenario = self.session.server_information.get(
+        #     'storage_scenario'
+        # )
+        # data = storage_scenario['data']
         # if data.keys() != PERFORCE_STORAGE_REQUIRED_FIELDS:
         #     raise PerforceValidationError('Perforce scenario fields do not match.')
-
-        return data
 
     @property
     def existing_perforce_storage_configuration(self):
