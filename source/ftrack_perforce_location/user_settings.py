@@ -162,6 +162,7 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
         title = 'Input required'
         result, ok = QtWidgets.QInputDialog.getText(self, title, label_text, mode)
         if ok:
+            logger.debug(f'Setting input for : {title} as {result}')
             return result
 
     def create_connection(self, perforce_settings_data=None):
@@ -223,6 +224,7 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
                     password = self.demand_input(
                         text, mode=QtWidgets.QLineEdit.Password
                     )
+                    logger.debug(f'setting password : {password}')
                     if password:
                         self.p4_handler.password = str(password)
                         self.p4_handler._login()

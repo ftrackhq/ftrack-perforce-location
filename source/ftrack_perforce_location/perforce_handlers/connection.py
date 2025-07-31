@@ -160,7 +160,8 @@ class PerforceConnectionHandler(object):
                 self._workspace_root, self._using_workspace
             )
             workspace = new_workspace['Client']
-        self.logger.debug('getting workspace: {0}'.format(workspace))
+            
+        self.logger.debug(f'getting workspace: {workspace}, with root : { self._workspace_root}')
         return workspace
 
     def _login(self):

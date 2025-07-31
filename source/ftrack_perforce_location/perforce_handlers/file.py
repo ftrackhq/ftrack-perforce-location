@@ -4,7 +4,7 @@
 import logging
 import os
 import re
-from pathlib import Path
+import contextlib
 
 from P4 import P4Exception
 from ftrack_perforce_location.perforce_handlers.errors import (
@@ -69,28 +69,38 @@ class PerforceFileHandler(object):
         self._change_handler = perforce_change_handler
 
         self.logger = logging.getLogger(__name__ + '.' + self.__class__.__name__)
+        self.logger.info(f'Using client: {self.connection.client}')
         self._ensure_folder(self.root)
+
+    def is_file_in_depot(self, filepath):
+
+        stats = []
+
+        with contextlib.suppress(P4Exception):
+
+            stats = self.connection.run_fstat(filepath)
+
+        return True if stats else False
+
 
     def file_to_depot(self, filepath, perforce_filemode='binary'):
         '''Publish **filepath** to server.'''
-        filepath = Path(filepath)
 
-        if self.root not in str(filepath):
-            raise IOError('File is not in {}'.format(self.root))
-        stats = []
+        if self.root not in filepath:            
+            msg = f'File {filepath} is not in {self.root}'
+            self.logger.error(msg)
+            raise IOError(msg)
 
-        self.logger.debug(
-            'moving file {} to depot with mode {}'.format(filepath, perforce_filemode)
+        self.logger.info(
+            'Moving file {} to depot with mode {}'.format(filepath, perforce_filemode)
         )
-
-        try:
-            stats = self.connection.run_fstat(filepath)
-        except P4Exception as error:
-            pass
+        
+        is_in_depot = self.is_file_in_depot(filepath)
 
         # no stats file has to be added to the depot
-        if not stats:
+        if not is_in_depot:
             client = self.connection.fetch_client('-t', self.connection.client)
+            self.logger.info(f'saving client {client} with root {self.root} ')
             # As of ftrack_api 1.7, filename must be a string
             client._root = str(self.root)
             try:
@@ -102,7 +112,7 @@ class PerforceFileHandler(object):
         else:
             # 'p4 edit' requires that the file exists in the client
             if not filepath.exists():
-                basedir = Path(os.path.dirname(filepath))
+                basedir = os.path.dirname(filepath)
                 if not basedir.exists():
                     os.makedirs(basedir)
                 open(filepath, 'a').close()

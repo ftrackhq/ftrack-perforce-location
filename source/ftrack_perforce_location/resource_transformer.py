@@ -41,7 +41,7 @@ class PerforceResourceIdentifierTransformer(
         fullpath = os.path.join(root, resource_identifier)
         mangled_path = seq_to_glob(fullpath)
         
-        stats = self.connection.run_fstat(str(Path(mangled_path)))
+        stats = self.connection.run_fstat(os.path.normpath(mangled_path))
         rx = re.compile('%+\d+d|%d')
         found = rx.search(resource_identifier)
         original_resource = resource_identifier
@@ -59,7 +59,7 @@ class PerforceResourceIdentifierTransformer(
         # P4 doesn't handle that very well, fstat shouldn't fail if the file isn't in the depot
         returned_path = encoded_path
         try:
-            self.connection.run_fstat(returned_path)
+            self.connection.run_fstat(os.path.normpath(returned_path))
         except P4Exception:
             returned_path = original_resource
 
@@ -122,7 +122,7 @@ class PerforceResourceIdentifierTransformer(
                 )
             )
 
-            return Path(decoded_path)
+            return decoded_path
         else:
             # assume file isn't in depot because resource_identifier is a local path
-            return Path(resource_identifier)
+            return resource_identifier
