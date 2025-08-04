@@ -2,14 +2,9 @@
 # :copyright: Copyright (c) 2021 ftrack
 
 import functools
-import json
 import logging
-import os
-import sys
 
 from ftrack_api.symbol import COMPONENT_ADDED_TO_LOCATION_TOPIC
-import ftrack_api
-
 from ftrack_perforce_location.constants import SCENARIO_ID
 from ftrack_perforce_location.perforce_handlers import errors
 

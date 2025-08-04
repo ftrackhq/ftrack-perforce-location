@@ -29,15 +29,14 @@ from ftrack_perforce_location.perforce_handlers.settings import (
 )
 
 
-class ConfigureUserSettingsWidget(QtWidgets.QDialog):
-    def __init__(self, settings):
-        super(ConfigureUserSettingsWidget, self).__init__()
+class ConfigureUserSettingsWidget(QtWidgets.QWidget):
+    def __init__(self, settings, parent=None):
+        super(ConfigureUserSettingsWidget, self).__init__(parent=parent)
+
         self.settings = settings
         self.ws_clients = []
         self.ws_roots = []
-        # self.setTheme()
         if not self.verify_scenario():
-            # self.reject()
             return
         self.build()
         self.post_build()
@@ -110,6 +109,7 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
     def on_workspace_change(self):
         '''Qt slot for workspace combobox changes.'''
         ws_root = self.ws_roots[self.ws_value.currentIndex()]
+        logger.debug(f'Setting workspace root as: {ws_root}')
         self.root_value.setText(ws_root)
 
     def on_save_settings(self):
@@ -118,6 +118,7 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
         config_data['user'] = self.user_value.text()
         config_data['using_workspace'] = self.ws_clients[self.ws_value.currentIndex()]
         config_data['workspace_root'] = self.root_value.text()
+        logger.debug(f'saving config data {config_data}')
         self.settings.write(config_data)
         # self.close()
 
@@ -143,8 +144,8 @@ class ConfigureUserSettingsWidget(QtWidgets.QDialog):
         if self.ws_clients and using_workspace:
             index = self.ws_value.findText(using_workspace, QtCore.Qt.MatchFixedString)
             self.ws_value.setCurrentIndex(index)
+        logger.debug(f'refreshing settings')
 
-        root_label = QtWidgets.QLabel('Workspace Root')
         self.root_value.setText(workspace_root)
         self.root_value.setReadOnly(False)
         if not workspace_root:

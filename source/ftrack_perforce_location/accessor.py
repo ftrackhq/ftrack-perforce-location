@@ -71,7 +71,6 @@ class PerforceAccessor(ftrack_api.accessor.disk.DiskAccessor):
                required to overwrite the file.
         '''
 
-        # self.logger.debug('exists : {}'.format(resource_identifier))
         return False
 
     def get_filesystem_path(self, resource_identifier):
