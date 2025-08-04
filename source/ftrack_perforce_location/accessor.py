@@ -53,6 +53,8 @@ class PerforceAccessor(ftrack_api.accessor.disk.DiskAccessor):
             ext.lower(), 'binary'
         )  # If is unknown let's piggy back on binary format.
 
+        project = resource_identifier.split('/')[0]
+        self.perforce_file_handler.update_workspace_map(project)
         filesystem_path = self.get_filesystem_path(resource_identifier)
         self.logger.info(f'Retrieving {filesystem_path}.')
 

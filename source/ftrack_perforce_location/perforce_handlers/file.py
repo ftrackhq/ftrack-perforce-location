@@ -56,20 +56,21 @@ class PerforceFileHandler(object):
             except IOError as error:
                 raise PerforceFileHandlerException(error)
 
-    # def _update_workspace_map(self, project):
-    #     self.logger.debug('Updating workspace map with : {}'.format(new_depot))
-    #     workspace = self.connection.fetch_client('-o')
-    #     new_mapping = '//{0}/... "//{1}/{0}/..."'.format(new_depot, workspace['Client'])
-    #     mappings = P4.Map(workspace['View']).as_array()
-    #     if new_mapping in mappings:
-    #         self.logger.info(
-    #             'Depot already in client view. Not adding: {0}'.format(new_mapping)
-    #         )
-    #         return
-    #
-    #     mappings.append(new_mapping)
-    #     workspace['View'] = mappings
-    #     self.connection.save_client(workspace)
+    def update_workspace_map(self, project_name):
+        workspace = self.connection.fetch_client('-o')
+        new_mapping = '//depot/{1}... "//{0}/{1}..."'.format(workspace['Client'], project_name)
+        self.logger.debug('Updating workspace map with : {}'.format(new_mapping))
+
+        mappings = P4.Map(workspace['View']).as_array()
+        if new_mapping in mappings:
+            self.logger.info(
+                'Depot already in client view. Not adding: {0}'.format(new_mapping)
+            )
+            return
+
+        mappings.append(new_mapping)
+        workspace['View'] = mappings
+        self.connection.save_client(workspace)
 
     def __init__(self, perforce_change_handler):
         '''
