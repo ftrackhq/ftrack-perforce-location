@@ -6,7 +6,9 @@ import os
 import re
 import contextlib
 
+import P4
 from P4 import P4Exception
+
 from ftrack_perforce_location.perforce_handlers.errors import (
     PerforceFileHandlerException,
 )
@@ -54,6 +56,21 @@ class PerforceFileHandler(object):
             except IOError as error:
                 raise PerforceFileHandlerException(error)
 
+    # def _update_workspace_map(self, project):
+    #     self.logger.debug('Updating workspace map with : {}'.format(new_depot))
+    #     workspace = self.connection.fetch_client('-o')
+    #     new_mapping = '//{0}/... "//{1}/{0}/..."'.format(new_depot, workspace['Client'])
+    #     mappings = P4.Map(workspace['View']).as_array()
+    #     if new_mapping in mappings:
+    #         self.logger.info(
+    #             'Depot already in client view. Not adding: {0}'.format(new_mapping)
+    #         )
+    #         return
+    #
+    #     mappings.append(new_mapping)
+    #     workspace['View'] = mappings
+    #     self.connection.save_client(workspace)
+
     def __init__(self, perforce_change_handler):
         '''
         Initialise Perforce file handler.
@@ -78,7 +95,8 @@ class PerforceFileHandler(object):
 
         with contextlib.suppress(P4Exception):
 
-            stats = self.connection.run_fstat(filepath)
+            stats = self.connection.run_fstat(str(filepath))
+            self.logger.debug(f'file is in depot  : {stats}')
 
         return True if stats else False
 
@@ -95,7 +113,7 @@ class PerforceFileHandler(object):
             'Moving file {} to depot with mode {}'.format(filepath, perforce_filemode)
         )
         
-        is_in_depot = self.is_file_in_depot(filepath)
+        is_in_depot = self.is_file_in_depot(str(filepath))
 
         # no stats file has to be added to the depot
         if not is_in_depot:
@@ -105,15 +123,15 @@ class PerforceFileHandler(object):
             client._root = str(self.root)
             try:
                 self.connection.save_client(client)
-                self.connection.run_add('-t', perforce_filemode, filepath)
+                self.connection.run_add('-t', perforce_filemode, str(filepath))
             except Exception as error:
                 self.logger.exception(error)
 
         else:
             # 'p4 edit' requires that the file exists in the client
-            if not filepath.exists():
-                basedir = os.path.dirname(filepath)
-                if not basedir.exists():
-                    os.makedirs(basedir)
-                open(filepath, 'a').close()
-            self.connection.run_edit(filepath)
+            if not os.path.exists(filepath):
+                basedir = os.path.dirname(str(filepath))
+                if not os.path.exists(str(basedir)):
+                    os.makedirs(str(basedir))
+                open(str(filepath), 'a').close()
+            self.connection.run_edit(str(filepath))
