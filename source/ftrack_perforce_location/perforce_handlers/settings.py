@@ -75,7 +75,7 @@ class PerforceSettingsHandler(object):
                     config['workspace_root'] = None
         except P4Exception as error:
             self.logger.debug(
-                'Error while querying client root: {0}'.format(error.message)
+                'Error while querying client root: {0}'.format(str(error))
             )
 
         self.logger.debug('Updated config from perforce with: {}'.format(config))
