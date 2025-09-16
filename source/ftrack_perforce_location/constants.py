@@ -10,3 +10,4 @@ SCENARIO_DESCRIPTION = (
     'Perforce, with flexible mapping between projects and depots.'
 )
 ICON_URL = os.environ.get('FTRACK_SERVER', '') + '/application_icons/helix_core.png'
+PERFORCE_STORAGE_REQUIRED_FIELDS = ['server', 'port_number', 'use_ssl']

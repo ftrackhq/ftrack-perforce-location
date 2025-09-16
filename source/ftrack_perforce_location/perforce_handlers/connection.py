@@ -1,12 +1,13 @@
 # :coding: utf-8
 # :copyright: Copyright (c) 2021 ftrack
-
+import os
 import logging
 import socket
 import uuid
-
+import time
 
 from P4 import P4, P4Exception
+
 from ftrack_perforce_location.perforce_handlers import errors
 
 
@@ -39,9 +40,22 @@ class PerforceConnectionHandler(object):
         '''Return the current server port.'''
         return self._port
 
+
     @property
     def connection(self):
-        '''Return the current server connection.'''
+        """Return the current server connection."""   
+        if self._connection:
+            return self._connection    
+
+        try:
+            connected = self._connection.connected()
+        except P4Exception:
+            connected = False
+        
+        if not connected or (time.time() > self._timeout + self._connected_time):
+            self._connection = None
+            self.connect()
+
         return self._connection
 
     @property
@@ -54,7 +68,7 @@ class PerforceConnectionHandler(object):
         host=None,
         port=None,
         user=None,
-        password=None,
+        password=os.getenv('P4PASSWD'),
         using_workspace=None,
         workspace_root=None,
     ):
@@ -82,7 +96,8 @@ class PerforceConnectionHandler(object):
         self._workspace = None
         self._workspace_root = workspace_root
         self._using_workspace = using_workspace
-
+        self._connected_time = 0
+        self._timeout = 15
         self.connect()
 
     def connect(self):
@@ -110,7 +125,8 @@ class PerforceConnectionHandler(object):
                 p4.run_trust('-y')
         except P4Exception as error:
             raise errors.PerforceConnectionHandlerException(error)
-
+        
+        self._connected_time = time.time()
         self._connection = p4
         return True
 
@@ -144,7 +160,8 @@ class PerforceConnectionHandler(object):
                 self._workspace_root, self._using_workspace
             )
             workspace = new_workspace['Client']
-        self.logger.debug('getting workspace: {0}'.format(workspace))
+            
+        self.logger.debug(f'getting workspace: {workspace}, with root : { self._workspace_root}')
         return workspace
 
     def _login(self):

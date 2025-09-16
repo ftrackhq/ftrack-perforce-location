@@ -4,9 +4,11 @@
 import logging
 import os
 import re
-from pathlib import Path
+import contextlib
 
+import P4
 from P4 import P4Exception
+
 from ftrack_perforce_location.perforce_handlers.errors import (
     PerforceFileHandlerException,
 )
@@ -54,6 +56,22 @@ class PerforceFileHandler(object):
             except IOError as error:
                 raise PerforceFileHandlerException(error)
 
+    def update_workspace_map(self, project_name):
+        workspace = self.connection.fetch_client('-o')
+        new_mapping = '//depot/{1}... "//{0}/{1}..."'.format(workspace['Client'], project_name)
+        self.logger.debug('Updating workspace map with : {}'.format(new_mapping))
+
+        mappings = P4.Map(workspace['View']).as_array()
+        if new_mapping in mappings:
+            self.logger.info(
+                'Depot already in client view. Not adding: {0}'.format(new_mapping)
+            )
+            return
+
+        mappings.append(new_mapping)
+        workspace['View'] = mappings
+        self.connection.save_client(workspace)
+
     def __init__(self, perforce_change_handler):
         '''
         Initialise Perforce file handler.
@@ -69,41 +87,52 @@ class PerforceFileHandler(object):
         self._change_handler = perforce_change_handler
 
         self.logger = logging.getLogger(__name__ + '.' + self.__class__.__name__)
+        self.logger.info(f'Using client: {self.connection.client}')
         self._ensure_folder(self.root)
+
+    def is_file_in_depot(self, filepath):
+
+        stats = []
+
+        with contextlib.suppress(P4Exception):
+
+            stats = self.connection.run_fstat(str(filepath))
+            self.logger.debug(f'file is in depot  : {stats}')
+
+        return True if stats else False
+
 
     def file_to_depot(self, filepath, perforce_filemode='binary'):
         '''Publish **filepath** to server.'''
-        filepath = Path(filepath)
 
-        if self.root not in str(filepath):
-            raise IOError('File is not in {}'.format(self.root))
-        stats = []
+        if self.root not in filepath:            
+            msg = f'File {filepath} is not in {self.root}'
+            self.logger.error(msg)
+            raise IOError(msg)
 
-        self.logger.debug(
-            'moving file {} to depot with mode {}'.format(filepath, perforce_filemode)
+        self.logger.info(
+            'Moving file {} to depot with mode {}'.format(filepath, perforce_filemode)
         )
-
-        try:
-            stats = self.connection.run_fstat(filepath)
-        except P4Exception as error:
-            pass
+        
+        is_in_depot = self.is_file_in_depot(str(filepath))
 
         # no stats file has to be added to the depot
-        if not stats:
+        if not is_in_depot:
             client = self.connection.fetch_client('-t', self.connection.client)
+            self.logger.info(f'saving client {client} with root {self.root} ')
             # As of ftrack_api 1.7, filename must be a string
             client._root = str(self.root)
             try:
                 self.connection.save_client(client)
-                self.connection.run_add('-t', perforce_filemode, filepath)
+                self.connection.run_add('-t', perforce_filemode, str(filepath))
             except Exception as error:
                 self.logger.exception(error)
 
         else:
             # 'p4 edit' requires that the file exists in the client
-            if not filepath.exists():
-                basedir = Path(os.path.dirname(filepath))
-                if not basedir.exists():
-                    os.makedirs(basedir)
-                open(filepath, 'a').close()
-            self.connection.run_edit(filepath)
+            if not os.path.exists(filepath):
+                basedir = os.path.dirname(str(filepath))
+                if not os.path.exists(str(basedir)):
+                    os.makedirs(str(basedir))
+                open(str(filepath), 'a').close()
+            self.connection.run_edit(str(filepath))

@@ -6,3 +6,4 @@ venv/**
 doc/build/**
 ftrack-perforce-location.code-workspace
 .vscode/**
+source/*.egg-info/** 

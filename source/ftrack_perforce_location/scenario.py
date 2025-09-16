@@ -14,6 +14,7 @@ from ftrack_perforce_location.constants import (
     SCENARIO_ID,
     SCENARIO_DESCRIPTION,
     SCENARIO_LABEL,
+    PERFORCE_STORAGE_REQUIRED_FIELDS
 )
 from ftrack_perforce_location.perforce_handlers import errors
 from ftrack_perforce_location.perforce_handlers.change import PerforceChangeHandler
@@ -34,25 +35,32 @@ class ConfigurePerforceStorageScenario(object):
     @property
     def storage_scenario(self):
         '''Return storage scenario setting.'''
-        return self.session.query(
+
+        storage_data = self.session.query(
             'select value from Setting '
             'where name is "storage_scenario" and group is "STORAGE"'
         ).one()
+
+        return storage_data
+
 
     @property
     def existing_perforce_storage_configuration(self):
         '''Return existing centralized storage configuration.'''
         storage_scenario = self.storage_scenario
+        self.logger.debug(f'Using data from Storage scenario: {storage_scenario}')
 
         try:
             configuration = json.loads(storage_scenario['value'])
-        except (ValueError, TypeError):
+        except (ValueError, TypeError) as error:
+            self.logger.error(error)
             return {}
 
         if not isinstance(configuration, dict):
             return {}
 
         if configuration.get('scenario') != SCENARIO_ID:
+            self.logger.error(f'scenario id {configuration.get("scenario")} is not {SCENARIO_ID}')
             return {}
 
         return configuration.get('data', {})

@@ -19,14 +19,16 @@ protocol, address and port.
 # Documentation
 
 Full documentation, including installation and setup guides, can be
-found at <https://ftrack-perforce-location.readthedocs.io/en/latest/>
+found in our [developer portal](https://developer.ftrack.com/custom%20locations/perforce%20location)
 
 ### Building the plugin
 
-bash
+*Please ensure wheel is installed and available in your virtual environment.*
 
+
+```bash
 $ python setup.py build_plugin
-
+```
 ### Configuration
 
 Perforce configuration is locally stored in perforce_config.json, inside
