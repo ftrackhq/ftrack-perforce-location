@@ -102,6 +102,9 @@ class PerforceFileHandler(object):
         return True if stats else False
 
 
+    def delete(self, filepath):
+        self.connection.run_delete(filepath)
+
     def file_to_depot(self, filepath, perforce_filemode='binary'):
         '''Publish **filepath** to server.'''
 
