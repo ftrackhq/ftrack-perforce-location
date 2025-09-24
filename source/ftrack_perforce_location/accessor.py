@@ -4,9 +4,10 @@
 import os
 import logging
 
-import ftrack_api.accessor.disk
+from ftrack_api.accessor.disk import DiskAccessor, error_handler
 from ftrack_api.exception import AccessorError
 
+from ftrack_api.exception import AccessorResourceNotFoundError
 
 class PerforceAccessorError(AccessorError):
     
@@ -21,7 +22,7 @@ class PerforceAccessorError(AccessorError):
         
 
 
-class PerforceAccessor(ftrack_api.accessor.disk.DiskAccessor):
+class PerforceAccessor(DiskAccessor):
     '''Extends the DiskAccessor to ensure target file is writable and/or the
     correct version.
     '''
@@ -105,3 +106,14 @@ class PerforceAccessor(ftrack_api.accessor.disk.DiskAccessor):
                 )
 
         return filesystem_path
+
+    def remove(self, resource_identifier):
+        filesystem_path = self.get_filesystem_path(resource_identifier)
+
+        if self.is_file(resource_identifier):
+            with error_handler(
+                operation="remove", resource_identifier=resource_identifier
+            ):
+                self.perforce_file_handler.delete(filesystem_path)
+        else:
+            raise AccessorResourceNotFoundError(resource_identifier=resource_identifier)
